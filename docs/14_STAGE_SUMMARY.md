@@ -58,6 +58,22 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：按 PRD §15.3 公式融合 keyword/semantic/tag/recency/user_signal 排序，提供混合搜索；无 embedding provider 时优雅降级为 keyword（不报错）；满足 §15.4 展示与 §15.4.7 调试分数。
+- 已完成内容：
+  - TASK-069：`@sourdex/search` `hybridScore`/`HYBRID_WEIGHTS`/`recencyScore`/`tagScore`/`normalizeSimilarities`。5 测试。
+  - TASK-070：`HybridSearchService`（keyword∪semantic 合并、统一结构化过滤、tag/recency/signal 打分、排序分页、debug 明细）+ `/api/search?mode=hybrid` 分发 + container 接线。service 4 + 集成 1 测试。
+  - TASK-071：SearchPage 启用 keyword/hybrid 切换（设计稿原 semantic 占位），选 semantic→`mode=hybrid`。组件 +1 测试。
+- 关键产出：单一相关性排序融合关键词与语义信号；无 AI 时自动退化为关键词排序、零错误；调试模式可见各信号分量。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 263（55 文件，252→263，+11）** / `pnpm build` 9/9 ✅。**无 schema/迁移改动**。
+- 重要决策：纯打分逻辑下沉 `@sourdex/search`（可测、无 IO）、编排在 server service；hybrid 不 409（semantic 缺失记 0，§5.2.3.7 优雅降级）；keyword `/api/search` 默认行为不变，hybrid 经 `mode` 分发；recency 用 30 天半衰期指数衰减；core 搜索类型新增可选 `debug`/`scoreBreakdown`（additive 非破坏，非 DB 改动）；UI 复用设计稿既有切换、不新增元素。
+- 遗留问题：`user_signal`（高亮/备注/收藏/阅读次数）暂为 0，待 STAGE-18 annotations/收藏数据落地接入；hybrid 候选各取 top-50 后合并（极大库可调候选数/引入 ANN，关联 OQ-A9）；调试分数仅后端暴露，UI 暂不展示（§15.4.7「可显示」非必须）；provider-config 测试存在既有同毫秒计时 flake（非本阶段）。
+- 下一阶段目标：STAGE-17 Ask 页面（RAG，强制引用 chunks，证据不足说明，PRD §14.5 / BACKLOG-004）。
+- 下一步建议：进入 STAGE-17 前明确 RAG 检索（复用 hybrid/semantic 取证据 chunk）、引用强制与「证据不足」判定口径、答案存 `ai_outputs(type='answer')`、Ask UI 对照设计稿 05/16。**当前按 /goal 停在 STAGE-16，等待用户下发 /goal 再进入 STAGE-17。**
+
 ### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BATCH-02
 
 - 阶段状态：DONE

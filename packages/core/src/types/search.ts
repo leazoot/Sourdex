@@ -23,6 +23,18 @@ export interface SearchInput {
   sort?: "relevance" | "newest" | "oldest";
   page?: number;
   pageSize?: number;
+  /** Debug mode: include the per-signal score breakdown in results (PRD §15.4.7). */
+  debug?: boolean;
+}
+
+/** Per-signal contributions behind a hybrid score, shown in debug mode (PRD §15.3/§15.4.7). */
+export interface ScoreBreakdown {
+  keyword: number;
+  semantic: number;
+  tag: number;
+  recency: number;
+  userSignal: number;
+  final: number;
 }
 
 /** A single search hit (PRD §13.3 response; display fields per PRD §15.4). */
@@ -38,6 +50,8 @@ export interface SearchResultItem {
   snippet: string;
   score: number;
   matchedFields: MatchedField[];
+  /** Present only when the request set `debug` (PRD §15.4.7). */
+  scoreBreakdown?: ScoreBreakdown;
 }
 
 /** Search response payload (PRD §13.3). */

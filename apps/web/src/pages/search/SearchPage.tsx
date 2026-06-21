@@ -27,6 +27,9 @@ export function SearchPage() {
   const [type, setType] = useState<SourceType | "">("");
   const [time, setTime] = useState<TimeRange>("any");
   const [sort, setSort] = useState<"relevance" | "newest">("relevance");
+  // The design's "semantic" toggle runs hybrid ranking (keyword + semantic + tag +
+  // recency, PRD §15.3); it degrades to keyword when no embedding provider is set.
+  const [mode, setMode] = useState<"keyword" | "hybrid">("keyword");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => inputRef.current?.focus(), []);
@@ -40,7 +43,13 @@ export function SearchPage() {
     return () => clearTimeout(id);
   }, [input, setParams]);
 
-  const request: SearchInput = { q, sort, ...(type ? { type } : {}), from: fromForTime(time) };
+  const request: SearchInput = {
+    q,
+    sort,
+    ...(mode === "hybrid" ? { mode } : {}),
+    ...(type ? { type } : {}),
+    from: fromForTime(time),
+  };
   const { data, isFetching, error, refetch } = useSearch(request);
   const results = data?.results ?? [];
   const hasQuery = q.trim().length > 0;
@@ -59,15 +68,17 @@ export function SearchPage() {
           className="flex-1 bg-transparent text-[22px] font-medium tracking-tight text-text outline-none placeholder:text-text3"
         />
         <div className="flex w-[178px] gap-[3px] rounded-[9px] border border-border bg-surface2 p-[3px]">
-          <span className="flex flex-1 items-center justify-center rounded-md bg-surface py-[5px] text-[12px] font-medium text-text shadow-sm">
-            {t("search.keyword")}
-          </span>
-          <span
-            title={t("search.semanticSoon")}
-            className="flex flex-1 cursor-not-allowed items-center justify-center rounded-md py-[5px] text-[12px] font-medium text-text3"
-          >
-            {t("search.semantic")}
-          </span>
+          {(["keyword", "hybrid"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={`flex flex-1 items-center justify-center rounded-md py-[5px] text-[12px] font-medium ${
+                mode === m ? "bg-surface text-text shadow-sm" : "text-text3 hover:text-text"
+              }`}
+            >
+              {t(m === "keyword" ? "search.keyword" : "search.semantic")}
+            </button>
+          ))}
         </div>
       </div>
 

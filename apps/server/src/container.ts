@@ -32,6 +32,7 @@ import { SummaryService } from "./services/summary-service.js";
 import { AutoTagService } from "./services/auto-tag-service.js";
 import { EmbeddingService } from "./services/embedding-service.js";
 import { SemanticSearchService } from "./services/semantic-search-service.js";
+import { HybridSearchService } from "./services/hybrid-search-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -52,6 +53,7 @@ export interface Container {
   summaryService: SummaryService;
   embeddingService: EmbeddingService;
   semanticSearchService: SemanticSearchService;
+  hybridSearchService: HybridSearchService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -126,6 +128,11 @@ export function createContainer(config: ServerConfig): Container {
     searchRepo,
     chunkRepo,
   });
+  const hybridSearchService = new HybridSearchService({
+    searchRepo,
+    semanticSearchService,
+    tagRepo,
+  });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));
 
@@ -156,6 +163,7 @@ export function createContainer(config: ServerConfig): Container {
     summaryService,
     embeddingService,
     semanticSearchService,
+    hybridSearchService,
     auth,
     worker,
     close: () => sqlite.close(),

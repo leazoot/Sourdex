@@ -4,7 +4,22 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-15（语义检索基础）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~14 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签）。STAGE-15 = DONE（TASK-066~068）：chunkText 分块（§14.6 token 目标+overlap+可溯源 offset）+ cosineSimilarity；ChunkRepository（幂等 replaceForItem）+ embedding 存 `ai_outputs(type='embedding', output JSON{chunkId,vector})`；EmbeddingService + `generate_embedding` 后台任务（幂等重建、失败不影响 FTS）；SemanticSearchService（brute-force 余弦、每 item 最佳 chunk、可溯源 snippet、软删排除）+ `GET /api/search/semantic` + `POST /api/ai/embed/:itemId`；**无新表、无迁移改动**；sqlite-vec 加速降级为非阻塞 OQ-A9；**test 252 全绿**。按 /goal 停在 STAGE-15。
+**BATCH-02（v0.2）进行中 — STAGE-16（混合搜索排序）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~15 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础）。STAGE-16 = DONE（TASK-069~071）：`@sourdex/search` 混合打分（PRD §15.3 权重 + recency 半衰期 + tagScore + 相似度归一化）；`HybridSearchService` 融合 keyword∪semantic、统一过滤、排序分页、debug 明细；`/api/search?mode=hybrid`（无 provider 优雅降级不 409）；Web 搜索启用 keyword/hybrid 切换；user_signal 暂 0（待 STAGE-18）；core 加可选 `debug`/`scoreBreakdown`（非破坏）；**test 263 全绿**。按 /goal 停在 STAGE-16。
+
+### STAGE-16 进度记录（2026-06-21，混合搜索排序 DONE）
+
+#### TASK-069（混合打分逻辑 @sourdex/search）— DONE
+- `HYBRID_WEIGHTS`（0.40/0.35/0.10/0.10/0.05）+ `hybridScore`；`recencyScore`（半衰期 30 天指数衰减，非法日期→0）；`tagScore`（查询 token 命中标签比例，子串/不区分大小写）；`normalizeSimilarities`（cosine 相对最优归一化、非正→0）。测试 5。检查：build/typecheck ✅，eslint 0。
+
+#### TASK-070（HybridSearchService + API server）— DONE
+- `HybridSearchService`：keyword 候选（FTS top-50 + normalizeScores）∪ semantic（启用时 top-50 + normalizeSimilarities）合并去重；统一应用结构化过滤（type/domain/from/to/tag，覆盖 semantic-only 命中）；每 item 计 tag/recency/signal(0)→hybridScore→排序(relevance/newest/oldest)→分页；debug 回传 scoreBreakdown。route `/api/search?mode=hybrid` 分发，无 embedding provider 时 semantic 贡献 0、不 409（§5.2.3.7 优雅降级）。container 接线。
+- 测试：service 单测 4（融合、降级、debug 明细、过滤 semantic-only）+ 集成 1（hybrid 降级 + debug.keyword>0）。
+
+#### TASK-071（搜索 UI 接入混合模式 apps/web）— DONE
+- SearchPage 将设计稿原「semantic（即将推出）」占位启用为 keyword/hybrid 双态切换；选 semantic→请求带 `mode=hybrid`；对照设计稿不新增元素、无硬编码。
+- 测试：组件测试 +1（点击 semantic→发出 `mode=hybrid` 请求）；既有 2 个搜索测试保持通过。
+- STAGE-16 收尾全量检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 263/263（55 文件，252→263，+11）**；`pnpm build` 9/9 ✅。
+- 备注：provider-config-repository 有一处既有计时 flake（同毫秒 create/update 致 updatedAt 相等，单独跑通过），非 STAGE-16 改动、按规则不动无关文件；user_signal 信号待 STAGE-18 annotations/收藏落地后接入。
 
 ### STAGE-15 进度记录（2026-06-21，语义检索基础 DONE）
 

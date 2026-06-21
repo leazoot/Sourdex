@@ -15,6 +15,7 @@ const searchQuerySchema = z.object({
   sort: z.enum(["relevance", "newest", "oldest"]).optional(),
   page: z.coerce.number().int().positive().optional(),
   pageSize: z.coerce.number().int().positive().max(50).optional(),
+  debug: z.coerce.boolean().optional(),
 });
 
 const semanticQuerySchema = z.object({
@@ -30,6 +31,9 @@ const semanticQuerySchema = z.object({
 export function registerSearchRoutes(app: FastifyInstance, container: Container): void {
   app.get("/api/search", async (request) => {
     const query = searchQuerySchema.parse(request.query);
+    // Hybrid blends keyword + semantic + tag + recency (PRD §15.3); it degrades to
+    // keyword ranking when no embedding provider is enabled, so it never 409s.
+    if (query.mode === "hybrid") return container.hybridSearchService.search(query);
     return container.searchService.search(query);
   });
 

@@ -131,4 +131,23 @@ describe("GET /api/search (TASK-039)", () => {
     expect(res.statusCode).toBe(409);
     expect(res.json()).toMatchObject({ error: "NO_AI_PROVIDER" });
   });
+
+  it("hybrid mode degrades to keyword ranking without an embedding provider (STAGE-16)", async () => {
+    const id = await saveAndExtract({
+      url: "https://example.com/hybrid",
+      title: "Hybrid ranking",
+      html: "<html><body><article><h1>Hybrid ranking</h1><p>Sourdex blends quokkasignal scoring across signals.</p></article></body></html>",
+    });
+
+    const res = await auth({
+      method: "GET",
+      url: "/api/search?mode=hybrid&q=quokkasignal&debug=1",
+    });
+    expect(res.statusCode).toBe(200);
+    const { results } = res.json() as {
+      results: { itemId: string; score: number; scoreBreakdown?: { keyword: number } }[];
+    };
+    expect(results[0]?.itemId).toBe(id);
+    expect(results[0]?.scoreBreakdown?.keyword).toBeGreaterThan(0);
+  });
 });

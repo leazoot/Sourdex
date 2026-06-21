@@ -781,6 +781,27 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：否
 
 ### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BACKLOG-007
+
+- 阶段目标：按 PRD §15.3 公式融合 keyword/semantic/tag/recency/user_signal 打分（`0.40 kw + 0.35 sem + 0.10 tag + 0.10 recency + 0.05 signal`），提供混合搜索；无 embedding provider 时优雅降级为 keyword 排序（不 409）；结果展示满足 §15.4，调试模式可显示分数明细（§15.4.7）。
+- 阶段状态：DONE（2026-06-21，TASK-069~071 全部 DONE）
+- 口径（无新表，不动 PRD §12）：纯打分逻辑在 `@sourdex/search`；编排在 `HybridSearchService`；`/api/search?mode=hybrid` 分发；`user_signal` 暂为 0（高亮/备注/收藏/阅读次数数据待 STAGE-18 annotations 落地，§15.3 rule 5）；core 搜索类型加可选 `debug`/`scoreBreakdown`（additive，非破坏）。
+- 是否需要人工确认：否
+
+#### TASK-069：混合打分逻辑（@sourdex/search）— STATUS: DONE
+- `HYBRID_WEIGHTS` + `hybridScore`（加权融合）+ `recencyScore`（半衰期 30 天指数衰减）+ `tagScore`（查询 token 命中标签比例，子串/不区分大小写）+ `normalizeSimilarities`（cosine 相对最优归一化到 0..1）。
+- 验收：单测覆盖权重公式、recency 半衰期/非法日期、tag 命中比例、相似度归一化。
+- 是否需要人工确认：否
+
+#### TASK-070：HybridSearchService + API（server）— STATUS: DONE
+- `HybridSearchService`：keyword（FTS 候选 + normalizeScores）∪ semantic（启用时 + normalizeSimilarities）合并；统一应用结构化过滤（type/domain/from/to/tag，含 semantic-only 命中）；每 item 算 tag/recency/signal→hybridScore→排序（relevance/newest/oldest）→分页；debug 回传 scoreBreakdown。`/api/search?mode=hybrid` 分发（无 provider 不 409，semantic 贡献 0 优雅降级）。
+- 验收：service 单测（融合、降级、debug、过滤 semantic-only）+ 集成（hybrid 降级 + debug 明细）。
+- 是否需要人工确认：否
+
+#### TASK-071：搜索 UI 接入混合模式（apps/web）— STATUS: DONE
+- SearchPage 将设计稿原「semantic（即将推出）」切换启用为 keyword/hybrid 双态；选 semantic→`mode=hybrid` 请求；对照设计稿样式不新增元素。
+- 验收：组件测试（点击 semantic 触发 mode=hybrid 请求）；既有搜索测试保持通过；无硬编码文案/颜色。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
 ### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BACKLOG-004
 ### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BACKLOG-005
 ### STAGE-19：Tags 页面 / Export 页面完整化 — BACKLOG-006

@@ -3,7 +3,7 @@ import { HIGHLIGHT_CLOSE, HIGHLIGHT_OPEN } from "@sourdex/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "@/lib/i18n";
 import { SearchPage } from "./SearchPage";
 
@@ -59,5 +59,18 @@ describe("SearchPage", () => {
     renderSearch();
     const marked = await screen.findByText("dolphinmarker");
     expect(marked.closest("mark")).not.toBeNull();
+  });
+
+  it("issues a hybrid request when the semantic toggle is selected", async () => {
+    renderSearch();
+    const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>;
+    await screen.findByText("SQLite FTS5 guide");
+
+    fireEvent.click(screen.getByRole("button", { name: "Semantic" }));
+
+    await waitFor(() => {
+      const urls = fetchMock.mock.calls.map((c) => String(c[0]));
+      expect(urls.some((u) => u.includes("mode=hybrid"))).toBe(true);
+    });
   });
 });
