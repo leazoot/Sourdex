@@ -32,4 +32,4 @@ First MVP release. Closes the local-first capture-to-export loop:
 - Data is stored locally by default; no content is uploaded anywhere. AI features are v0.2,
   opt-in, and disabled by default.
 
-[0.1.0]: https://github.com/USER/Sourdex/releases/tag/v0.1.0
+[0.1.0]: https://github.com/leazoot/Sourdex/releases/tag/v0.1.0

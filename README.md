@@ -1,116 +1,154 @@
 # Sourdex
 
-> Local-first index for everything you save on the web. **Save once. Find forever.**
+**Save once. Find forever.**
 
-Sourdex 是一个**本地优先的全网资料索引库**。通过浏览器插件一键保存网页与选中文本，Sourdex 自动提取正文、生成 Markdown、保存来源、建立本地全文索引，并可导出到 Obsidian。它不是普通收藏夹，也不是普通 AI 知识库——核心是让保存过的资料**可搜索、可引用、可复用**，且本地优先、不锁定平台。
+[English](#english) · [中文](#中文)
 
-数据默认完全保存在你自己的设备上，**默认不上传任何资料内容**。
+---
 
-## 截图
+## English
 
-> 以下为设计稿预览（`design/screenshots/`，浅色主题；深色主题见 `12`–`17`）。
+Sourdex keeps an index of the things you read on the web. Clip a page or a
+selection from your browser, and Sourdex pulls out the readable text, turns it
+into Markdown, keeps the original snapshot, and adds it to a local full-text
+search index. Later you can search, read, or export what you saved.
 
-| Source Desk | Library | Reader |
-| --- | --- | --- |
-| ![Source Desk](design/screenshots/01-source-desk-light.png) | ![Library](design/screenshots/02-library-light.png) | ![Reader](design/screenshots/03-reader-light.png) |
+Everything stays on your own machine. Nothing is uploaded.
 
-| Search | Settings | Extension |
-| --- | --- | --- |
-| ![Search](design/screenshots/04-search-light.png) | ![Settings](design/screenshots/08-settings-light.png) | ![Extension](design/screenshots/09-browser-extensions.png) |
+> This is **v0.1**, a developer preview — you run it from source.
 
-## 核心功能（v0.1 MVP）
+### What it does
 
-- 浏览器插件一键保存网页 / 选中文本（Chrome / Edge，Manifest V3）
-- 自动正文提取 + HTML→Markdown + 原始快照
-- 本地 SQLite 存储（数据完全在本地，数据目录可配置 / 可迁移）
-- 全文搜索（SQLite FTS5，支持中英文）
-- 阅读器 + Inbox / Library
-- Markdown / Obsidian 导出
+- Clip a web page or selected text from the browser (Chrome / Edge, MV3).
+- Extract readable content, convert to Markdown, keep the original HTML snapshot.
+- Store everything in a local SQLite database (data dir is configurable).
+- Full-text search across your library (Chinese and English).
+- Read clips in a built-in reader; browse them in Inbox and Library.
+- Export to Markdown — a single file, or a folder laid out for Obsidian.
 
-后续版本（v0.2+）：AI 摘要、自动标签、语义检索、可溯源问答（Ask）、高亮备注等。详见 [ROADMAP.md](ROADMAP.md)。
+AI features (summaries, auto-tags, semantic search, Q&A) are planned for v0.2.
+They are optional and off by default; saving, reading, search and export all
+work without them.
 
-## 技术栈
+### Requirements
 
-TypeScript monorepo（pnpm + Turborepo）。前端 React + Vite + Tailwind + shadcn/ui；插件 WXT + MV3；本地服务 Node + Fastify + Zod + Drizzle + SQLite(FTS5)。详见 [docs/04_TECH_STACK.md](docs/04_TECH_STACK.md)。
-
-## 安装
-
-v0.1 为开发者预览版，从源码运行。要求：**Node ≥ 22、pnpm 10.x**（见 `.nvmrc` 与 `package.json` 的 `packageManager`）。
+Node ≥ 22 and pnpm 10.x.
 
 ```bash
-git clone <repo-url> Sourdex
+git clone https://github.com/leazoot/Sourdex.git
 cd Sourdex
 pnpm install
 pnpm build
 ```
 
-## 本地运行
+### Running it
 
-Sourdex 由三部分组成：**本地服务**（local service）、**Web UI**、**浏览器插件**。
-
-### 1. 启动本地服务
+Sourdex has three parts: the local service, the web UI, and the browser
+extension.
 
 ```bash
+# 1. Local service — listens on 127.0.0.1:8787 only
 pnpm --filter @sourdex/server start
-```
 
-服务默认监听 `http://127.0.0.1:8787`（仅本地回环，不对外网开放）。首次启动会在数据目录生成访问 token；数据目录默认：
-
-- macOS：`~/Library/Application Support/Sourdex`
-- Windows：`%APPDATA%\Sourdex`
-- Linux：`~/.local/share/sourdex`
-
-可用环境变量覆盖：`SOURDEX_DATA_DIR`、`SOURDEX_PORT`、`SOURDEX_HOST`（默认 `127.0.0.1`，请勿改为 `0.0.0.0`）。
-
-### 2. 启动 Web UI
-
-```bash
-pnpm --filter @sourdex/web dev
-```
-
-Web UI 通过 token 访问本地服务。开发期可将配对得到的 token 注入：
-
-```bash
+# 2. Web UI (pass the paired token in dev)
 VITE_SOURDEX_API_TOKEN=<token> pnpm --filter @sourdex/web dev
+
+# 3. Browser extension — build, then load unpacked
+pnpm --filter @sourdex/extension zip
+# Chrome/Edge → chrome://extensions → Developer mode → Load unpacked
+# → apps/extension/.output/chrome-mv3/
 ```
 
-## 浏览器插件安装
+The data directory defaults to `~/Library/Application Support/Sourdex` (macOS),
+`%APPDATA%\Sourdex` (Windows), or `~/.local/share/sourdex` (Linux). Override it
+with `SOURDEX_DATA_DIR`.
+
+**First connection:** start pairing in the extension; the local service prints a
+6-digit code to its console; type it into the extension to exchange it for an
+access token. The code is shown only on the server console, expires in 5
+minutes, and is never sent over the network.
+
+### Privacy
+
+Local by default — no content leaves your machine. The service binds to
+loopback; the extension needs a token and a one-time confirmation to connect.
+See [docs/PRIVACY.md](docs/PRIVACY.md).
+
+### License
+
+[Apache-2.0](LICENSE).
+
+---
+
+## 中文
+
+Sourdex 帮你给读过的网页建一份索引。用浏览器插件剪藏一个页面或一段划选，
+Sourdex 会提取正文、转成 Markdown、留存原始快照，并写入本地全文索引。之后你
+可以搜索、阅读，或导出保存过的内容。
+
+所有数据都在你自己的电脑上，不会上传。
+
+> 这是 **v0.1** 开发者预览版，从源码运行。
+
+### 功能
+
+- 用浏览器插件剪藏网页或选中文本（Chrome / Edge，MV3）。
+- 提取正文、转 Markdown、保留原始 HTML 快照。
+- 存入本地 SQLite 数据库（数据目录可配置）。
+- 全文搜索（支持中英文）。
+- 内置阅读器；用 Inbox 和 Library 浏览。
+- 导出 Markdown——单个文件，或按 Obsidian 结构组织的文件夹。
+
+AI 功能（摘要、自动标签、语义检索、问答）计划在 v0.2 提供，默认关闭；不开 AI
+时，保存、阅读、搜索、导出都正常可用。
+
+### 环境要求
+
+Node ≥ 22，pnpm 10.x。
 
 ```bash
-pnpm --filter @sourdex/extension zip   # 产出 .output/sourdexextension-*-chrome.zip
+git clone https://github.com/leazoot/Sourdex.git
+cd Sourdex
+pnpm install
+pnpm build
 ```
 
-在 Chrome / Edge 打开 `chrome://extensions` → 开启「开发者模式」→「加载已解压的扩展程序」选择 `apps/extension/.output/chrome-mv3/`（或解压上面的 zip）。
+### 运行
 
-**首次连接配对**：在插件中发起配对 → 本地服务控制台会打印一个 6 位配对码 → 在插件中输入该码，即可换取访问 token（配对码仅在服务端控制台显示、5 分钟内有效，不经网络返回，本地恶意页面无法窃取）。
+Sourdex 分三部分：本地服务、Web UI、浏览器插件。
 
-## 仓库结构
+```bash
+# 1. 本地服务——仅监听 127.0.0.1:8787
+pnpm --filter @sourdex/server start
 
-```text
-apps/        extension | web | server
-packages/    core | db | extractor | search | exporter
-docs/        PRD 与开发文档体系（01~14）
-design/      UI 设计稿（所有界面以此为视觉准则）
-tests/       e2e
+# 2. Web UI（开发期传入配对得到的 token）
+VITE_SOURDEX_API_TOKEN=<token> pnpm --filter @sourdex/web dev
+
+# 3. 浏览器插件——先构建，再加载
+pnpm --filter @sourdex/extension zip
+# Chrome/Edge → chrome://extensions → 开发者模式 → 加载已解压的扩展程序
+# → apps/extension/.output/chrome-mv3/
 ```
 
-## 隐私
+数据目录默认在 `~/Library/Application Support/Sourdex`（macOS）、
+`%APPDATA%\Sourdex`（Windows）或 `~/.local/share/sourdex`（Linux），可用
+`SOURDEX_DATA_DIR` 覆盖。
 
-- **默认本地存储，默认不上传任何资料内容。** 详见 [docs/PRIVACY.md](docs/PRIVACY.md)。
-- 本地服务默认仅监听 `127.0.0.1`；插件访问需 token，首次连接需用户确认。
-- AI 功能为 v0.2，默认关闭；不配置 AI 时，保存 / 阅读 / 全文搜索 / 导出均正常工作。
-- 安全问题报告见 [SECURITY.md](SECURITY.md)。
+**首次连接：** 在插件里发起配对，本地服务会在控制台打印一个 6 位配对码，把它
+输入插件即可换取访问 token。配对码只显示在服务端控制台、5 分钟内有效、不经网络
+传输。
 
-## Roadmap
+### 隐私
 
-见 [ROADMAP.md](ROADMAP.md)。简述：v0.1 闭环（保存→提取→索引→搜索→阅读→导出）→ v0.2 AI（摘要 / 标签 / 语义检索 / Ask）→ v0.3+ 桌面端等。
+默认本地存储，内容不外传。服务只监听回环地址；插件需 token 且首次连接需确认。
+详见 [docs/PRIVACY.md](docs/PRIVACY.md)。
 
-## Contributing
-
-欢迎贡献。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 与 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)，并遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。本仓库采用文档驱动流程，开发约定见 [CLAUDE.md](CLAUDE.md)、[docs/03_ARCHITECTURE.md](docs/03_ARCHITECTURE.md) 与 `.claude/rules/`；所有 UI 必须严格按 `design/` 设计稿实现。
-
-## License
+### 许可证
 
 [Apache-2.0](LICENSE)。
 
-> PRD §20.1 给出 AGPL-3.0 / Apache-2.0 两个候选；本项目最终采用 **Apache-2.0**（宽松许可、含专利授权，便于传播与第三方集成）。
+---
+
+更多文档：[Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) ·
+[开发指南](docs/DEVELOPMENT.md) · [Security](SECURITY.md) ·
+[Changelog](CHANGELOG.md)
