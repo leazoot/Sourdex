@@ -3,6 +3,7 @@ import {
   createDb,
   createSqlite,
   ItemRepository,
+  AiOutputRepository,
   JobRepository,
   ProviderConfigRepository,
   runMigrations,
@@ -19,11 +20,13 @@ import { EncryptedFileSecretStore } from "./infrastructure/security/encrypted-fi
 import { LocalStorage } from "./infrastructure/storage/local-storage.js";
 import { JobWorker } from "./infrastructure/jobs/job-worker.js";
 import { createExtractContentJob } from "./infrastructure/jobs/extract-content-job.js";
+import { createGenerateSummaryJob } from "./infrastructure/jobs/generate-summary-job.js";
 import { CaptureService } from "./services/capture-service.js";
 import { ItemService } from "./services/item-service.js";
 import { SearchService } from "./services/search-service.js";
 import { ExportService } from "./services/export-service.js";
 import { ProviderConfigService } from "./services/provider-config-service.js";
+import { SummaryService } from "./services/summary-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -35,11 +38,13 @@ export interface Container {
   jobRepo: JobRepository;
   searchRepo: SearchRepository;
   providerConfigRepo: ProviderConfigRepository;
+  aiOutputRepo: AiOutputRepository;
   captureService: CaptureService;
   itemService: ItemService;
   searchService: SearchService;
   exportService: ExportService;
   providerConfigService: ProviderConfigService;
+  summaryService: SummaryService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -64,6 +69,7 @@ export function createContainer(config: ServerConfig): Container {
   const jobRepo = new JobRepository(db);
   const searchRepo = new SearchRepository(db);
   const providerConfigRepo = new ProviderConfigRepository(db);
+  const aiOutputRepo = new AiOutputRepository(db);
 
   const storage = new LocalStorage(config.dataDir);
   const secrets = new EncryptedFileSecretStore({ secretsPath: config.secretsPath });
@@ -75,10 +81,27 @@ export function createContainer(config: ServerConfig): Container {
     searchRepo,
     storage,
   });
-  const itemService = new ItemService({ itemRepo, captureRepo, tagRepo, searchRepo, storage });
+  const itemService = new ItemService({
+    itemRepo,
+    captureRepo,
+    tagRepo,
+    searchRepo,
+    aiOutputRepo,
+    storage,
+  });
   const searchService = new SearchService({ searchRepo });
   const exportService = new ExportService({ itemRepo, captureRepo, tagRepo, storage });
   const providerConfigService = new ProviderConfigService({ repo: providerConfigRepo, secrets });
+  const summaryService = new SummaryService({
+    providerConfigRepo,
+    secrets,
+    aiOutputRepo,
+    itemRepo,
+    captureRepo,
+    tagRepo,
+    searchRepo,
+    storage,
+  });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));
 
@@ -88,6 +111,7 @@ export function createContainer(config: ServerConfig): Container {
     "extract_content",
     createExtractContentJob({ itemRepo, captureRepo, tagRepo, searchRepo, storage, extractor }),
   );
+  worker.register("generate_summary", createGenerateSummaryJob(summaryService));
 
   return {
     sqlite,
@@ -98,11 +122,13 @@ export function createContainer(config: ServerConfig): Container {
     jobRepo,
     searchRepo,
     providerConfigRepo,
+    aiOutputRepo,
     captureService,
     itemService,
     searchService,
     exportService,
     providerConfigService,
+    summaryService,
     auth,
     worker,
     close: () => sqlite.close(),

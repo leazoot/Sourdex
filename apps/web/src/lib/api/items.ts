@@ -1,4 +1,12 @@
-import type { Capture, Item, ItemListQuery, Paginated, Tag, UpdateItemInput } from "@sourdex/core";
+import type {
+  Capture,
+  Item,
+  ItemListQuery,
+  Paginated,
+  SummaryOutput,
+  Tag,
+  UpdateItemInput,
+} from "@sourdex/core";
 import { apiFetch } from "./client";
 
 /** Full item view from GET /api/items/:id (mirrors the server's ItemDetail). */
@@ -6,6 +14,7 @@ export interface ItemDetail {
   item: Item;
   capture: Capture | null;
   tags: Tag[];
+  summary: SummaryOutput | null;
 }
 
 /** Readable content from GET /api/items/:id/content (added in TASK-037). */

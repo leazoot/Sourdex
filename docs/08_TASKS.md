@@ -703,6 +703,40 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 呈现若与设计稿冲突则 Decision Required
 
 ### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BACKLOG-001
+
+- 阶段目标：用户配置并启用 Provider 后，可对资料生成结构化摘要（PRD §14.3 JSON）；后台任务执行、不阻塞保存；AI 失败不影响保存/搜索/导出；摘要写入 `ai_outputs` + `items.summary/one_sentence/ai_status` 并并入 FTS。
+- 阶段状态：DONE（2026-06-21，TASK-059~063 全部 DONE）
+- 「可关闭」与数据外发口径（消解既有 OQ，无需新表）：以「存在 enabled 的 provider_config」作为 AI 开关 + 数据外发显式 opt-in（PRD §17.1）；无启用 Provider 时摘要不可用，保存/阅读/搜索/导出照常。**不新增表**，不动 PRD §12 数据模型。
+- 是否需要人工确认：否（沿用上面默认口径；如需独立「数据外发总开关」表再单列 Decision）
+
+#### TASK-059：AiOutputRepository + Item 摘要写入（db）— STATUS: DONE
+- `mapAiOutput`；`AiOutputRepository`（create / findLatestByItem(itemId,type)）；`ItemRepository.applyAiSummary(id,{summary,oneSentence})` 设 summary/one_sentence/ai_status='done'，`setAiStatus(id,status)`。
+- 验收：repo 用测试 SQLite 单测 create/findLatest（按 createdAt 取最新）+ item 摘要字段与 ai_status 更新；ai_outputs 已在迁移中。
+- 是否需要人工确认：否
+
+#### TASK-060：摘要 Prompt + JSON 解析（@sourdex/ai）— STATUS: DONE
+- `buildSummaryMessages({title,text,lang?})`：system+user，约束 PRD §14.3（仅 JSON、不编造、不超出原文、不 Markdown 包裹、内容不足返回空字段+原因）。
+- `parseSummaryOutput(content)`：剥离 ```json 围栏、Zod 校验为 `SummaryOutput`（oneSentence/summary/keyPoints/usefulFor/riskNotes/suggestedTags），非法抛 `AIProviderError`。
+- 验收：单测覆盖正常 JSON、带围栏、缺字段、非 JSON（PRD §21.1 AI 输出 JSON 解析）。
+- 是否需要人工确认：否
+
+#### TASK-061：generate_summary 后台任务 + SummaryService（server）— STATUS: DONE
+- `SummaryService`（DI：providerConfigRepo/secrets/aiOutputRepo/itemRepo/captureRepo/searchRepo/storage/createProvider）：选首个 enabled provider→取 Key→建 provider→读 item 正文（capture 文本文件）→chat→parseSummaryOutput→写 ai_outputs + item 摘要 + 以 summary 重建 FTS；置 ai_status pending→done/failed；记录 attempts/error；**不向保存流程抛错**。
+- `createGenerateSummaryJob`（Command）调用 service；container 注册 worker handler。
+- 验收：service 单测（mock provider + 测试 db + 临时 storage）：成功写 ai_outputs/summary/done 且 FTS 含 summary；provider 失败→ai_status=failed 且不抛；无 enabled provider→明确不可用。
+- 是否需要人工确认：否
+
+#### TASK-062：AI 摘要 API + 详情暴露 — STATUS: DONE
+- `POST /api/ai/summarize/:itemId`：校验存在 enabled provider（否则 409 可读错误），置 ai_status=pending，入队 generate_summary，返回 `{ jobId }`；Zod、沿用 Bearer/CORS。
+- `GET /api/items/:id` 详情附最新 summary 结构化输出（keyPoints 等，来自 ai_outputs）。
+- 验收：集成测试 CRUD/守卫（无 provider→409；有 provider→入队+pending；worker 处理后详情含摘要）；响应不含 Key。
+- 是否需要人工确认：否
+
+#### TASK-063：Reader 摘要 UI（apps/web）— STATUS: DONE
+- 对照设计稿 reader（03/14）摘要区：展示 summary/one_sentence/keyPoints；「生成摘要」动作（无 enabled provider 时禁用并提示去设置）；轮询/失效刷新 ai_status；i18n EN/简中、浅深主题。
+- 验收：组件 < 150 行、无硬编码文案/颜色；TanStack Query 走既有客户端；jsdom 组件测试（有/无摘要、无 provider 禁用）。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
 ### STAGE-14：AI 自动标签（规范化复用）— BACKLOG-002
 ### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BACKLOG-003
 ### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BACKLOG-007

@@ -4,9 +4,48 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-12（AI 基础设施）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（TASK-054~058）：SecretStore 加密文件 + `@sourdex/ai` Provider 适配/工厂 + ProviderConfig 仓储/服务 + 设置 API 路由 + Settings AI 配置页；AI 默认关闭、明示数据外发；**test 200 全绿**。按 /goal 停在 STAGE-12。
+**BATCH-02（v0.2）进行中 — STAGE-13（AI 摘要）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（AI 基础设施）。STAGE-13 = DONE（TASK-059~063）：AiOutput 仓储 + 摘要 prompt/JSON 解析 + generate_summary 后台任务/SummaryService + 摘要 API/详情暴露 + Reader 摘要 UI；AI 以 enabled provider 为开关、失败不影响保存/搜索/导出、摘要并入 FTS；**test 223 全绿**。按 /goal 停在 STAGE-13。
 - **OQ-T7 已确认（2026-06-21，用户决定）：API Key 安全存储 = 本地加密文件**（数据目录 `secrets.enc`，AES-256-GCM + scrypt 派生主密钥，仅依赖 `node:crypto`；零原生依赖、跨平台一致、临时目录即可测）；系统 Keychain 留作后续增强。已同步 08_TASKS / 04_TECH_STACK / security 规则。STAGE-12（AI 基础设施）阻塞已解除，待用户下发 /goal 启动。
 - 今日另提交：UI/bug 修复（Select 箭头间距、设置外观预览、capture 32MB 体积上限+413）已推送 `e6c5f97`。
+
+### STAGE-13 进度记录（2026-06-21，AI 摘要 DONE）
+
+#### TASK-063（Reader 摘要 UI apps/web）— DONE
+- api `ItemDetail` 加 `summary: SummaryOutput|null`；新增 `lib/api/ai.ts`（summarizeItem）+ `hooks/useSummarize.ts`（触发后失效 item 查询）。
+- `features/reader/SummaryPanel.tsx`（对照设计稿 03/14 右栏）：有摘要展示 summary + 编号 Key Points；无摘要显示「生成摘要」按钮（无 enabled provider 则禁用 + 提示去设置，经 useProviders 判定）；ai_status=pending 显示「生成中…」并定时失效 item 查询轮询结果；failed 显示重试文案。ReaderPage 改双栏（正文 + 右侧 aside，lg 显示）。
+- i18n：reader.summarize/summarizing/noSummary/summaryFailed/aiOff（EN/简中）；无硬编码文案/颜色；组件 < 150 行。
+- 测试 `SummaryPanel.test.tsx`（4）：展示 summary+keyPoints+编号、无 provider 时禁用+提示、有 provider 时启用、pending 态文案；既有 ReaderPage 测试仍通过（防御 providers 非数组）。
+- 检查：web typecheck ✅；vitest 6/6（含既有 ReaderPage）✅；eslint 0。
+
+#### STAGE-13 收尾全量检查（2026-06-21）
+- typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 223/223（47 文件，200→223，+23）**；`pnpm build` 9/9 ✅。
+- 测试增量：ai-output repo 4、summary 解析 6、summary-service 4、ai 路由 5、SummaryPanel 4 = 23。
+
+### STAGE-13 任务明细（TASK-059~062）
+
+> 口径：以「存在 enabled 的 provider_config」为 AI 开关 + 数据外发显式 opt-in，无新增表（不动 PRD §12）。
+
+#### TASK-059（AiOutputRepository + Item 摘要写入）— DONE
+- schema 加 `AiOutputRow`；mappers 加 `mapAiOutput`；新增 `AiOutputRepository`（create / findLatestByItem，按 createdAt desc + rowid desc 取最新，规避同毫秒并列）；`ItemRepository.applyAiSummary`（写 summary/one_sentence + ai_status='done'）与 `setAiStatus`；barrel 导出。ai_outputs 表已在迁移中。
+- 测试（4）：create + findLatest 取最新、无输出返回 null、applyAiSummary 字段+done、setAiStatus pending/failed。
+- 检查：db build ✅；vitest 4/4 ✅；typecheck ✅；eslint 0。
+
+#### TASK-060（摘要 Prompt + JSON 解析 @sourdex/ai）— DONE
+- `summary.ts`：`buildSummaryMessages`（system+user，PRD §14.3 约束：仅 JSON、不编造、不超出原文、不 Markdown 包裹、不足返回空字段+原因、标签 ≤20 字符且具体）；`parseSummaryOutput`（剥离 ```json 围栏、回退取最外层 {...}、接受 snake_case 或 camelCase、数组过滤非字符串、缺字段空默认；非 JSON/非对象抛 `AIProviderError`）。无新增依赖（手写校验）。
+- 测试（6）：干净 snake_case、围栏+camelCase、夹杂文本中恢复 JSON、缺字段空默认+丢弃非字符串项、非 JSON/数组抛错。
+- 检查：typecheck ✅；vitest 6/6 ✅；eslint 0；build ✅。
+
+#### TASK-061（generate_summary 后台任务 + SummaryService）— DONE
+- `SummaryService`（DI）：选首个 enabled provider→取 Key→建 provider（默认 `@sourdex/ai`，可注入）→读 capture.originalTextPath 文本（截断 12000 字）→chat(buildSummaryMessages)→parseSummaryOutput→写 ai_outputs(type summary) + `applyAiSummary`(summary/oneSentence/done) + 以 summary 重建 FTS。无 enabled provider→ai_status=none 且不动数据；正文缺失或 AIProviderError/解析失败→ai_status=failed 且**不抛**；非 AI（基础设施）错误才上抛重试。inputHash=sha256(model+text)。
+- `createGenerateSummaryJob`（Command）委托 service；container 注册 `generate_summary` worker + AiOutputRepository + SummaryService 接线。
+- 测试（4，mock provider + 测试 db + 临时 storage）：成功写 ai_outputs/summary/done 且 FTS 可搜到 summary；provider 错误→failed 不抛；非 JSON 输出→failed；无 enabled provider→none 且无副作用。
+- 检查：server typecheck ✅；vitest 4/4 ✅；eslint 0。
+
+#### TASK-062（AI 摘要 API + 详情暴露）— DONE
+- `routes/ai.ts`：`POST /api/ai/summarize/:itemId`——item 不存在 404；无 enabled provider → 409 `NO_AI_PROVIDER`（可读提示去设置）；否则置 ai_status=pending、入队 `generate_summary`、返回 202 `{jobId,status}`。Zod、沿用鉴权/CORS。
+- `ItemService.get` 扩展 `ItemDetail.summary: SummaryOutput|null`（取 `aiOutputRepo.findLatestByItem(summary)` 并安全 JSON.parse，损坏返回 null）；container 给 ItemService 注入 aiOutputRepo。
+- 集成测试（5）：缺 item→404、无 provider→409、有 provider→202+pending+入队 generate_summary、详情含结构化 summary、无摘要时 summary=null。
+- 检查：server typecheck ✅；vitest 5/5 ✅；eslint 0。
 
 ### STAGE-12 进度记录（2026-06-21，AI 基础设施 DONE）
 

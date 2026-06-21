@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Loading } from "@/components/ui/Loading";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { SummaryPanel } from "@/features/reader/SummaryPanel";
 import { formatNumber } from "@/lib/format";
 
 export function ReaderPage() {
@@ -109,46 +110,53 @@ export function ReaderPage() {
         </div>
       )}
 
-      <article className="mx-auto w-full max-w-[720px] flex-1 overflow-y-auto px-8 py-8">
-        <div className="mb-3 flex items-center gap-2">
-          <TypeBadge type={item.type} />
-          {item.domain && <span className="font-mono text-[12px] text-text3">{item.domain}</span>}
-        </div>
-        <h1 className="font-serif text-[34px] font-bold leading-[1.2]">{item.title}</h1>
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-text3">
-          {item.author && <span>{item.author}</span>}
-          {item.wordCount > 0 && (
-            <span>
-              {formatNumber(item.wordCount)} {t("common.words")}
-            </span>
-          )}
-          {item.readingTime > 0 && (
-            <span>
-              {item.readingTime} {t("common.min")}
-            </span>
-          )}
-        </div>
-        {detail.data && detail.data.tags.length > 0 && (
-          <div className="mt-4">
-            <TagDisplay tags={detail.data.tags.map((tg) => tg.name)} />
-          </div>
-        )}
+      <div className="flex min-h-0 flex-1">
+        <div className="flex-1 overflow-y-auto">
+          <article className="mx-auto w-full max-w-[720px] px-8 py-8">
+            <div className="mb-3 flex items-center gap-2">
+              <TypeBadge type={item.type} />
+              {item.domain && (
+                <span className="font-mono text-[12px] text-text3">{item.domain}</span>
+              )}
+            </div>
+            <h1 className="font-serif text-[34px] font-bold leading-[1.2]">{item.title}</h1>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-text3">
+              {item.author && <span>{item.author}</span>}
+              {item.wordCount > 0 && (
+                <span>
+                  {formatNumber(item.wordCount)} {t("common.words")}
+                </span>
+              )}
+              {item.readingTime > 0 && (
+                <span>
+                  {item.readingTime} {t("common.min")}
+                </span>
+              )}
+            </div>
+            {detail.data && detail.data.tags.length > 0 && (
+              <div className="mt-4">
+                <TagDisplay tags={detail.data.tags.map((tg) => tg.name)} />
+              </div>
+            )}
 
-        <div className="mt-8 border-t border-border pt-8">
-          {content.isLoading ? (
-            <Loading />
-          ) : content.data?.readableHtml ? (
-            <div
-              className="reader-content"
-              dangerouslySetInnerHTML={{ __html: content.data.readableHtml }}
-            />
-          ) : content.data?.plainText ? (
-            <div className="reader-content whitespace-pre-wrap">{content.data.plainText}</div>
-          ) : (
-            <p className="text-[14px] text-text3">{t("reader.noContent")}</p>
-          )}
+            <div className="mt-8 border-t border-border pt-8">
+              {content.isLoading ? (
+                <Loading />
+              ) : content.data?.readableHtml ? (
+                <div
+                  className="reader-content"
+                  dangerouslySetInnerHTML={{ __html: content.data.readableHtml }}
+                />
+              ) : content.data?.plainText ? (
+                <div className="reader-content whitespace-pre-wrap">{content.data.plainText}</div>
+              ) : (
+                <p className="text-[14px] text-text3">{t("reader.noContent")}</p>
+              )}
+            </div>
+          </article>
         </div>
-      </article>
+        <SummaryPanel item={item} summary={detail.data?.summary ?? null} />
+      </div>
 
       <ConfirmDialog
         open={confirming}

@@ -5,10 +5,12 @@ import {
   type ItemListQuery,
   type Paginated,
   type Storage,
+  type SummaryOutput,
   type Tag,
   type UpdateItemInput,
 } from "@sourdex/core";
 import type {
+  AiOutputRepository,
   CaptureRepository,
   ItemRepository,
   SearchRepository,
@@ -20,6 +22,8 @@ export interface ItemDetail {
   item: Item;
   capture: Capture | null;
   tags: Tag[];
+  /** Latest structured AI summary (PRD §14.3), or null if none has been generated. */
+  summary: SummaryOutput | null;
 }
 
 /** Readable content returned by GET /api/items/:id/content. */
@@ -34,6 +38,7 @@ export interface ItemServiceDeps {
   captureRepo: CaptureRepository;
   tagRepo: TagRepository;
   searchRepo: SearchRepository;
+  aiOutputRepo: AiOutputRepository;
   storage: Storage;
 }
 
@@ -45,7 +50,7 @@ export class ItemService {
     return this.deps.itemRepo.list(query);
   }
 
-  /** Get an item with its capture and tags. Throws NotFoundError if missing. */
+  /** Get an item with its capture, tags and latest AI summary. Throws if missing. */
   get(id: string): ItemDetail {
     const item = this.deps.itemRepo.findById(id);
     if (!item) throw new NotFoundError(`Item not found: ${id}`);
@@ -53,7 +58,19 @@ export class ItemService {
       item,
       capture: this.deps.captureRepo.findByItemId(id),
       tags: this.deps.tagRepo.listByItem(id),
+      summary: this.latestSummary(id),
     };
+  }
+
+  /** Parse the latest stored summary output, tolerating corrupt rows (returns null). */
+  private latestSummary(id: string): SummaryOutput | null {
+    const output = this.deps.aiOutputRepo.findLatestByItem(id, "summary");
+    if (!output) return null;
+    try {
+      return JSON.parse(output.output) as SummaryOutput;
+    } catch {
+      return null;
+    }
   }
 
   /** Read the extracted readable content from disk (Reader page). */

@@ -58,6 +58,24 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：用户启用 Provider 后可对资料生成结构化摘要（PRD §14.3 JSON）；后台执行、不阻塞保存；AI 失败不影响保存/阅读/搜索/导出；摘要写入 ai_outputs + items.summary/one_sentence/ai_status 并并入 FTS。
+- 已完成内容：
+  - TASK-059：`AiOutputRepository`（create/findLatestByItem，createdAt+rowid 取最新）+ `mapAiOutput` + `ItemRepository.applyAiSummary`/`setAiStatus`。4 测试。
+  - TASK-060：`@sourdex/ai` `buildSummaryMessages`（§14.3 约束）+ `parseSummaryOutput`（剥围栏/恢复 JSON/snake|camel/缺字段默认/非法抛 AIProviderError，无新依赖）。6 测试。
+  - TASK-061：`SummaryService`（选 enabled provider→取 Key→建 provider→读正文截断→chat→parse→写 ai_outputs+item 摘要+重建 FTS；无 provider=none、失败=failed 不抛、infra 错上抛重试）+ `generate_summary` 任务；container 接线。4 测试。
+  - TASK-062：`POST /api/ai/summarize/:itemId`（404/409 NO_AI_PROVIDER/202 pending+入队）+ `ItemDetail.summary` 暴露最新结构化摘要。5 集成测试。
+  - TASK-063：Reader 摘要侧栏（设计 03/14）展示 summary+keyPoints、生成按钮（无 provider 禁用+提示）、pending 轮询、failed 重试；ReaderPage 双栏；i18n EN/简中。4 组件测试。
+- 关键产出：完整「保存→提取→（可选）AI 摘要→阅读/搜索」闭环；摘要可搜索；AI 严格 opt-in 且不破坏离线主流程。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 223（47 文件，+23）** / `pnpm build` 9/9 ✅。
+- 重要决策：以「存在 enabled provider_config」作 AI 开关 + 数据外发显式 opt-in，消解「设置表」决策、不动 PRD §12（不新增表）；摘要正文截断 12000 字限制 prompt 体积；inputHash=sha256(model+text) 备缓存；摘要重建 FTS 使其可搜（PRD §15.2）。
+- 遗留问题：摘要 job 走真实网络（单测 mock 覆盖，集成只验入队/守卫/详情）；未做自动触发（仅手动 API/UI 触发，自动摘要可后续）；多 enabled provider 取首个；keyPoints/usefulFor/riskNotes/suggestedTags 仅存 ai_outputs，UI 暂只展示 summary+keyPoints。
+- 下一阶段目标：STAGE-14 AI 自动标签（复用已有标签、规范化、最多新增 3 个/单条最多 7 个，PRD §14.4）。
+- 下一步建议：进入 STAGE-14 前明确「自动标签」触发与写入口径（复用 TagRepository 规范化；是否随摘要同任务产出 suggested_tags 落库）；保持 AI opt-in 与不阻塞主流程。
+
 ### STAGE-12：AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）— BATCH-02
 
 - 阶段状态：DONE

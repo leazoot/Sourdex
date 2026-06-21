@@ -156,3 +156,4 @@ export type CaptureRow = typeof captures.$inferSelect;
 export type TagRow = typeof tags.$inferSelect;
 export type JobRow = typeof jobs.$inferSelect;
 export type ProviderConfigRow = typeof providerConfigs.$inferSelect;
+export type AiOutputRow = typeof aiOutputs.$inferSelect;

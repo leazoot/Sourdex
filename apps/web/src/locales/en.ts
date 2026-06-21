@@ -93,6 +93,11 @@ export const en = {
     keyPoints: "Key points",
     relatedSources: "Related sources",
     noContent: "No readable content yet. Extraction may still be running or has failed.",
+    summarize: "Summarize",
+    summarizing: "Summarizing…",
+    noSummary: "No summary yet.",
+    summaryFailed: "Summary failed. Try again.",
+    aiOff: "Enable an AI provider in Settings to summarize.",
   },
   settings: {
     title: "Settings",

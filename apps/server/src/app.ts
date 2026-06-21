@@ -11,6 +11,7 @@ import { registerPairRoutes } from "./routes/pair.js";
 import { registerSearchRoutes } from "./routes/search.js";
 import { registerExportRoutes } from "./routes/export.js";
 import { registerProviderRoutes } from "./routes/providers.js";
+import { registerAiRoutes } from "./routes/ai.js";
 
 /** Endpoints reachable without a paired token: liveness + the pairing handshake itself. */
 const PUBLIC_PATHS = new Set(["/api/health", "/api/pair/initiate", "/api/pair/complete"]);
@@ -96,6 +97,7 @@ export async function buildApp(
   registerSearchRoutes(app, container);
   registerExportRoutes(app, container);
   registerProviderRoutes(app, container);
+  registerAiRoutes(app, container);
 
   return app;
 }

@@ -2,6 +2,7 @@ import {
   createId,
   NotFoundError,
   nowIso,
+  type AiStatus,
   type CreateItemInput,
   type Item,
   type ItemListQuery,
@@ -136,6 +137,32 @@ export class ItemRepository {
     const row = this.db.update(items).set(patch).where(eq(items.id, id)).returning().get();
     if (!row) throw new NotFoundError(`Item not found: ${id}`);
     return mapItem(row);
+  }
+
+  /** Persist an AI summary (PRD §14.3) — sets summary/one_sentence and ai_status='done'. */
+  applyAiSummary(id: string, input: { summary: string; oneSentence: string }): Item {
+    const row = this.db
+      .update(items)
+      .set({
+        summary: input.summary,
+        oneSentence: input.oneSentence,
+        aiStatus: "done",
+        updatedAt: nowIso(),
+      })
+      .where(eq(items.id, id))
+      .returning()
+      .get();
+    if (!row) throw new NotFoundError(`Item not found: ${id}`);
+    return mapItem(row);
+  }
+
+  /** Update only the AI processing status (pending while a job runs, failed on error). */
+  setAiStatus(id: string, status: AiStatus): void {
+    this.db
+      .update(items)
+      .set({ aiStatus: status, updatedAt: nowIso() })
+      .where(eq(items.id, id))
+      .run();
   }
 
   /** Soft delete (PRD §13.2) — sets status to `deleted`; files are never removed. */

@@ -95,6 +95,11 @@ export const zh: Resources = {
     keyPoints: "要点",
     relatedSources: "相关来源",
     noContent: "暂无可读正文。提取可能仍在进行或已失败。",
+    summarize: "生成摘要",
+    summarizing: "生成中…",
+    noSummary: "尚无摘要。",
+    summaryFailed: "摘要失败，请重试。",
+    aiOff: "在设置中启用 AI 服务后可生成摘要。",
   },
   settings: {
     title: "设置",
