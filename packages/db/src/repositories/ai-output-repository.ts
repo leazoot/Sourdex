@@ -1,5 +1,5 @@
 import { createId, nowIso, type AiOutput, type AiOutputType } from "@sourdex/core";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type { Db } from "../client.js";
 import { aiOutputs } from "../schema.js";
 import { mapAiOutput } from "../mappers.js";
@@ -37,6 +37,25 @@ export class AiOutputRepository {
       .returning()
       .get();
     return mapAiOutput(row);
+  }
+
+  /** All outputs of a kind for an item, oldest first (e.g. one embedding per chunk). */
+  listByItemAndType(itemId: string, type: AiOutputType): AiOutput[] {
+    const rows = this.db
+      .select()
+      .from(aiOutputs)
+      .where(and(eq(aiOutputs.itemId, itemId), eq(aiOutputs.type, type)))
+      .orderBy(asc(aiOutputs.createdAt), asc(sql`rowid`))
+      .all();
+    return rows.map(mapAiOutput);
+  }
+
+  /** Remove all outputs of a kind for an item (used to rebuild embeddings, PRD §14.6.5). */
+  deleteByItemAndType(itemId: string, type: AiOutputType): void {
+    this.db
+      .delete(aiOutputs)
+      .where(and(eq(aiOutputs.itemId, itemId), eq(aiOutputs.type, type)))
+      .run();
   }
 
   /** Latest output of a kind for an item (most recent by creation), or null. */

@@ -54,6 +54,35 @@ describe("AiOutputRepository", () => {
     const item = makeItem();
     expect(aiRepo.findLatestByItem(item.id, "summary")).toBeNull();
   });
+
+  it("lists and deletes embeddings by item and type (rebuild path)", () => {
+    const item = makeItem();
+    for (let i = 0; i < 3; i++) {
+      aiRepo.create({
+        itemId: item.id,
+        type: "embedding",
+        provider: "ollama",
+        model: "nomic",
+        inputHash: `c${i}`,
+        output: JSON.stringify({ chunkId: `chunk_${i}`, vector: [i, i] }),
+      });
+    }
+    aiRepo.create({
+      itemId: item.id,
+      type: "summary",
+      provider: "ollama",
+      model: "x",
+      inputHash: "s",
+      output: "{}",
+    });
+
+    expect(aiRepo.listByItemAndType(item.id, "embedding").length).toBe(3);
+
+    aiRepo.deleteByItemAndType(item.id, "embedding");
+    expect(aiRepo.listByItemAndType(item.id, "embedding")).toEqual([]);
+    // Other output types are untouched.
+    expect(aiRepo.findLatestByItem(item.id, "summary")).not.toBeNull();
+  });
 });
 
 describe("ItemRepository AI summary fields", () => {

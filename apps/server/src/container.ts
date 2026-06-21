@@ -1,5 +1,6 @@
 import {
   CaptureRepository,
+  ChunkRepository,
   createDb,
   createSqlite,
   ItemRepository,
@@ -21,6 +22,7 @@ import { LocalStorage } from "./infrastructure/storage/local-storage.js";
 import { JobWorker } from "./infrastructure/jobs/job-worker.js";
 import { createExtractContentJob } from "./infrastructure/jobs/extract-content-job.js";
 import { createGenerateSummaryJob } from "./infrastructure/jobs/generate-summary-job.js";
+import { createGenerateEmbeddingJob } from "./infrastructure/jobs/generate-embedding-job.js";
 import { CaptureService } from "./services/capture-service.js";
 import { ItemService } from "./services/item-service.js";
 import { SearchService } from "./services/search-service.js";
@@ -28,6 +30,8 @@ import { ExportService } from "./services/export-service.js";
 import { ProviderConfigService } from "./services/provider-config-service.js";
 import { SummaryService } from "./services/summary-service.js";
 import { AutoTagService } from "./services/auto-tag-service.js";
+import { EmbeddingService } from "./services/embedding-service.js";
+import { SemanticSearchService } from "./services/semantic-search-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -46,6 +50,8 @@ export interface Container {
   exportService: ExportService;
   providerConfigService: ProviderConfigService;
   summaryService: SummaryService;
+  embeddingService: EmbeddingService;
+  semanticSearchService: SemanticSearchService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -71,6 +77,7 @@ export function createContainer(config: ServerConfig): Container {
   const searchRepo = new SearchRepository(db);
   const providerConfigRepo = new ProviderConfigRepository(db);
   const aiOutputRepo = new AiOutputRepository(db);
+  const chunkRepo = new ChunkRepository(db);
 
   const storage = new LocalStorage(config.dataDir);
   const secrets = new EncryptedFileSecretStore({ secretsPath: config.secretsPath });
@@ -105,6 +112,20 @@ export function createContainer(config: ServerConfig): Container {
     storage,
     autoTagService,
   });
+  const embeddingService = new EmbeddingService({
+    providerConfigRepo,
+    secrets,
+    chunkRepo,
+    aiOutputRepo,
+    itemRepo,
+    captureRepo,
+    storage,
+  });
+  const semanticSearchService = new SemanticSearchService({
+    embeddingService,
+    searchRepo,
+    chunkRepo,
+  });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));
 
@@ -115,6 +136,7 @@ export function createContainer(config: ServerConfig): Container {
     createExtractContentJob({ itemRepo, captureRepo, tagRepo, searchRepo, storage, extractor }),
   );
   worker.register("generate_summary", createGenerateSummaryJob(summaryService));
+  worker.register("generate_embedding", createGenerateEmbeddingJob(embeddingService));
 
   return {
     sqlite,
@@ -132,6 +154,8 @@ export function createContainer(config: ServerConfig): Container {
     exportService,
     providerConfigService,
     summaryService,
+    embeddingService,
+    semanticSearchService,
     auth,
     worker,
     close: () => sqlite.close(),

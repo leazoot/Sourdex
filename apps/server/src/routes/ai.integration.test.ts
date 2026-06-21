@@ -72,6 +72,43 @@ describe("POST /api/ai/summarize/:itemId (TASK-062)", () => {
   });
 });
 
+describe("POST /api/ai/embed/:itemId (STAGE-15)", () => {
+  it("404s for a missing item", async () => {
+    const res = await auth({ method: "POST", url: "/api/ai/embed/item_missing" });
+    expect(res.statusCode).toBe(404);
+  });
+
+  it("409s when no enabled provider has an embedding model", async () => {
+    const itemId = await saveAndExtract();
+    await enableProvider(); // no embeddingModel configured
+    const res = await auth({ method: "POST", url: `/api/ai/embed/${itemId}` });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toMatchObject({ error: "NO_AI_PROVIDER" });
+  });
+
+  it("enqueues a generate_embedding job when an embedding provider is enabled", async () => {
+    const itemId = await saveAndExtract();
+    await auth({
+      method: "POST",
+      url: "/api/settings/providers",
+      payload: {
+        name: "Emb",
+        type: "openai-compatible",
+        baseUrl: "https://api.example.com/v1",
+        embeddingModel: "text-embedding-3-small",
+        enabled: true,
+        apiKey: "sk-x",
+      },
+    });
+
+    const res = await auth({ method: "POST", url: `/api/ai/embed/${itemId}` });
+    expect(res.statusCode).toBe(202);
+    const { jobId, status } = res.json() as { jobId: string; status: string };
+    expect(status).toBe("pending");
+    expect(server.container.jobRepo.findById(jobId)?.type).toBe("generate_embedding");
+  });
+});
+
 describe("GET /api/items/:id summary exposure (TASK-062)", () => {
   it("returns the latest structured summary when one exists", async () => {
     const itemId = await saveAndExtract();

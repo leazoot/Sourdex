@@ -17,10 +17,32 @@ const searchQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(50).optional(),
 });
 
-/** Search API (PRD §13.3). v0.1 implements keyword mode; semantic/hybrid are v0.2. */
+const semanticQuerySchema = z.object({
+  q: z.string().min(1),
+  limit: z.coerce.number().int().positive().max(50).optional(),
+});
+
+/**
+ * Search API (PRD §13.3). Keyword mode is v0.1; semantic mode (v0.2) is exposed at a
+ * dedicated endpoint and requires an enabled embedding provider (AI opt-in, PRD §17.1).
+ * Hybrid ranking that merges both is STAGE-16.
+ */
 export function registerSearchRoutes(app: FastifyInstance, container: Container): void {
   app.get("/api/search", async (request) => {
     const query = searchQuerySchema.parse(request.query);
     return container.searchService.search(query);
+  });
+
+  app.get("/api/search/semantic", async (request, reply) => {
+    const { q, limit } = semanticQuerySchema.parse(request.query);
+    if (!container.semanticSearchService.enabledProvider()) {
+      reply.code(409).send({
+        error: "NO_AI_PROVIDER",
+        message: "Enable an AI provider with an embedding model to use semantic search.",
+      });
+      return;
+    }
+    const results = await container.semanticSearchService.search(q, { limit });
+    return { results };
   });
 }

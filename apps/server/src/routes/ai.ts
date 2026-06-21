@@ -30,4 +30,23 @@ export function registerAiRoutes(app: FastifyInstance, container: Container): vo
     reply.code(202);
     return { jobId: job.id, status: "pending" as const };
   });
+
+  app.post("/api/ai/embed/:itemId", async (request, reply) => {
+    const { itemId } = idParamSchema.parse(request.params);
+
+    const item = container.itemRepo.findById(itemId);
+    if (!item) throw new NotFoundError(`Item not found: ${itemId}`);
+
+    if (!container.embeddingService.enabledProvider()) {
+      reply.code(409).send({
+        error: "NO_AI_PROVIDER",
+        message: "Enable an AI provider with an embedding model to build the semantic index.",
+      });
+      return;
+    }
+
+    const job = container.jobRepo.create({ type: "generate_embedding", payload: { itemId } });
+    reply.code(202);
+    return { jobId: job.id, status: "pending" as const };
+  });
 }

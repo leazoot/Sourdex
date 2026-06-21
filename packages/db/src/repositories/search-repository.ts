@@ -54,6 +54,18 @@ export interface SearchQueryRow {
   tagsMatch: number;
 }
 
+/** A stored chunk embedding joined with its item, for semantic ranking (PRD §15.1). */
+export interface SemanticCandidateRow {
+  itemId: string;
+  /** JSON `{ chunkId, vector }` from ai_outputs.output. */
+  output: string;
+  title: string;
+  url: string | null;
+  domain: string | null;
+  type: SourceType;
+  savedAt: string;
+}
+
 /**
  * Maintains and queries the `items_fts` virtual table at the application layer
  * (decision OQ-A3). Keyword search only in v0.1 (PRD §15.1). Indexed text is CJK-segmented
@@ -152,5 +164,26 @@ export class SearchRepository {
           LIMIT ${limit} OFFSET ${offset}`,
     ) as SearchQueryRow[];
     return rows;
+  }
+
+  /**
+   * Embedding candidates for semantic search (PRD §15.1): every stored chunk embedding
+   * joined with its item, excluding soft-deleted items (PRD §15.2). The vector lives in
+   * the ai_outputs JSON `output`; the caller parses it and scores by cosine similarity.
+   */
+  listEmbeddingCandidates(): SemanticCandidateRow[] {
+    return this.db.all(
+      sql`SELECT
+            ao.item_id AS itemId,
+            ao.output AS output,
+            i.title AS title,
+            i.url AS url,
+            i.domain AS domain,
+            i.type AS type,
+            i.saved_at AS savedAt
+          FROM ai_outputs ao
+          JOIN items i ON i.id = ao.item_id
+          WHERE ao.type = 'embedding' AND i.status != 'deleted'`,
+    ) as SemanticCandidateRow[];
   }
 }

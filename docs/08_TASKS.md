@@ -756,6 +756,30 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：否
 
 ### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BACKLOG-003
+
+- 阶段目标：AI 启用且配置 embedding 模型时，为资料分块（PRD §14.6：500–900 tokens、overlap 80–120）、为每个 chunk 生成 embedding 并存储、可按语义检索且结果可追溯到原文片段（PRD §5.2.3 / §14.6）；embedding 后台执行、失败不影响全文搜索（§5.2.3.7）。
+- 阶段状态：DONE（2026-06-21，TASK-066~068 全部 DONE）
+- 口径（无需新表，不动 PRD §12）：chunks/ai_outputs 表已在迁移中；embedding 存 `ai_outputs(type='embedding', item_id, output=JSON{chunkId,vector})`（可溯源、可重建）；**向量检索默认 brute-force 余弦**（零原生依赖、可测、v0.2 规模足够）；**sqlite-vec ANN 加速降级为非阻塞 OQ-A9**（PRD §5.2.3.6 为「可使用」非必须）。AI 开关沿用「enabled provider + 配置 embeddingModel」。
+- 是否需要人工确认：否（sqlite-vec 加速与「低优先级队列」均为非阻塞优化，记 OQ-A9；PRD 已允许）
+
+#### TASK-066：分块/向量工具 + ChunkRepository + 嵌入存取（core/db）— STATUS: DONE
+- core：`chunkText`（段落优先打包到 token 目标、超大段按句/空白硬切、相邻 chunk overlap、字符 offset 可溯源）+ `estimateTokens`（Latin 词+CJK 字，无依赖）+ `cosineSimilarity`（长度不等/零向量→0 优雅降级）。
+- db：`ChunkRow`/`mapChunk`；`ChunkRepository`（replaceForItem 事务幂等、listByItem、findById、deleteByItem）；`AiOutputRepository.listByItemAndType`/`deleteByItemAndType`（重建用）；`SearchRepository.listEmbeddingCandidates`（join items 排除软删，复杂搜索模块例外）。
+- 验收：core 单测（分块空/短/长+overlap+offset、硬切、token；余弦同向/正交/反向/降级）+ db 单测（chunk CRUD 幂等、ai_output list/delete by type）。
+- 是否需要人工确认：否
+
+#### TASK-067：EmbeddingService + generate_embedding 后台任务（server）— STATUS: DONE
+- `EmbeddingService`（DI）：`enabledProvider()`（首个 enabled 且有 embeddingModel）；`embedItem`（读正文截断→chunkText→replaceForItem→deleteByItemAndType('embedding')→分批 embed→存 ai_outputs；无 provider/正文→no-op；AIProviderError→吞错不抛、infra 错上抛重试；幂等重建支持模型变更 §14.6.5）；`embedQuery`（查询向量）。
+- `createGenerateEmbeddingJob`（Command）+ container 注册 worker（FIFO，embedding 自然后置≈低优先级，无 priority 列改动）。
+- 验收：service 单测（mock embed provider）：每 chunk 一条 embedding、重跑幂等、无 embeddingModel no-op、provider 失败不抛且 FTS 不受影响。
+- 是否需要人工确认：否
+
+#### TASK-068：语义检索服务 + API（server）— STATUS: DONE
+- `SemanticSearchService`：embedQuery→`listEmbeddingCandidates`→余弦排序→每 item 取最佳 chunk→top-K，回填 chunk 文本 snippet（可溯源 §5.2.3.5）；`enabledProvider()`。
+- API：`GET /api/search/semantic?q&limit`（无 embedding provider→409 NO_AI_PROVIDER；否则 results）；`POST /api/ai/embed/:itemId`（404/409/202 入队 generate_embedding）。keyword `/api/search` 契约不变；hybrid 合并属 STAGE-16。
+- 验收：service 单测（余弦排序+可溯源 snippet、软删排除、无 provider 返回空）；集成测试（semantic 409 守卫、embed 404/409/202 入队）。
+- 是否需要人工确认：否
+
 ### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BACKLOG-007
 ### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BACKLOG-004
 ### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BACKLOG-005
@@ -804,6 +828,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-A7（新增）FTS5 CJK 分词策略~~ ✅ 已定（2026-06-20）：保留 unicode61 + 索引/查询期 CJK 逐字切分（`segmentCjk`），snippet 返回前去字间空格并合并相邻高亮；相比 trigram（≥3 字符门槛）支持中文常见 2 字词与任意长度子串，且无需更改 FTS schema/迁移（STAGE-08 落地）
 - ~~OQ-A6 Storage 是否抽象接口~~ ✅ 已定：是（core 接口 + LocalStorage 实现）（STAGE-04 落地）
 - OQ-A8（新增，非阻塞）AI 功能级开关粒度（单独禁用「自动标签」而不关摘要）— 当前默认：由 AI 总开关（enabled provider）统一覆盖；用户可手动改/删标签、手动标签优先。若后续需要功能级独立开关，再评估新增设置项（不动 PRD §12 现有表）。STAGE-14 不阻塞。
+- OQ-A9（新增，非阻塞）向量检索后端与队列优先级 — 当前默认：embedding 存 `ai_outputs(type='embedding')`，语义检索用 **brute-force 余弦**（零原生依赖、可测、v0.2 规模足够）；**sqlite-vec ANN** 作为后续规模化加速（PRD §5.2.3.6「可使用」非必须）。jobs 表无 priority 列，embedding「低优先级」（§14.6.6）以 FIFO 后置近似；若需严格优先级再评估（不动 PRD §12）。STAGE-15 不阻塞。
 - ~~OQ-R1 重复 URL 默认行为~~ ✅ 已定：status="exists" + forceNew 新建（STAGE-04 落地）
 - ~~OQ-R2 批量导出单条失败策略~~ ✅ 已定（2026-06-20）：批量单条失败**跳过并在响应 `failed[]` 报告**，不整体失败（STAGE-09 落地）
 - ~~OQ-R3 插件发送 DOM 范围与体积上限~~ ✅ 已定（2026-06-20）：发送 `documentElement.outerHTML`，**上限 2MB**，超限截断并在元数据标记 `truncated=true`；清理交服务端 extractor；选中文本单独字段。（STAGE-06 落地）

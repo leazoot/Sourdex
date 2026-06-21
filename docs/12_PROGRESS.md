@@ -4,7 +4,26 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-14（AI 自动标签）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（AI 基础设施）。STAGE-13 = DONE（AI 摘要）。STAGE-14 = DONE（TASK-064~065）：AutoTagService（规范化 + 复用已有 + 新建≤3 + 单条≤7 + 过泛/超长过滤 + 手动优先）随摘要任务同一次模型输出产出标签（无额外 LLM 调用），写 `tags.type='ai'`/`item_tags.source='ai'` + `ai_outputs(type='tags')` 并并入 FTS；Reader 经既有 TagDisplay 自动展示，无新 UI；**test 229 全绿**。按 /goal 停在 STAGE-14。
+**BATCH-02（v0.2）进行中 — STAGE-15（语义检索基础）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~14 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签）。STAGE-15 = DONE（TASK-066~068）：chunkText 分块（§14.6 token 目标+overlap+可溯源 offset）+ cosineSimilarity；ChunkRepository（幂等 replaceForItem）+ embedding 存 `ai_outputs(type='embedding', output JSON{chunkId,vector})`；EmbeddingService + `generate_embedding` 后台任务（幂等重建、失败不影响 FTS）；SemanticSearchService（brute-force 余弦、每 item 最佳 chunk、可溯源 snippet、软删排除）+ `GET /api/search/semantic` + `POST /api/ai/embed/:itemId`；**无新表、无迁移改动**；sqlite-vec 加速降级为非阻塞 OQ-A9；**test 252 全绿**。按 /goal 停在 STAGE-15。
+
+### STAGE-15 进度记录（2026-06-21，语义检索基础 DONE）
+
+#### TASK-066（分块/向量工具 + ChunkRepository + 嵌入存取 core/db）— DONE
+- core utils：`chunkText`（段落优先打包到 token 目标、超大段按句/空白硬切、相邻 overlap、字符 offset 可溯源）+ `estimateTokens`（Latin 词+CJK 字，无依赖，规避 core→extractor 依赖）+ `cosineSimilarity`（长度不等/零向量→0 优雅降级，§14.6.5/§5.2.3.7）。
+- db：`ChunkRow`/`mapChunk`；`ChunkRepository`（replaceForItem 事务幂等 / listByItem / findById / deleteByItem）；`AiOutputRepository.listByItemAndType` + `deleteByItemAndType`（重建路径）；`SearchRepository.listEmbeddingCandidates`（join items 排除 status=deleted，属复杂搜索模块例外）。
+- 测试：core 8（chunk 5 + vector 3）；db 4（chunk repo 3 + ai-output +1）。检查：core/db build+typecheck ✅，eslint 0。
+
+#### TASK-067（EmbeddingService + generate_embedding 后台任务 server）— DONE
+- `EmbeddingService`：`enabledProvider()`（首个 enabled 且配置 embeddingModel）；`embedItem`（读正文截断 200k→chunkText→replaceForItem→deleteByItemAndType('embedding')→分批 64 embed→存 ai_outputs；无 provider/正文→no-op；AIProviderError→吞错不抛、infra 错上抛重试；幂等重建支持模型变更）；`embedQuery`。
+- `createGenerateEmbeddingJob`（Command）+ container 接线 worker（FIFO 后置≈低优先级，无 priority 列改动）。
+- 测试 4（mock embed provider）：每 chunk 一条 embedding、重跑幂等、无 embeddingModel no-op、provider 失败不抛且 FTS 不受影响。
+
+#### TASK-068（语义检索服务 + API server）— DONE
+- `SemanticSearchService`：embedQuery→listEmbeddingCandidates→余弦排序→每 item 最佳 chunk→top-K，回填 chunk 文本 snippet（可溯源 §5.2.3.5）；`enabledProvider()`。
+- API：`GET /api/search/semantic?q&limit`（无 embedding provider→409 NO_AI_PROVIDER）；`POST /api/ai/embed/:itemId`（404/409/202 入队）。keyword `/api/search` 契约不变；hybrid 合并留 STAGE-16。
+- 测试：service 单测 3（余弦排序+可溯源 snippet、软删排除、无 provider 空）；集成 +4（semantic 409、embed 404/409/202）。
+- STAGE-15 收尾全量检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 252/252（53 文件，229→252，+23）**；`pnpm build` 9/9 ✅。
+- 非阻塞 OQ-A9 记录：向量检索默认 brute-force 余弦，sqlite-vec ANN + 严格队列优先级留作后续优化（PRD §5.2.3.6「可使用」）。
 
 ### STAGE-14 进度记录（2026-06-21，AI 自动标签 DONE）
 

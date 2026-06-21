@@ -125,4 +125,10 @@ describe("GET /api/search (TASK-039)", () => {
     expect(content.statusCode).toBe(200);
     expect((content.json() as { plainText: string | null }).plainText).toContain("wombatmarker");
   });
+
+  it("409s on semantic search when no embedding provider is enabled (STAGE-15)", async () => {
+    const res = await auth({ method: "GET", url: "/api/search/semantic?q=vectors" });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toMatchObject({ error: "NO_AI_PROVIDER" });
+  });
 });

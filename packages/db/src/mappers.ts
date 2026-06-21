@@ -1,8 +1,9 @@
 /** Map database rows (snake_case columns, nullable defaults) to core domain DTOs. */
-import type { AiOutput, Capture, Item, Job, ProviderConfig, Tag } from "@sourdex/core";
+import type { AiOutput, Capture, Chunk, Item, Job, ProviderConfig, Tag } from "@sourdex/core";
 import type {
   AiOutputRow,
   CaptureRow,
+  ChunkRow,
   ItemRow,
   JobRow,
   ProviderConfigRow,
@@ -84,6 +85,20 @@ export function mapProviderConfig(row: ProviderConfigRow): ProviderConfig {
     enabled: row.enabled,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  };
+}
+
+export function mapChunk(row: ChunkRow): Chunk {
+  return {
+    id: row.id,
+    itemId: row.itemId,
+    chunkIndex: row.chunkIndex,
+    text: row.text,
+    heading: row.heading,
+    startOffset: row.startOffset,
+    endOffset: row.endOffset,
+    tokenCount: row.tokenCount ?? 0,
+    createdAt: row.createdAt,
   };
 }
 

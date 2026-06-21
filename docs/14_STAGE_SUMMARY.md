@@ -58,6 +58,22 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：AI 启用且配置 embedding 模型时，为资料分块（PRD §14.6）、为每 chunk 生成并存储 embedding、可按语义检索且结果可追溯到原文片段（§5.2.3）；embedding 后台执行、失败不影响全文搜索（§5.2.3.7）。
+- 已完成内容：
+  - TASK-066：core `chunkText`/`estimateTokens`/`cosineSimilarity`；db `ChunkRepository`（幂等 replaceForItem）+ `mapChunk`/`ChunkRow` + `AiOutputRepository.listByItemAndType`/`deleteByItemAndType` + `SearchRepository.listEmbeddingCandidates`（排除软删）。core 8 + db 4 测试。
+  - TASK-067：`EmbeddingService`（enabledProvider/embedItem 幂等重建/embedQuery，provider 失败吞错、infra 错重试）+ `generate_embedding` 任务；container 接线。4 测试。
+  - TASK-068：`SemanticSearchService`（余弦排序、每 item 最佳 chunk、可溯源 snippet、软删排除）+ `GET /api/search/semantic` + `POST /api/ai/embed/:itemId`。service 3 + 集成 4 测试。
+- 关键产出：embedding 存 `ai_outputs(type='embedding', output JSON{chunkId,vector})`（可溯源、可重建）；语义检索可用且结果追溯到 chunk；全程 AI opt-in、失败不破坏 FTS/保存。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 252（53 文件，229→252，+23）** / `pnpm build` 9/9 ✅。**无 schema/迁移改动**（chunks/ai_outputs 已在 0000_init）。
+- 重要决策：向量检索默认 **brute-force 余弦**（零原生依赖、可测、v0.2 规模足够），sqlite-vec ANN 降级为非阻塞 OQ-A9（PRD §5.2.3.6「可使用」非必须）；embedding 落 `ai_outputs` 而非新增向量列（不动 PRD §12）；分块用近似 token 计数避免引入 tokenizer 重依赖；keyword `/api/search` 契约保持不变，语义走独立端点（hybrid 合并留 STAGE-16）；jobs 无 priority 列，「低优先级」以 FIFO 后置近似。
+- 遗留问题：OQ-A9（非阻塞）sqlite-vec/ANN 加速与严格队列优先级；语义检索每次全量加载 embedding 余弦（大规模需 ANN）；embedding 仅手动触发（无自动 embedding 流水线）；查询向量与库内维度不一致时按 0 处理（待模型变更后重建）。
+- 下一阶段目标：STAGE-16 混合搜索排序（keyword+semantic+tag+recency 合并打分，PRD §15.3 / BACKLOG-007）。
+- 下一步建议：进入 STAGE-16 前明确混合打分公式与各信号权重、semantic 与 keyword 结果的归一化与去重合并口径、是否在 `/api/search` 以 `mode=hybrid` 统一。**当前按 /goal 停在 STAGE-15，等待用户下发 /goal 再进入 STAGE-16。**
+
 ### STAGE-14：AI 自动标签（规范化复用）— BATCH-02
 
 - 阶段状态：DONE
