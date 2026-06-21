@@ -8,4 +8,5 @@ export const queryKeys = {
   search: (params: SearchInput) => ["search", params] as const,
   status: () => ["status"] as const,
   providers: () => ["providers"] as const,
+  annotations: (itemId: string) => ["annotations", itemId] as const,
 };

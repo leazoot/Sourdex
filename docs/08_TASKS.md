@@ -825,6 +825,32 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 与设计稿冲突则 Decision Required
 
 ### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BACKLOG-005
+
+- 阶段目标：阅读时选中文本高亮 + 备注 + 颜色分类（PRD §5.2.5）；高亮不破坏原文；备注关联资料；备注可被搜索；导出 Markdown 含高亮与备注。启用 annotations 表。
+- 阶段状态：DONE（2026-06-21，TASK-075~078 全部 DONE）
+- 口径（无新表/迁移，不动 PRD §12）：annotations 表已在 0000_init；高亮以 selectedText 独立存储、永不改原文（§5.2.5.1）；备注搜索把笔记文本折叠进 FTS `summary` 列（应用层重建，避免重建 items_fts 虚表）；user_signal（STAGE-16 预留）由 annotation 数接入混合排序（§15.3 rule 5）。
+- 是否需要人工确认：否
+
+#### TASK-075：AnnotationRepository + FTS 笔记索引支持（db）— STATUS: DONE
+- `AnnotationRow`/`mapAnnotation`；`AnnotationRepository`（create/findById/listByItem/update 三态/delete/countByItem）；`FtsIndexInput.annotations`（折叠进 summary 列索引）。
+- 验收：repo 单测（创建+列出、三态 update、count+delete）。
+- 是否需要人工确认：否
+
+#### TASK-076：AnnotationService + API + 备注搜索 + user_signal（server）— STATUS: DONE
+- `AnnotationService`（create/update/delete/listByItem，变更后重建该 item 的 FTS 含笔记文本）；REST `GET/POST /api/items/:itemId/annotations`、`PATCH/DELETE /api/annotations/:id`；`HybridSearchService` 接入 annotationRepo 计 user_signal（min(1, count/3)）。
+- 验收：service 单测（笔记可搜索/删后不可搜+原文仍可搜、404）+ 集成（CRUD、404、笔记搜索增删）+ hybrid user_signal boost 测试。
+- 是否需要人工确认：否
+
+#### TASK-077：导出含高亮与备注（exporter + export-service）— STATUS: DONE
+- `MarkdownExportInput.annotations` + 「## Highlights & Notes」区块（引用 selectedText + 备注，置于正文前）；`ExportService` 经 annotationRepo 收集并传入。
+- 验收：exporter 单测（有/无 annotation 区块、顺序在 Content 前）；既有导出集成保持通过。
+- 是否需要人工确认：否
+
+#### TASK-078：Reader 高亮/备注 UI（apps/web）— STATUS: DONE
+- 对照设计稿 reader（03/14）：工具栏 Highlight/Note 按钮（取当前选区创建高亮，amber/blue 颜色，不改原文）；`HighlightsPanel`（颜色点 + 引用 + 行内备注编辑 PATCH + 删除）；api/hooks。i18n EN/简中。
+- 验收：组件测试（渲染高亮+备注、空则不渲染）；既有 Reader 测试保持通过；组件 < 150 行、无硬编码。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
 ### STAGE-19：Tags 页面 / Export 页面完整化 — BACKLOG-006
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）
 
@@ -870,6 +896,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-A7（新增）FTS5 CJK 分词策略~~ ✅ 已定（2026-06-20）：保留 unicode61 + 索引/查询期 CJK 逐字切分（`segmentCjk`），snippet 返回前去字间空格并合并相邻高亮；相比 trigram（≥3 字符门槛）支持中文常见 2 字词与任意长度子串，且无需更改 FTS schema/迁移（STAGE-08 落地）
 - ~~OQ-A6 Storage 是否抽象接口~~ ✅ 已定：是（core 接口 + LocalStorage 实现）（STAGE-04 落地）
 - OQ-A8（新增，非阻塞）AI 功能级开关粒度（单独禁用「自动标签」而不关摘要）— 当前默认：由 AI 总开关（enabled provider）统一覆盖；用户可手动改/删标签、手动标签优先。若后续需要功能级独立开关，再评估新增设置项（不动 PRD §12 现有表）。STAGE-14 不阻塞。
+- OQ-A11（新增，非阻塞）备注全文索引与正文内联高亮 — 备注搜索当前折叠进 FTS `summary` 列（命中归为 summary match），专用 `annotations` FTS 列需重建 items_fts 虚表 + 全量重提取，故延后；Reader 正文内联高亮渲染（在文章中标记选区）延后，当前以 HighlightsPanel 列表 + 工具栏 Highlight/Note 呈现（高亮独立存储不改原文，满足 §5.2.5 验收）。STAGE-18 不阻塞。
 - OQ-A10（新增，非阻塞）Ask scope 的「当前标签 / 选中资料」上下文来源 — 独立 Ask 页暂无「当前标签/选中集」，tag/selected chip 当前无 ID 即等同 all；当前 all 完整可用。后续可从 Library/Reader 进入 Ask 时带入 tagIds/itemIds（API 已支持 scope.tagIds/itemIds）。STAGE-17 不阻塞。
 - OQ-A9（新增，非阻塞）向量检索后端与队列优先级 — 当前默认：embedding 存 `ai_outputs(type='embedding')`，语义检索用 **brute-force 余弦**（零原生依赖、可测、v0.2 规模足够）；**sqlite-vec ANN** 作为后续规模化加速（PRD §5.2.3.6「可使用」非必须）。jobs 表无 priority 列，embedding「低优先级」（§14.6.6）以 FIFO 后置近似；若需严格优先级再评估（不动 PRD §12）。STAGE-15 不阻塞。
 - ~~OQ-R1 重复 URL 默认行为~~ ✅ 已定：status="exists" + forceNew 新建（STAGE-04 落地）

@@ -5,7 +5,12 @@ import type {
   SearchResultItem,
   SourceType,
 } from "@sourdex/core";
-import type { SearchQueryRow, SearchRepository, TagRepository } from "@sourdex/db";
+import type {
+  AnnotationRepository,
+  SearchQueryRow,
+  SearchRepository,
+  TagRepository,
+} from "@sourdex/db";
 import { normalizeTagName } from "@sourdex/db";
 import {
   buildMatchExpression,
@@ -41,9 +46,14 @@ export interface HybridSearchServiceDeps {
   searchRepo: SearchRepository;
   semanticSearchService: SemanticSearchService;
   tagRepo: TagRepository;
+  /** Optional: user-signal score from an item's annotation count (PRD §15.3 rule 5). */
+  annotationRepo?: AnnotationRepository;
   /** Injectable clock for recency scoring (defaults to Date.now). */
   now?: () => number;
 }
+
+/** Annotation count at which the user-signal score saturates to 1.0. */
+const USER_SIGNAL_SATURATION = 3;
 
 function deriveMatchedFields(row: SearchQueryRow): MatchedField[] {
   const fields: MatchedField[] = [];
@@ -77,12 +87,14 @@ export class HybridSearchService {
 
     const scored = filtered.map((m) => {
       const tags = this.deps.tagRepo.listByItem(m.itemId).map((t) => t.name);
+      const annoCount = this.deps.annotationRepo?.countByItem(m.itemId) ?? 0;
       const breakdown = {
         keyword: m.keywordScore,
         semantic: m.semanticScore,
         tag: tagScore(tokens, tags),
         recency: recencyScore(m.savedAt, nowMs),
-        userSignal: 0,
+        // Items the user highlighted/annotated rank higher (PRD §15.3 rule 5).
+        userSignal: Math.min(1, annoCount / USER_SIGNAL_SATURATION),
       };
       const final = hybridScore({
         keywordScore: breakdown.keyword,

@@ -1,6 +1,11 @@
 import { createId, type ExportFailure, type ExportInput, type ExportResult } from "@sourdex/core";
 import type { Storage } from "@sourdex/core";
-import type { CaptureRepository, ItemRepository, TagRepository } from "@sourdex/db";
+import type {
+  AnnotationRepository,
+  CaptureRepository,
+  ItemRepository,
+  TagRepository,
+} from "@sourdex/db";
 import { safeFilename, toMarkdownDocument, uniqueFilename } from "@sourdex/exporter";
 import { strToU8, zipSync } from "fflate";
 
@@ -8,6 +13,7 @@ export interface ExportServiceDeps {
   itemRepo: ItemRepository;
   captureRepo: CaptureRepository;
   tagRepo: TagRepository;
+  annotationRepo: AnnotationRepository;
   storage: Storage;
 }
 
@@ -46,10 +52,11 @@ export class ExportService {
         }
       }
       const tags = this.deps.tagRepo.listByItem(id);
+      const annotations = this.deps.annotationRepo.listByItem(id);
       docs.push({
         domain: item.domain,
         filename: safeFilename(item.title),
-        markdown: toMarkdownDocument({ item, tags, content, format: input.format }),
+        markdown: toMarkdownDocument({ item, tags, content, annotations, format: input.format }),
       });
     }
 

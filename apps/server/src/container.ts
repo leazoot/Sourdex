@@ -1,4 +1,5 @@
 import {
+  AnnotationRepository,
   CaptureRepository,
   ChunkRepository,
   createDb,
@@ -34,6 +35,7 @@ import { EmbeddingService } from "./services/embedding-service.js";
 import { SemanticSearchService } from "./services/semantic-search-service.js";
 import { HybridSearchService } from "./services/hybrid-search-service.js";
 import { AskService } from "./services/ask-service.js";
+import { AnnotationService } from "./services/annotation-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -56,6 +58,7 @@ export interface Container {
   semanticSearchService: SemanticSearchService;
   hybridSearchService: HybridSearchService;
   askService: AskService;
+  annotationService: AnnotationService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -82,6 +85,7 @@ export function createContainer(config: ServerConfig): Container {
   const providerConfigRepo = new ProviderConfigRepository(db);
   const aiOutputRepo = new AiOutputRepository(db);
   const chunkRepo = new ChunkRepository(db);
+  const annotationRepo = new AnnotationRepository(db);
 
   const storage = new LocalStorage(config.dataDir);
   const secrets = new EncryptedFileSecretStore({ secretsPath: config.secretsPath });
@@ -102,7 +106,13 @@ export function createContainer(config: ServerConfig): Container {
     storage,
   });
   const searchService = new SearchService({ searchRepo });
-  const exportService = new ExportService({ itemRepo, captureRepo, tagRepo, storage });
+  const exportService = new ExportService({
+    itemRepo,
+    captureRepo,
+    tagRepo,
+    annotationRepo,
+    storage,
+  });
   const providerConfigService = new ProviderConfigService({ repo: providerConfigRepo, secrets });
   const autoTagService = new AutoTagService({ tagRepo, aiOutputRepo });
   const summaryService = new SummaryService({
@@ -134,6 +144,15 @@ export function createContainer(config: ServerConfig): Container {
     searchRepo,
     semanticSearchService,
     tagRepo,
+    annotationRepo,
+  });
+  const annotationService = new AnnotationService({
+    annotationRepo,
+    itemRepo,
+    captureRepo,
+    tagRepo,
+    searchRepo,
+    storage,
   });
   const askService = new AskService({
     providerConfigRepo,
@@ -177,6 +196,7 @@ export function createContainer(config: ServerConfig): Container {
     semanticSearchService,
     hybridSearchService,
     askService,
+    annotationService,
     auth,
     worker,
     close: () => sqlite.close(),

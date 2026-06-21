@@ -120,6 +120,10 @@ export const zh: Resources = {
     noSummary: "尚无摘要。",
     summaryFailed: "摘要失败，请重试。",
     aiOff: "在设置中启用 AI 服务后可生成摘要。",
+    highlight: "高亮",
+    note: "备注",
+    highlights: "高亮与备注",
+    addNote: "添加备注…",
   },
   settings: {
     title: "设置",

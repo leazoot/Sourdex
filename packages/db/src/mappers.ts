@@ -1,7 +1,17 @@
 /** Map database rows (snake_case columns, nullable defaults) to core domain DTOs. */
-import type { AiOutput, Capture, Chunk, Item, Job, ProviderConfig, Tag } from "@sourdex/core";
+import type {
+  AiOutput,
+  Annotation,
+  Capture,
+  Chunk,
+  Item,
+  Job,
+  ProviderConfig,
+  Tag,
+} from "@sourdex/core";
 import type {
   AiOutputRow,
+  AnnotationRow,
   CaptureRow,
   ChunkRow,
   ItemRow,
@@ -83,6 +93,19 @@ export function mapProviderConfig(row: ProviderConfigRow): ProviderConfig {
     chatModel: row.chatModel,
     embeddingModel: row.embeddingModel,
     enabled: row.enabled,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+export function mapAnnotation(row: AnnotationRow): Annotation {
+  return {
+    id: row.id,
+    itemId: row.itemId,
+    chunkId: row.chunkId,
+    selectedText: row.selectedText,
+    note: row.note,
+    color: row.color,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

@@ -92,4 +92,39 @@ describe("toMarkdownDocument", () => {
     const doc = toMarkdownDocument({ item: makeItem(), tags: [], content: null });
     expect(doc).toContain("## Content\n\n_No extracted content._");
   });
+
+  it("includes a highlights & notes section when annotations are present (PRD §5.2.5.3)", () => {
+    const doc = toMarkdownDocument({
+      item: makeItem(),
+      tags: [],
+      content: "body",
+      annotations: [
+        {
+          id: "anno_1",
+          itemId: "item_1",
+          chunkId: null,
+          selectedText: "local-first software",
+          note: "core idea",
+          color: "amber",
+          createdAt: "x",
+          updatedAt: "x",
+        },
+      ],
+    });
+    expect(doc).toContain("## Highlights & Notes");
+    expect(doc).toContain("> local-first software");
+    expect(doc).toContain("> — core idea");
+    // Highlights appear before the content section.
+    expect(doc.indexOf("## Highlights & Notes")).toBeLessThan(doc.indexOf("## Content"));
+  });
+
+  it("omits the highlights section when there are no annotations", () => {
+    const doc = toMarkdownDocument({
+      item: makeItem(),
+      tags: [],
+      content: "body",
+      annotations: [],
+    });
+    expect(doc).not.toContain("## Highlights & Notes");
+  });
 });

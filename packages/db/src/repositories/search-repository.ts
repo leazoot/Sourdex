@@ -10,6 +10,12 @@ export interface FtsIndexInput {
   plainText: string;
   summary?: string | null;
   tags?: string | null;
+  /**
+   * Annotation notes/highlights to index so notes are searchable (PRD §15.2, §5.2.5).
+   * Folded into the FTS `summary` column to avoid recreating the virtual table (a real
+   * `annotations` column is deferred, OQ-A11); matches surface as a summary match.
+   */
+  annotations?: string | null;
 }
 
 /** A raw FTS hit (item id + matched snippet). Used as a simple "is it indexed" probe. */
@@ -77,13 +83,14 @@ export class SearchRepository {
   /** Upsert an item's searchable text (delete-then-insert keeps it simple and correct). */
   index(input: FtsIndexInput): void {
     this.removeFromIndex(input.itemId);
+    const summaryText = [input.summary ?? "", input.annotations ?? ""].filter(Boolean).join(" ");
     this.db.run(
       sql`INSERT INTO items_fts (item_id, title, plain_text, summary, tags)
           VALUES (
             ${input.itemId},
             ${segmentCjk(input.title)},
             ${segmentCjk(input.plainText)},
-            ${segmentCjk(input.summary ?? "")},
+            ${segmentCjk(summaryText)},
             ${segmentCjk(input.tags ?? "")}
           )`,
     );

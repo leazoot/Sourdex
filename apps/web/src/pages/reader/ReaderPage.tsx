@@ -10,6 +10,8 @@ import { Loading } from "@/components/ui/Loading";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { SummaryPanel } from "@/features/reader/SummaryPanel";
+import { HighlightsPanel } from "@/features/reader/HighlightsPanel";
+import { useCreateAnnotation } from "@/hooks/useAnnotations";
 import { formatNumber } from "@/lib/format";
 
 export function ReaderPage() {
@@ -21,6 +23,7 @@ export function ReaderPage() {
   const update = useUpdateItem();
   const del = useDeleteItem();
   const exportM = useExport();
+  const createAnnotation = useCreateAnnotation(id ?? "");
   const [copied, setCopied] = useState(false);
   const [exportedPath, setExportedPath] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -47,6 +50,14 @@ export function ReaderPage() {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // Highlight/note the current text selection without modifying the source (PRD §5.2.5.1).
+  const annotate = (color: string) => {
+    const selectedText = window.getSelection()?.toString().trim();
+    if (!selectedText) return;
+    createAnnotation.mutate({ selectedText, color });
+    window.getSelection()?.removeAllRanges();
+  };
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex flex-none items-center gap-3 border-b border-border px-6 py-3">
@@ -60,6 +71,12 @@ export function ReaderPage() {
           {t("reader.reading")}
         </span>
         <div className="ml-auto flex items-center gap-2">
+          <Button variant="secondary" onClick={() => annotate("amber")}>
+            {t("reader.highlight")}
+          </Button>
+          <Button variant="secondary" onClick={() => annotate("blue")}>
+            {t("reader.note")}
+          </Button>
           <Button
             variant="secondary"
             onClick={() => void copyMarkdown()}
@@ -154,6 +171,7 @@ export function ReaderPage() {
               )}
             </div>
           </article>
+          <HighlightsPanel itemId={item.id} />
         </div>
         <SummaryPanel item={item} summary={detail.data?.summary ?? null} />
       </div>

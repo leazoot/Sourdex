@@ -4,7 +4,25 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-17（Ask 页面 RAG）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~16 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础 / 混合搜索排序）。STAGE-17 = DONE（TASK-072~074）：`@sourdex/ai` 答案 prompt/JSON 解析（强制引用）；`AskService`（semantic+keyword 取证 chunk→引用校验→无有效引用即「证据不足」不展示）+ `POST /api/ask`（无 provider 409、答案存 `ai_outputs(answer)`、不编造）；Ask 页面（设计稿 05/16：提问栏+scope+答案卡含内联引用 chip+证据 quote+复制引用）、rail 启用 /ask；core 加 `AskScope/AskCitation/AskResult`；**test 280 全绿**。按 /goal 停在 STAGE-17。
+**BATCH-02（v0.2）进行中 — STAGE-18（高亮与备注）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~17 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础 / 混合搜索排序 / Ask 页面 RAG）。STAGE-18 = DONE（TASK-075~078）：`AnnotationRepository` + `AnnotationService`（高亮/备注 CRUD，变更重建 FTS 含笔记→备注可搜）+ REST API；备注笔记折叠进 FTS summary 列、高亮独立存储不改原文；导出 Markdown 含「Highlights & Notes」；混合排序 user_signal 由 annotation 数接入（消解 STAGE-16 预留）；Reader 工具栏 Highlight/Note + HighlightsPanel（颜色/备注/删除）；**test 295 全绿**。按 /goal 停在 STAGE-18。
+
+### STAGE-18 进度记录（2026-06-21，高亮与备注 DONE）
+
+#### TASK-075（AnnotationRepository + FTS 笔记索引支持 db）— DONE
+- `AnnotationRow`/`mapAnnotation`；`AnnotationRepository`（create/findById/listByItem/update 三态/delete/countByItem）；`FtsIndexInput.annotations`（折叠进 summary 列，规避重建 items_fts 虚表，OQ-A11）。测试 3。
+
+#### TASK-076（AnnotationService + API + 备注搜索 + user_signal server）— DONE
+- `AnnotationService`（create/update/delete/listByItem；变更后重建该 item FTS，含 selectedText+note → 备注可搜，删后不可搜、原文仍可搜）；routes `GET/POST /api/items/:itemId/annotations` + `PATCH/DELETE /api/annotations/:id`（404 守卫）；`HybridSearchService` 接入 annotationRepo 计 user_signal=min(1, count/3)（PRD §15.3 rule 5，消解 STAGE-16 预留）。container 接线。
+- 测试：service 单测 4 + 集成 3（CRUD/404/备注搜索增删）+ hybrid user_signal boost 1。
+
+#### TASK-077（导出含高亮与备注 exporter + export-service）— DONE
+- `MarkdownExportInput.annotations` + 「## Highlights & Notes」区块（引用 selectedText + `— note`，置于 Content 前）；`ExportService` 经 annotationRepo 收集传入。测试 +2（有/无区块+顺序），既有导出集成保持。
+
+#### TASK-078（Reader 高亮/备注 UI apps/web）— DONE
+- `lib/api/annotations.ts` + `hooks/useAnnotations.ts`（list/create/update/delete + 失效 query-keys.annotations）；`features/reader/HighlightsPanel.tsx`（颜色点 + 引用 + 行内备注编辑 PATCH + 删除）；ReaderPage 工具栏 Highlight/Note（取选区创建、amber/blue、清除选区、不改原文）+ 文章下方渲染 HighlightsPanel。i18n EN/简中。
+- 测试：HighlightsPanel 2（渲染高亮+备注 / 空则不渲染）；既有 ReaderPage 2 保持通过。
+- STAGE-18 收尾全量检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 295/295（62 文件，280→295，+15）**；`pnpm build` 9/9 ✅。
+- 非阻塞 OQ-A11：专用 annotations FTS 列（需重建虚表+重提取）与正文内联高亮渲染延后；当前 HighlightsPanel 列表 + 备注折叠进 summary 列已满足 §5.2.5 验收。
 
 ### STAGE-17 进度记录（2026-06-21，Ask 页面 RAG DONE）
 

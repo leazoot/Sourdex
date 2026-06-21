@@ -7,3 +7,4 @@ export * from "./search-repository.js";
 export * from "./provider-config-repository.js";
 export * from "./ai-output-repository.js";
 export * from "./chunk-repository.js";
+export * from "./annotation-repository.js";

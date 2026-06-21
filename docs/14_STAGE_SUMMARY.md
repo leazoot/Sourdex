@@ -58,6 +58,23 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：阅读时高亮文本 + 备注 + 颜色分类（PRD §5.2.5）；高亮不破坏原文；备注关联资料；备注可搜索；导出 Markdown 含高亮备注。启用 annotations 表。
+- 已完成内容：
+  - TASK-075：`AnnotationRepository`（CRUD/三态 update/count）+ `mapAnnotation` + `FtsIndexInput.annotations`。3 测试。
+  - TASK-076：`AnnotationService`（变更重建 FTS 含笔记 → 可搜）+ REST API + `HybridSearchService` user_signal（annotation 数）。service 4 + 集成 3 + hybrid 1 测试。
+  - TASK-077：导出「## Highlights & Notes」区块 + ExportService 收集 annotations。2 测试。
+  - TASK-078：Reader 工具栏 Highlight/Note + `HighlightsPanel`（颜色/引用/备注编辑/删除）+ api/hooks/i18n。2 测试。
+- 关键产出：高亮/备注闭环——独立存储不改原文、关联资料、备注可全文搜、导出含高亮；混合排序 user_signal 信号落地（消解 STAGE-16 预留）。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 295（62 文件，280→295，+15）** / `pnpm build` 9/9 ✅。**无 schema/迁移改动**（annotations 已在 0000_init）。
+- 重要决策：备注搜索折叠进 FTS `summary` 列（应用层，避免重建 items_fts 虚表 + 全量重提取，OQ-A11）；高亮以 selectedText 独立存储、永不改原文（满足 §5.2.5.1）；user_signal=min(1, annotationCount/3) 接入混合排序；导出高亮区块置于正文前；Reader 以工具栏 Highlight/Note + HighlightsPanel 呈现（正文内联高亮渲染延后，OQ-A11）。
+- 遗留问题：OQ-A11（非阻塞）专用 annotations FTS 列与正文内联高亮渲染延后；备注命中当前归为 summary match（matchedFields 粒度）；备注编辑为行内 input（无富文本）。
+- 下一阶段目标：STAGE-19 Tags 页面 / Export 页面完整化（PRD §6.2 / BACKLOG-006）。
+- 下一步建议：进入 STAGE-19 前对照设计稿 tags(06)/export(07)，明确标签管理（重命名/合并/删除）与导出范围选择（全部/标签/选中）UI 与既有 API 的衔接。**当前按 /goal 停在 STAGE-18，等待用户下发 /goal 再进入 STAGE-19。**
+
 ### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BATCH-02
 
 - 阶段状态：DONE

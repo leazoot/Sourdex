@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  AnnotationRepository,
   ItemRepository,
   SearchRepository,
   TagRepository,
@@ -13,6 +14,7 @@ let sqlite: SqliteDatabase;
 let itemRepo: ItemRepository;
 let searchRepo: SearchRepository;
 let tagRepo: TagRepository;
+let annotationRepo: AnnotationRepository;
 
 const NOW = Date.parse("2026-06-21T00:00:00.000Z");
 
@@ -55,6 +57,7 @@ beforeEach(() => {
   itemRepo = new ItemRepository(mem.db);
   searchRepo = new SearchRepository(mem.db);
   tagRepo = new TagRepository(mem.db);
+  annotationRepo = new AnnotationRepository(mem.db);
 });
 
 afterEach(() => sqlite.close());
@@ -118,6 +121,28 @@ describe("HybridSearchService", () => {
     const debug = await svc.search({ q: "vector", mode: "hybrid", debug: true });
     expect(debug.results[0].scoreBreakdown?.tag).toBeGreaterThan(0); // tag "vector" matched
     expect(debug.results[0].scoreBreakdown?.final).toBeCloseTo(debug.results[0].score, 2);
+  });
+
+  it("boosts items with user annotations via the user_signal score (PRD §15.3)", async () => {
+    const annotated = indexItem({ title: "Vector A", text: "vector search" });
+    indexItem({ title: "Vector B", text: "vector search" });
+    const a = annotationRepo.create({ itemId: annotated, selectedText: "vector" });
+    annotationRepo.create({ itemId: annotated, selectedText: "search" });
+    void a;
+
+    const svc = new HybridSearchService({
+      searchRepo,
+      tagRepo,
+      annotationRepo,
+      now: () => NOW,
+      semanticSearchService: stubSemantic(false, []),
+    });
+
+    const { results } = await svc.search({ q: "vector search", mode: "hybrid", debug: true });
+    const hit = results.find((r) => r.itemId === annotated);
+    expect(hit?.scoreBreakdown?.userSignal).toBeGreaterThan(0);
+    // The annotated item outranks the otherwise-equal one.
+    expect(results[0]?.itemId).toBe(annotated);
   });
 
   it("applies structured filters to semantic-only hits", async () => {

@@ -154,6 +154,7 @@ export const providerConfigs = sqliteTable("provider_configs", {
 export type ItemRow = typeof items.$inferSelect;
 export type CaptureRow = typeof captures.$inferSelect;
 export type ChunkRow = typeof chunks.$inferSelect;
+export type AnnotationRow = typeof annotations.$inferSelect;
 export type TagRow = typeof tags.$inferSelect;
 export type JobRow = typeof jobs.$inferSelect;
 export type ProviderConfigRow = typeof providerConfigs.$inferSelect;

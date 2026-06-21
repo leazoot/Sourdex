@@ -118,6 +118,10 @@ export const en = {
     noSummary: "No summary yet.",
     summaryFailed: "Summary failed. Try again.",
     aiOff: "Enable an AI provider in Settings to summarize.",
+    highlight: "Highlight",
+    note: "Note",
+    highlights: "Highlights & Notes",
+    addNote: "Add a note…",
   },
   settings: {
     title: "Settings",
