@@ -1,0 +1,13 @@
+**/dist/**
+**/build/**
+**/.turbo/**
+**/node_modules/**
+**/coverage/**
+**/.output/**
+**/.wxt/**
+pnpm-lock.yaml
+design/**
+
+# Markdown is authored prose/docs (incl. user-owned docs/PRD.md); not Prettier-managed.
+**/*.md
+

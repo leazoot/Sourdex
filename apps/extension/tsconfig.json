@@ -1,0 +1,10 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["entrypoints", "components", "lib", "wxt.config.ts"],
+  "exclude": ["dist", ".output", "node_modules"]
+}

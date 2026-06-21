@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;}
+:root{
+  --bg:#F7F3EA; --bg-canvas:#EDE7DB; --surface:#FBF8F1; --surface-2:#F1EBDF; --surface-3:#E9E1D2; --surface-raised:#FFFDF7;
+  --text:#1D1B18; --text-2:#544C42; --text-3:#857B6D;
+  --border:#DED4C4; --border-2:#CFC4B1;
+  --primary-bg:#221E18; --primary-fg:#F7F3EA;
+  --olive:#7D875F; --copper:#AE7149; --blue:#5F7182; --amber:#BC8540; --clay:#B5694F;
+  --olive-tint:rgba(125,135,95,.14); --copper-tint:rgba(174,113,73,.13); --blue-tint:rgba(95,113,130,.12); --amber-tint:rgba(215,168,94,.22); --clay-tint:rgba(181,105,79,.13);
+  --hl:rgba(215,168,94,.34);
+  --shadow-sm:0 1px 2px rgba(29,27,24,.05); --shadow:0 4px 18px rgba(29,27,24,.07); --shadow-lg:0 18px 48px rgba(29,27,24,.14);
+  --ring:rgba(95,113,130,.4);
+}
+[data-theme="dark"]{
+  --bg:#11100E; --bg-canvas:#17150F; --surface:#1C1A16; --surface-2:#24211C; --surface-3:#2C2820; --surface-raised:#27231D;
+  --text:#E8DED0; --text-2:#B4AA98; --text-3:#897F70;
+  --border:#3A342B; --border-2:#473F34;
+  --primary-bg:#E8DED0; --primary-fg:#1A1815;
+  --olive:#A4B07B; --copper:#C58A5A; --blue:#92A2B2; --amber:#D8A85F; --clay:#C37861;
+  --olive-tint:rgba(164,176,123,.16); --copper-tint:rgba(197,138,90,.16); --blue-tint:rgba(146,162,178,.15); --amber-tint:rgba(216,168,95,.2); --clay-tint:rgba(195,120,97,.16);
+  --hl:rgba(216,168,95,.3);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.32); --shadow:0 6px 22px rgba(0,0,0,.4); --shadow-lg:0 18px 50px rgba(0,0,0,.55);
+  --ring:rgba(146,162,178,.45);
+}
+::selection{background:rgba(215,168,94,.3);}
+.sx-scroll::-webkit-scrollbar{width:10px;height:10px;}
+.sx-scroll::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:8px;border:3px solid transparent;background-clip:content-box;}
+.sx-scroll::-webkit-scrollbar-thumb:hover{background:var(--text-3);background-clip:content-box;border:3px solid transparent;}
+.sx-scroll::-webkit-scrollbar-track{background:transparent;}
+@keyframes sxUp{from{transform:translateY(8px);}to{transform:none;}}
+@keyframes sxPop{0%{transform:scale(.5);opacity:0;}55%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+@keyframes sxShimmer{0%{background-position:-220px 0;}100%{background-position:220px 0;}}
+@keyframes sxSlide{from{transform:translateX(18px);opacity:0;}to{transform:none;opacity:1;}}
+@keyframes sxSpin{to{transform:rotate(360deg);}}
+@keyframes sxDraw{from{stroke-dashoffset:32;}to{stroke-dashoffset:0;}}
+@keyframes sxPulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+[data-sxcard] [data-sxact]{max-height:0;opacity:0;overflow:hidden;transition:max-height .18s ease,opacity .14s ease,margin-top .18s ease;margin-top:0;}
+[data-sxcard]:hover [data-sxact]{max-height:44px;opacity:1;margin-top:11px;}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="height:100vh;display:flex;flex-direction:column;background:var(--bg-canvas);color:var(--text);font-family:'Inter','Noto Sans SC',sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-0.01em;overflow:hidden;">
+
+  <!-- ===== TITLEBAR ===== -->
+  <div style="height:50px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+    <div onClick="{{ go.desk }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;flex:none;">
+      <div style="position:relative;width:27px;height:27px;border-radius:7px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);">
+        <div style="position:absolute;top:5px;left:6px;right:6px;height:1px;background:rgba(247,243,234,.22);"></div>
+        <div style="position:absolute;top:8px;left:6px;right:10px;height:1px;background:rgba(247,243,234,.15);"></div>
+        <span style="font-family:'Literata',serif;font-weight:600;font-size:16px;color:var(--primary-fg);line-height:1;margin-top:2px;">S</span>
+        <div style="position:absolute;right:4px;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--copper);"></div>
+      </div>
+      <span style="font-size:14.5px;font-weight:600;letter-spacing:-0.02em;">Sourdex</span>
+    </div>
+
+    <div style="flex:1;display:flex;justify-content:center;">
+      <button onClick="{{ go.search }}" style="display:flex;align-items:center;gap:9px;width:100%;max-width:460px;height:34px;padding:0 13px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2)">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-3.4-3.4"/></svg>
+        <span style="font-size:13px;">{{ t.globalSearch }}</span>
+        <span style="margin-left:auto;display:flex;gap:3px;"><kbd style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;">⌘</kbd><kbd style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;">K</kbd></span>
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:9px;flex:none;">
+      <div title="Local service connected" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);"><span style="width:7px;height:7px;border-radius:50%;background:var(--olive);box-shadow:0 0 0 3px var(--olive-tint);"></span>{{ t.connected }}</div>
+      <div style="width:1px;height:18px;background:var(--border);"></div>
+      <button onClick="{{ toggleLang }}" title="Language" style="display:flex;align-items:center;gap:5px;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;" style-hover="border-color:var(--border-2);color:var(--text)"><span>{{ themeIcon }}</span></button>
+      <div style="width:1px;height:18px;background:var(--border);"></div>
+      <div title="Prototype frames" style="display:flex;gap:1px;background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:2px;">
+        <button onClick="{{ sec.app }}" style="{{ tabStyle.app }}" style-hover="color:var(--text-2)">App</button>
+        <button onClick="{{ sec.browser }}" style="{{ tabStyle.browser }}" style-hover="color:var(--text-2)">Browser</button>
+        <button onClick="{{ sec.onboarding }}" style="{{ tabStyle.onboarding }}" style-hover="color:var(--text-2)">Intro</button>
+        <button onClick="{{ sec.system }}" style="{{ tabStyle.system }}" style-hover="color:var(--text-2)">System</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTIONS ===== -->
+  <div style="flex:1;position:relative;overflow:hidden;">
+
+    <!-- ========= APP SECTION ========= -->
+    <sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+    <div style="height:100%;display:flex;background:var(--bg);">
+
+      <!-- RAIL -->
+      <div style="width:60px;flex:none;display:flex;flex-direction:column;align-items:center;padding:13px 0;background:var(--surface);border-right:1px solid var(--border);">
+        <div onClick="{{ go.desk }}" style="position:relative;width:30px;height:30px;border-radius:8px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;margin-bottom:16px;cursor:pointer;">
+          <div style="position:absolute;top:5px;left:6px;right:6px;height:1px;background:rgba(247,243,234,.22);"></div>
+          <span style="font-family:'Literata',serif;font-weight:600;font-size:17px;color:var(--primary-fg);margin-top:2px;">S</span>
+          <div style="position:absolute;right:5px;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--copper);"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;width:100%;align-items:center;">
+          <button onClick="{{ go.desk }}" title="Source Desk" style="{{ railStyle.desk }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l8-6 8 6"/><path d="M6 9.5V18a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5"/><path d="M9.5 19v-5h5v5"/></svg></button>
+          <button onClick="{{ go.library }}" title="Library" style="{{ railStyle.library }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="6" rx="1.6"/><rect x="4" y="13.5" width="16" height="6" rx="1.6"/><path d="M7.5 7.5h2M7.5 16.5h2"/></svg></button>
+          <button onClick="{{ go.search }}" title="Search" style="{{ railStyle.search }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-3.4-3.4"/></svg></button>
+          <button onClick="{{ go.ask }}" title="Ask" style="{{ railStyle.ask }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.5h14a2 2 0 0 1 2 2v6.4a2 2 0 0 1-2 2h-7l-4 3v-3H5a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2z"/><path d="M8.5 10h7M8.5 13h4"/></svg></button>
+          <button onClick="{{ go.export }}" title="Export" style="{{ railStyle.export }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8.4 10.6L12 14.2l3.6-3.6"/><path d="M5 15.5v2.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2.5"/></svg></button>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:3px;align-items:center;">
+          <button onClick="{{ go.tags }}" title="Tags" style="{{ railStyle.tags }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.8V5.5a1.5 1.5 0 0 1 1.5-1.5h6.3a1.5 1.5 0 0 1 1.06.44l6.7 6.7a1.5 1.5 0 0 1 0 2.12l-5.74 5.74a1.5 1.5 0 0 1-2.12 0l-6.7-6.7A1.5 1.5 0 0 1 4 11.8z"/><circle cx="8.2" cy="8.2" r="1.3" fill="currentColor" stroke="none"/></svg></button>
+          <button onClick="{{ go.settings }}" title="Settings" style="{{ railStyle.settings }}" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h9"/><circle cx="16.5" cy="8" r="2.1"/><path d="M19 8h1"/><path d="M4 16h4"/><circle cx="11" cy="16" r="2.1"/><path d="M13.5 16H20"/></svg></button>
+          <div title="Local service connected" style="width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;margin-top:4px;">
+            <div style="width:23px;height:23px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text-2);">JL</div>
+            <div style="position:absolute;right:3px;bottom:3px;width:8px;height:8px;border-radius:50%;background:var(--olive);border:2px solid var(--surface);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APP MAIN -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:912px;margin:0 auto;padding:44px 36px 72px;">
+            <!-- hero -->
+            <div style="margin-bottom:22px;">
+              <div style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--copper);margin-bottom:11px;">{{ t.sourceDesk }}</div>
+              <h1 style="margin:0;font-family:'Literata',serif;font-size:34px;font-weight:600;letter-spacing:-0.02em;line-height:1.1;">{{ t.deskGreeting }}</h1>
+              <p style="margin:8px 0 0;font-family:'Literata',serif;font-size:16px;font-style:italic;color:var(--text-3);">{{ t.deskSub }}</p>
+            </div>
+
+            <!-- command -->
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <button onClick="{{ go.search }}" style="flex:1;display:flex;align-items:center;gap:11px;height:54px;padding:0 18px;border-radius:13px;border:1px solid var(--border-2);background:var(--surface-raised);box-shadow:var(--shadow);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--copper)">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-2)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="M20.5 20.5l-3.6-3.6"/></svg>
+                <span style="font-size:16px;color:var(--text-3);">{{ t.globalSearch }}</span>
+                <span style="margin-left:auto;display:flex;gap:3px;"><kbd style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">⌘</kbd><kbd style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">K</kbd></span>
+              </button>
+              <button onClick="{{ go.ask }}" style="flex:none;display:flex;align-items:center;gap:8px;height:54px;padding:0 20px;border-radius:13px;background:var(--primary-bg);color:var(--primary-fg);border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;" style-hover="opacity:.92"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M12 3.5c.16 3.6.7 5.5 1.7 6.5 1 1 2.9 1.54 6.5 1.7-3.6.16-5.5.7-6.5 1.7-1 1-1.54 2.9-1.7 6.5-.16-3.6-.7-5.5-1.7-6.5-1-1-2.9-1.54-6.5-1.7 3.6-.16 5.5-.7 6.5-1.7 1-1 1.54-2.9 1.7-6.5Z"/></svg>{{ t.quickAsk }}</button>
+            </div>
+
+            <!-- trust strip -->
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 15px;border-radius:11px;background:var(--olive-tint);border:1px solid var(--border);margin-bottom:30px;">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><rect x="5" y="10.5" width="14" height="9" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+              <span style="font-size:13px;font-weight:600;color:var(--text);">{{ t.dataLocal }}</span>
+              <span style="font-size:12.5px;color:var(--text-2);">{{ t.dataLocalSub }}</span>
+            </div>
+
+            <div style="display:flex;gap:24px;align-items:flex-start;">
+              <!-- left -->
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;margin-bottom:12px;">{{ t.continueReading }}</div>
+                <div onClick="{{ continueSrc.openReader }}" style="cursor:pointer;background:var(--surface-raised);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:28px;box-shadow:var(--shadow-sm);" style-hover="border-color:var(--border-2)">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="{{ continueSrc.typePill }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ continueSrc.typeTone }};"></span>{{ continueSrc.typeLabel }}</span><span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ continueSrc.domain }}</span></div>
+                  <h3 style="margin:0 0 13px;font-family:'Literata',serif;font-size:18px;font-weight:600;line-height:1.3;">{{ continueSrc.title }}</h3>
+                  <div style="display:flex;align-items:center;gap:11px;"><div style="flex:1;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden;"><div style="height:100%;width:38%;border-radius:3px;background:var(--copper);"></div></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">38%</span></div>
+                </div>
+
+                <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;margin-bottom:12px;">{{ t.recent }}</div>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <sc-for list="{{ deskRecent }}" as="s" hint-placeholder-count="5">
+                    <div onClick="{{ s.openReader }}" style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;" style-hover="background:var(--surface);border-color:var(--border)">
+                      <span style="flex:none;width:30px;height:30px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text-2);font-family:'JetBrains Mono',monospace;">{{ s.fav }}</span>
+                      <div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:500;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.title }}</div><div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-top:2px;">{{ s.domain }}</div></div>
+                      <span style="flex:none;font-size:11px;color:var(--text-3);">{{ s.savedAt }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- right -->
+              <div style="width:264px;flex:none;margin-top:27px;display:flex;flex-direction:column;gap:20px;">
+                <div onClick="{{ go.inbox }}" style="cursor:pointer;background:var(--copper-tint);border:1px solid var(--border);border-radius:13px;padding:16px;" style-hover="border-color:var(--copper)">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--copper)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2.1 4.1a2 2 0 0 0 1.8 1.1h8.2a2 2 0 0 0 1.8-1.1L20 13"/><path d="M4 13V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6"/></svg><span style="font-size:13px;font-weight:600;color:var(--text);">{{ t.inbox }}</span></div>
+                  <div style="font-size:13px;color:var(--text-2);line-height:1.4;"><b style="font-size:22px;font-weight:600;color:var(--copper);">3</b> <span>{{ t.needsReviewN }}</span></div>
+                  <div style="margin-top:11px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--copper);">{{ t.review }}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></div>
+                </div>
+
+                <div>
+                  <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;margin-bottom:11px;">{{ t.recentSearchesL }}</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button onClick="{{ go.search }}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-2);font-size:12.5px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.2-3.2"/></svg>local-first sync</button>
+                    <button onClick="{{ go.search }}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-2);font-size:12.5px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.2-3.2"/></svg>sqlite fts5</button>
+                    <button onClick="{{ go.search }}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text-2);font-size:12.5px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.2-3.2"/></svg>阅读器 高亮</button>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;margin-bottom:11px;">{{ t.topTags }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <sc-for list="{{ deskTags }}" as="tg" hint-placeholder-count="6"><button onClick="{{ go.tags }}" style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:4px 9px;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2)">{{ tg.name }}<span style="color:var(--text-3);font-size:11px;">{{ tg.count }}</span></button></sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div style="height:100%;display:flex;flex-direction:column;">
+          <!-- command bar -->
+          <div style="flex:none;padding:14px 22px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);background:var(--bg);">
+            <div style="flex:1;max-width:560px;position:relative;display:flex;align-items:center;height:38px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:0 12px;gap:9px;" style-focus-within="border-color:var(--border-2)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.2"/><path d="M20 20l-3.4-3.4"/></svg>
+              <span style="color:var(--text-3);font-size:13px;">{{ t.searchPlaceholder }}</span>
+              <span style="margin-left:auto;display:flex;gap:3px;"><kbd style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;">⌘</kbd><kbd style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;">K</kbd></span>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3);"><div style="width:7px;height:7px;border-radius:50%;background:var(--olive);"></div>{{ t.connected }}</div>
+              <div style="width:1px;height:18px;background:var(--border);"></div>
+              <span style="font-size:12px;color:var(--text-3);font-variant-numeric:tabular-nums;"><b style="color:var(--text);font-weight:600;">1,248</b> {{ t.sourcesSaved }}</span>
+            </div>
+          </div>
+
+          <!-- library body -->
+          <div style="flex:1;display:flex;min-height:0;">
+            <!-- list -->
+            <div class="sx-scroll" style="flex:1;min-width:0;overflow-y:auto;padding:18px 22px 32px;">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;">
+                <div>
+                  <h1 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.025em;">{{ t.library }}</h1>
+                  <p style="margin:4px 0 0;font-size:13px;color:var(--text-3);">{{ t.librarySub }}</p>
+                </div>
+                <div style="display:flex;gap:7px;">
+                  <button style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>{{ t.allTypes }}</button>
+                  <button style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">{{ t.newest }}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+                </div>
+              </div>
+
+              <!-- filter chips -->
+              <div style="display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:7px;background:var(--primary-bg);color:var(--primary-fg);font-size:12px;font-weight:500;cursor:pointer;">{{ t.all }} <span style="opacity:.6;">128</span></div>
+                <div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;" style-hover="border-color:var(--border-2)">{{ t.unread }} <span style="color:var(--text-3);">42</span></div>
+                <div style="display:flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;" style-hover="border-color:var(--border-2)">{{ t.archived }} <span style="color:var(--text-3);">61</span></div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <sc-for list="{{ sources }}" as="s" hint-placeholder-count="5">
+                  <div onClick="{{ s.onSelect }}" data-sxcard="1" style="{{ s.cardStyle }}" style-hover="border-color:var(--border-2);box-shadow:var(--shadow-sm)">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+                      <span style="{{ s.typePill }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ s.typeTone }};"></span>{{ s.typeLabel }}</span>
+                      <span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ s.domain }}</span>
+                      <span style="font-size:12px;color:var(--text-3);">· {{ s.savedAt }}</span>
+                      <span style="margin-left:auto;{{ s.statusDot }}"></span>
+                    </div>
+                    <h3 style="margin:0 0 6px;font-size:15px;font-weight:600;letter-spacing:-0.015em;line-height:1.35;">{{ s.title }}</h3>
+                    <p style="margin:0 0 11px;font-size:13px;line-height:1.55;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ s.summary }}</p>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <sc-for list="{{ s.tags }}" as="tg" hint-placeholder-count="2">
+                        <span style="font-size:11px;font-weight:500;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">{{ tg }}</span>
+                      </sc-for>
+                      <span style="margin-left:auto;font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ s.readingTime }}</span>
+                    </div>
+                    <div data-sxact="1" style="display:flex;align-items:center;gap:6px;border-top:1px solid var(--border);padding-top:11px;">
+                      <button onClick="{{ s.openReader }}" style="display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>{{ t.openReaderShort }}</button>
+                      <button onClick="{{ go.ask }}" style="display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 4c.14 3.1.6 4.76 1.46 5.62C14.32 10.48 16 10.94 19.1 11.08c-3.1.14-4.78.6-5.64 1.46-.86.86-1.32 2.52-1.46 5.62-.14-3.1-.6-4.76-1.46-5.62C9.68 11.68 8 11.22 4.9 11.08c3.1-.14 4.78-.6 5.64-1.46C11.4 8.76 11.86 7.1 12 4Z"/></svg>{{ t.askThis }}</button>
+                      <button title="Copy Markdown" style="margin-left:auto;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+                      <button title="Archive" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="4" rx="1"/><path d="M5 9v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg></button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- preview -->
+            <div class="sx-scroll" style="width:392px;flex:none;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;">
+              <div style="padding:20px 22px 28px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <span style="{{ selected.typePill }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ selected.typeTone }};"></span>{{ selected.typeLabel }}</span>
+                  <div style="display:flex;gap:4px;">
+                    <button title="Archive" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="4" rx="1"/><path d="M5 9v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg></button>
+                    <button title="More" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/></svg></button>
+                  </div>
+                </div>
+
+                <h2 style="margin:0 0 12px;font-size:19px;font-weight:600;line-height:1.3;letter-spacing:-0.02em;">{{ selected.title }}</h2>
+
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;">
+                  <div style="width:28px;height:28px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-2);font-family:'JetBrains Mono',monospace;">{{ selected.fav }}</div>
+                  <div style="display:flex;flex-direction:column;line-height:1.3;">
+                    <span style="font-size:12px;color:var(--text);font-family:'JetBrains Mono',monospace;">{{ selected.domain }}</span>
+                    <span style="font-size:11px;color:var(--text-3);">{{ selected.author }} · {{ selected.savedAt }}</span>
+                  </div>
+                </div>
+
+                <!-- snapshot -->
+                <div style="border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:18px;position:relative;background:repeating-linear-gradient(135deg,var(--surface-2),var(--surface-2) 9px,var(--surface-3) 9px,var(--surface-3) 18px);height:138px;display:flex;align-items:center;justify-content:center;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);background:var(--surface);padding:4px 9px;border-radius:6px;border:1px solid var(--border);">page snapshot</span>
+                  <button style="position:absolute;bottom:9px;right:9px;display:flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:6px;background:var(--surface);border:1px solid var(--border);font-size:11px;font-weight:500;color:var(--text-2);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2)">{{ t.viewSnapshot }}</button>
+                </div>
+
+                <!-- meta -->
+                <div style="display:flex;gap:18px;margin-bottom:18px;padding:13px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+                  <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:11px;color:var(--text-3);">{{ t.words }}</span><span style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;">{{ selected.words }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:11px;color:var(--text-3);">{{ t.readTime }}</span><span style="font-size:14px;font-weight:600;">{{ selected.readingTime }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:11px;color:var(--text-3);">{{ t.status }}</span><span style="font-size:14px;font-weight:600;text-transform:capitalize;">{{ selected.status }}</span></div>
+                </div>
+
+                <!-- AI summary -->
+                <div style="background:var(--olive-tint);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:18px;">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.6 4.2L18 9.6l-3.2 2.8.9 4.4L12 14.8 8.3 16.8l.9-4.4L6 9.6l4.4-1.4z"/></svg>
+                    <span style="font-size:12px;font-weight:600;color:var(--olive);letter-spacing:0.01em;">{{ t.aiSummary }}</span>
+                  </div>
+                  <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text-2);">{{ selected.summary }}</p>
+                </div>
+
+                <!-- tags -->
+                <div style="margin-bottom:18px;">
+                  <span style="font-size:11px;color:var(--text-3);display:block;margin-bottom:8px;">{{ t.tags }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <sc-for list="{{ selected.tags }}" as="tg" hint-placeholder-count="3">
+                      <span style="font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;">{{ tg }}</span>
+                    </sc-for>
+                    <button style="font-size:12px;color:var(--text-3);background:transparent;border:1px dashed var(--border-2);border-radius:6px;padding:3px 9px;cursor:pointer;font-family:inherit;" style-hover="color:var(--text);border-color:var(--text-3)">+ {{ t.addTag }}</button>
+                  </div>
+                </div>
+
+                <!-- actions -->
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <button onClick="{{ go.reader }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border-radius:9px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;" style-hover="opacity:.92"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>{{ t.openReader }}</button>
+                  <div style="display:flex;gap:8px;">
+                    <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v4"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>{{ t.openOriginal }}</button>
+                    <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8l4 4v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" opacity=".0"/><path d="M9 9h6M9 13h6M9 17h3"/><rect x="5" y="4" width="14" height="16" rx="2"/></svg>{{ t.copyMd }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isReader }}" hint-placeholder-val="{{ true }}" data-screen="1">
+        <div style="height:100%;display:flex;flex-direction:column;">
+          <!-- reader toolbar -->
+          <div style="flex:none;height:54px;display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid var(--border);background:var(--bg);">
+            <button onClick="{{ go.library }}" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px 0 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6l-6 6 6 6"/></svg>{{ t.backToLibrary }}</button>
+            <span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">{{ t.readingNow }}</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+              <button style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--copper)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-4-7 4z"/></svg>{{ t.highlight }}</button>
+              <button style="display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16l-7-4-7 4z" opacity="0"/><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 9h6M9 13h4"/></svg>{{ t.note }}</button>
+              <div style="width:1px;height:20px;background:var(--border);"></div>
+              <button title="Copy Markdown" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
+              <button title="Open original" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v4"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg></button>
+            </div>
+          </div>
+
+          <div style="flex:1;display:flex;min-height:0;">
+            <!-- reading column -->
+            <div class="sx-scroll" style="flex:1;min-width:0;overflow-y:auto;display:flex;justify-content:center;padding:46px 32px 80px;">
+              <article style="width:100%;max-width:680px;">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px;">
+                  <span style="{{ selected.typePill }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ selected.typeTone }};"></span>{{ selected.typeLabel }}</span>
+                  <span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ selected.domain }}</span>
+                </div>
+                <h1 style="margin:0 0 16px;font-family:'Literata',serif;font-size:36px;font-weight:600;line-height:1.18;letter-spacing:-0.02em;">{{ selected.title }}</h1>
+                <div style="display:flex;align-items:center;gap:16px;padding-bottom:22px;margin-bottom:30px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-3);">
+                  <span style="color:var(--text-2);font-weight:500;">{{ selected.author }}</span>
+                  <span>{{ selected.words }} {{ t.words }}</span>
+                  <span>·</span>
+                  <span>{{ selected.readingTime }} {{ t.readTime }}</span>
+                </div>
+                <div style="font-family:'Literata',serif;font-size:18px;line-height:1.72;color:var(--text);">
+                  <p style="margin:0 0 22px;">In the cloud, the data you create with an application is held on a server you don’t control. The promise of <span style="background:var(--hl);border-radius:3px;padding:0 2px;box-decoration-break:clone;">local-first software</span> is to reverse that arrangement: your data lives on your own devices first, and the network becomes an enhancement rather than a dependency.</p>
+                  <p style="margin:0 0 22px;">This is not a return to the era of files trapped on a single machine. Modern local-first apps keep working offline, sync seamlessly when a connection returns, and let several people collaborate on the same document in real time — all without a central authority owning the source of truth.</p>
+                  <blockquote style="margin:30px 0;padding:4px 0 4px 22px;border-left:3px solid var(--copper);font-style:italic;color:var(--text-2);">“The cloud cannot give us ownership and agency. For that, the data has to live on our own devices, under our own control.”</blockquote>
+                  <h2 style="font-family:'Literata',serif;font-size:24px;font-weight:600;letter-spacing:-0.01em;margin:36px 0 14px;line-height:1.25;">Seven ideals</h2>
+                  <p style="margin:0 0 22px;">The authors distill the movement into seven ideals: no spinners, work happens instantly; your work is not trapped on one device; the network is optional; collaboration is seamless; <span style="background:var(--hl);border-radius:3px;padding:0 2px;">the long now</span> — data outlives the company that made the app; security and privacy by default; and finally, you retain ultimate ownership and control.</p>
+                  <p style="margin:0 0 22px;">Conflict-free replicated data types (CRDTs) are the technical foundation that makes much of this possible. They allow independent replicas to be merged automatically, without a server arbitrating every change, so two people editing offline can reconcile their work cleanly when they reconnect.</p>
+                  <div style="display:flex;gap:10px;align-items:flex-start;margin:30px 0;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--blue)" stroke-width="1.7" stroke-linecap="round" style="flex:none;margin-top:3px;"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l2 2 4-4"/></svg>
+                    <p style="margin:0;font-family:'Inter',sans-serif;font-size:13.5px;line-height:1.6;color:var(--text-2);"><b style="color:var(--text);">Sourdex note —</b> This passage maps directly onto how Sourdex stores your sources: extracted, indexed, and searchable on disk, with the cloud kept strictly optional.</p>
+                  </div>
+                  <p style="margin:0 0 22px;">For a tool whose entire job is to remember things on your behalf, local-first is not a feature — it is the premise. An index you cannot lose, cannot be locked out of, and can export at any moment is the only kind worth building a memory on.</p>
+                </div>
+              </article>
+            </div>
+
+            <!-- summary panel -->
+            <div class="sx-scroll" style="width:316px;flex:none;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;padding:24px 20px 32px;">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.6 4.2L18 9.6l-3.2 2.8.9 4.4L12 14.8 8.3 16.8l.9-4.4L6 9.6l4.4-1.4z"/></svg>
+                <span style="font-size:13px;font-weight:600;">{{ t.summary }}</span>
+              </div>
+              <p style="margin:0 0 22px;font-size:13.5px;line-height:1.62;color:var(--text-2);">{{ selected.summary }}</p>
+              <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:11px;">{{ t.keyPoints }}</span>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:26px;">
+                <div style="display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--text-2);"><span style="color:var(--copper);font-weight:600;">01</span><span>Data lives on the user’s device first; the network is an enhancement.</span></div>
+                <div style="display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--text-2);"><span style="color:var(--copper);font-weight:600;">02</span><span>CRDTs merge offline edits automatically with no central server.</span></div>
+                <div style="display:flex;gap:9px;font-size:13px;line-height:1.5;color:var(--text-2);"><span style="color:var(--copper);font-weight:600;">03</span><span>Software should outlive the company that made it — “the long now”.</span></div>
+              </div>
+              <div style="height:1px;background:var(--border);margin-bottom:20px;"></div>
+              <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:12px;">{{ t.relatedSources }}</span>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <sc-for list="{{ related }}" as="r" hint-placeholder-count="3">
+                  <div onClick="{{ r.onSelect }}" style="cursor:pointer;padding:10px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);" style-hover="border-color:var(--border-2)">
+                    <div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:4px;">{{ r.domain }}</div>
+                    <div style="font-size:13px;font-weight:500;line-height:1.4;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ r.title }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:1080px;margin:0 auto;padding:40px 36px 60px;">
+            <!-- big search -->
+            <div style="display:flex;align-items:center;gap:13px;height:62px;background:var(--surface);border:1px solid var(--border-2);border-radius:15px;padding:0 20px;box-shadow:var(--shadow);">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--text-2)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20.5 20.5l-3.7-3.7"/></svg>
+              <span style="flex:1;font-size:22px;font-weight:500;letter-spacing:-0.02em;color:var(--text);">{{ query }}</span>
+              <span style="width:2px;height:26px;background:var(--copper);animation:sxPulse 1.1s infinite;"></span>
+              <div style="display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:3px;width:178px;">
+                <button onClick="{{ setKeyword }}" style="{{ modeKwStyle }}">{{ t.keyword }}</button>
+                <button onClick="{{ setSemantic }}" style="{{ modeSemStyle }}"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M10.6 2.8c.15 4.13.8 6.4 1.9 7.5 1.1 1.1 3.37 1.75 7.5 1.9-4.13.15-6.4.8-7.5 1.9-1.1 1.1-1.75 3.37-1.9 7.5-.15-4.13-.8-6.4-1.9-7.5-1.1-1.1-3.37-1.75-7.5-1.9 4.13-.15 6.4-.8 7.5-1.9 1.1-1.1 1.75-3.37 1.9-7.5Z"/><path d="M18.4 2.6c.08 1.6.34 2.5.84 3 .5.5 1.4.76 3 .84-1.6.08-2.5.34-3 .84-.5.5-.76 1.4-.84 3-.08-1.6-.34-2.5-.84-3-.5-.5-1.4-.76-3-.84 1.6-.08 2.5-.34 3-.84.5-.5.76-1.4.84-3Z" opacity="0.8"/></svg>{{ t.semantic }}</button>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;margin-top:14px;">
+              <span style="font-size:12px;color:var(--text-3);">{{ t.recentSearches }}:</span>
+              <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;" style-hover="border-color:var(--border-2)">crdt merge</span>
+              <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;" style-hover="border-color:var(--border-2)">sqlite fts5</span>
+              <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;" style-hover="border-color:var(--border-2)">阅读器 高亮</span>
+            </div>
+
+            <div style="display:flex;gap:28px;margin-top:34px;align-items:flex-start;">
+              <!-- results -->
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                  <span style="font-size:13px;color:var(--text-3);"><b style="color:var(--text);font-weight:600;">24</b> {{ t.results }} · “{{ query }}”</span>
+                  <div style="display:flex;gap:5px;">
+                    <span style="font-size:12px;font-weight:500;color:var(--text);background:var(--surface-2);border:1px solid var(--border-2);border-radius:7px;padding:5px 11px;cursor:pointer;">{{ t.relevant }}</span>
+                    <span style="font-size:12px;font-weight:500;color:var(--text-3);border-radius:7px;padding:5px 11px;cursor:pointer;" style-hover="color:var(--text)">{{ t.newest }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <sc-for list="{{ searchResults }}" as="r" hint-placeholder-count="4">
+                    <div onClick="{{ r.onOpen }}" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;animation:sxUp .3s ease;" style-hover="border-color:var(--border-2);box-shadow:var(--shadow-sm)">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+                        <span style="{{ selected.typePill }}">{{ r.typeLabel }}</span>
+                        <span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ r.domain }}</span>
+                        <span style="font-size:12px;color:var(--text-3);">· {{ r.savedAt }}</span>
+                        <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--olive);font-family:'JetBrains Mono',monospace;"><span style="width:6px;height:6px;border-radius:50%;background:var(--olive);"></span>{{ r.score }} {{ t.match }}</span>
+                      </div>
+                      <h3 style="margin:0 0 8px;font-size:15px;font-weight:600;line-height:1.4;"><sc-for list="{{ r.title }}" as="p" hint-placeholder-count="1"><sc-if value="{{ p.m }}" hint-placeholder-val="{{ false }}" data-screen="1"><mark style="background:var(--hl);color:inherit;border-radius:3px;padding:0 2px;">{{ p.t }}</mark></sc-if><sc-if value="{{ p.notM }}" hint-placeholder-val="{{ true }}">{{ p.t }}</sc-if></sc-for></h3>
+                      <p style="margin:0;font-size:13px;line-height:1.6;color:var(--text-2);"><sc-for list="{{ r.snippet }}" as="p" hint-placeholder-count="1"><sc-if value="{{ p.m }}" hint-placeholder-val="{{ false }}" data-screen="1"><mark style="background:var(--hl);color:inherit;border-radius:3px;padding:0 2px;font-weight:500;">{{ p.t }}</mark></sc-if><sc-if value="{{ p.notM }}" hint-placeholder-val="{{ true }}">{{ p.t }}</sc-if></sc-for></p>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <!-- filters -->
+              <div style="width:228px;flex:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:16px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--text-2)" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span style="font-size:13px;font-weight:600;">{{ t.filters }}</span></div>
+                <div style="margin-bottom:18px;"><span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:9px;">{{ t.type }}</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <span style="font-size:12px;color:var(--primary-fg);background:var(--primary-bg);border-radius:6px;padding:3px 9px;cursor:pointer;">{{ t.all }}</span>
+                    <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">Webpage</span>
+                    <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">PDF</span>
+                    <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">Selection</span>
+                  </div>
+                </div>
+                <div style="margin-bottom:18px;"><span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:9px;">{{ t.tags }}</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <span style="font-size:12px;color:var(--text);background:var(--olive-tint);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">local-first</span>
+                    <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">sqlite</span>
+                    <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;">crdt</span>
+                  </div>
+                </div>
+                <div><span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:9px;">{{ t.time }}</span>
+                  <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--text-2);">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid var(--copper);display:flex;align-items:center;justify-content:center;"><span style="width:7px;height:7px;border-radius:50%;background:var(--copper);"></span></span>Any time</label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-3);"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-2);"></span>Past week</label>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--text-3);"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border-2);"></span>Past month</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isAsk }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:840px;margin:0 auto;padding:36px 36px 70px;">
+            <!-- ask bar -->
+            <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:30px;">
+              <div style="display:flex;align-items:center;gap:13px;min-height:58px;background:var(--surface);border:1px solid var(--border-2);border-radius:14px;padding:12px 18px;box-shadow:var(--shadow);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 4l1.5 4L18 9.5l-3.6 2.6.9 4.4L12 14.6 8.7 16.5l.9-4.4L6 9.5 10.5 8z"/></svg>
+                <span style="flex:1;font-size:17px;font-weight:500;letter-spacing:-0.015em;line-height:1.4;">How do local-first apps resolve sync conflicts when editing offline?</span>
+                <button style="flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:var(--primary-bg);color:var(--primary-fg);border:none;cursor:pointer;" style-hover="opacity:.9"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></button>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;color:var(--text-3);">{{ t.sources_ }}:</span>
+                <button onClick="{{ setScope.all }}" style="{{ scopeStyle.all }}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4.5" width="16" height="6" rx="1.5"/><rect x="4" y="13.5" width="16" height="6" rx="1.5"/></svg>{{ t.allLibrary }}</button>
+                <button onClick="{{ setScope.tag }}" style="{{ scopeStyle.tag }}">{{ t.currentTag }} · local-first</button>
+                <button onClick="{{ setScope.sel }}" style="{{ scopeStyle.sel }}">{{ t.selectedSources }}</button>
+              </div>
+            </div>
+
+            <!-- answer -->
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:sxUp .35s ease;">
+              <div style="display:flex;align-items:center;gap:10px;padding:15px 22px;border-bottom:1px solid var(--border);background:var(--surface-2);">
+                <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;color:var(--text-2);">{{ t.answer }}</span>
+                <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--olive);background:var(--olive-tint);border-radius:6px;padding:3px 9px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--olive);"></span>{{ t.confidence }}: {{ t.high }}</span>
+                <span style="font-size:12px;color:var(--text-3);">· {{ t.basedOn }}</span>
+              </div>
+              <div style="padding:22px;font-size:15px;line-height:1.72;color:var(--text);">
+                <p style="margin:0 0 16px;">Local-first applications avoid a central server arbitrating edits. Instead, each device keeps its own replica and records changes locally, so editing continues uninterrupted even while offline.<span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:3px;border-radius:4px;background:var(--copper-tint);color:var(--copper);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;vertical-align:1px;">1</span></p>
+                <p style="margin:0 0 16px;">When devices reconnect, conflict-free replicated data types (CRDTs) merge the divergent replicas automatically. Each operation carries enough causal metadata that merges are deterministic — every replica converges to the same result regardless of the order updates arrive in.<span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:3px;border-radius:4px;background:var(--copper-tint);color:var(--copper);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;vertical-align:1px;">1</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:3px;border-radius:4px;background:var(--copper-tint);color:var(--copper);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;vertical-align:1px;">2</span></p>
+                <p style="margin:0;">Because the underlying store is often a single local file, syncing reduces to snapshotting and merging that state across devices, with no round-trip required before the user can read or search.<span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;margin-left:3px;border-radius:4px;background:var(--copper-tint);color:var(--copper);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;vertical-align:1px;">3</span></p>
+              </div>
+
+              <!-- evidence -->
+              <div style="padding:4px 22px 22px;">
+                <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:11px;">{{ t.sources_ }}</span>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <sc-for list="{{ evidence }}" as="e" hint-placeholder-count="3">
+                    <div onClick="{{ go.reader }}" style="cursor:pointer;display:flex;gap:13px;padding:13px 15px;border:1px solid var(--border);border-radius:11px;background:var(--bg);" style-hover="border-color:var(--border-2)">
+                      <span style="flex:none;width:22px;height:22px;border-radius:6px;background:var(--copper-tint);color:var(--copper);font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;justify-content:center;">{{ e.n }}</span>
+                      <div style="min-width:0;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="font-size:13px;font-weight:600;color:var(--text);">{{ e.title }}</span><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ e.domain }}</span></div>
+                        <p style="margin:0;font-size:12.5px;line-height:1.55;color:var(--text-2);border-left:2px solid var(--border-2);padding-left:10px;">“{{ e.quote }}”</p>
+                      </div>
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--text-3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;"><path d="M14 4h4a2 2 0 0 1 2 2v4"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:9px;padding:0 22px 22px;">
+                <button style="display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>{{ t.copyCitations }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:840px;margin:0 auto;padding:30px 36px 70px;">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;"><h1 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.025em;">{{ t.inbox }}</h1><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--copper);background:var(--copper-tint);border-radius:7px;padding:3px 10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--copper);"></span>3 {{ t.needsReview }}</span></div>
+                <p style="margin:6px 0 0;font-size:13px;color:var(--text-3);">{{ t.inboxSub }}</p>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:9px;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:16px;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-2);cursor:pointer;"><span style="width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-2);display:inline-block;"></span>{{ t.selectAll }}</label>
+              <div style="width:1px;height:18px;background:var(--border);margin:0 4px;"></div>
+              <button style="display:flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="4" rx="1"/><path d="M5 9v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></svg>{{ t.archiveAll }}</button>
+              <button style="display:flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.8V5.5a1.5 1.5 0 0 1 1.5-1.5h6.3a1.5 1.5 0 0 1 1.06.44l6.7 6.7a1.5 1.5 0 0 1 0 2.12l-5.74 5.74a1.5 1.5 0 0 1-2.12 0l-6.7-6.7A1.5 1.5 0 0 1 4 11.8z"/></svg>{{ t.quickTag }}</button>
+              <button style="margin-left:auto;display:flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--copper);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="background:var(--copper-tint)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/></svg>{{ t.del }}</button>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:11px;">
+              <sc-for list="{{ inbox }}" as="it" hint-placeholder-count="5">
+                <div style="display:flex;gap:13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px 16px;" style-hover="border-color:var(--border-2)">
+                  <span style="flex:none;width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-2);margin-top:2px;"></span>
+                  <div style="flex:1;min-width:0;">
+                    <sc-if value="{{ it.isSkeleton }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:9px;">
+                        <div style="width:120px;height:11px;border-radius:4px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);background-size:400px 100%;animation:sxShimmer 1.4s infinite linear;"></div>
+                        <div style="width:80%;height:15px;border-radius:5px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);background-size:400px 100%;animation:sxShimmer 1.4s infinite linear;"></div>
+                        <div style="display:flex;align-items:center;gap:7px;margin-top:2px;"><span style="width:13px;height:13px;border:1.6px solid var(--border-2);border-top-color:var(--text-3);border-radius:50%;animation:sxSpin .8s linear infinite;"></span><span style="font-size:12px;color:var(--text-3);">{{ t.extracting }}</span></div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ it.isFailed }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ it.domain }}</span><span style="font-size:11px;color:var(--text-3);">· {{ it.savedAt }}</span></div>
+                      <div style="display:flex;gap:11px;align-items:flex-start;padding:11px 13px;background:var(--copper-tint);border-radius:9px;">
+                        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--copper)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5M12 16h.01"/></svg>
+                        <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:2px;">{{ t.extractFailed }}</div><div style="font-size:12.5px;color:var(--text-2);">{{ it.title }}</div></div>
+                        <button style="flex:none;display:flex;align-items:center;gap:5px;height:28px;padding:0 11px;border-radius:7px;background:var(--surface);border:1px solid var(--border-2);color:var(--text);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 19v-4h4"/></svg>{{ t.retry }}</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ it.isReview }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">{{ it.typeLabel }}</span>
+                        <span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ it.domain }}</span>
+                        <span style="font-size:12px;color:var(--text-3);">· {{ it.savedAt }}</span>
+                      </div>
+                      <h3 style="margin:0 0 6px;font-size:15px;font-weight:600;line-height:1.4;">{{ it.title }}</h3>
+                      <p style="margin:0 0 10px;font-size:13px;line-height:1.55;color:var(--text-2);">{{ it.summary }}</p>
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <sc-for list="{{ it.tags }}" as="tg" hint-placeholder-count="2"><span style="font-size:11px;font-weight:500;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">{{ tg }}</span></sc-for>
+                        <button style="font-size:11px;color:var(--text-3);background:transparent;border:1px dashed var(--border-2);border-radius:5px;padding:2px 8px;cursor:pointer;font-family:inherit;" style-hover="color:var(--text);border-color:var(--text-3)">+ {{ t.quickTag }}</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ it.isSummarizing }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">{{ it.typeLabel }}</span>
+                        <span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ it.domain }}</span>
+                        <span style="font-size:12px;color:var(--text-3);">· {{ it.savedAt }}</span>
+                      </div>
+                      <h3 style="margin:0 0 9px;font-size:15px;font-weight:600;line-height:1.4;">{{ it.title }}</h3>
+                      <div style="display:flex;align-items:center;gap:7px;"><span style="width:13px;height:13px;border:1.6px solid var(--olive-tint);border-top-color:var(--olive);border-radius:50%;animation:sxSpin .8s linear infinite;"></span><span style="font-size:12.5px;color:var(--olive);font-weight:500;">{{ t.generating }}</span></div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isTags }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:920px;margin:0 auto;padding:30px 36px 70px;">
+            <div style="margin-bottom:24px;"><h1 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.025em;">{{ t.tags }}</h1><p style="margin:6px 0 0;font-size:13px;color:var(--text-3);">{{ t.tagsSub }}</p></div>
+
+            <div style="display:flex;gap:18px;align-items:stretch;margin-bottom:28px;">
+              <div style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 26px;display:flex;flex-wrap:wrap;gap:18px 22px;align-items:baseline;align-content:center;">
+                <sc-for list="{{ tagsList }}" as="tg" hint-placeholder-count="12"><span style="{{ tg.cloudStyle }}" style-hover="color:var(--copper)">{{ tg.name }}</span></sc-for>
+              </div>
+              <div style="width:236px;flex:none;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l5-5 4 3 6-7"/><path d="M16 7h3v3"/></svg><span style="font-size:13px;font-weight:600;">{{ t.recentlyGrowing }}</span></div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <sc-for list="{{ growing }}" as="g" hint-placeholder-count="3"><div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;font-weight:500;color:var(--text);">{{ g.name }}</span><span style="font-size:12px;font-weight:600;color:var(--olive);font-family:'JetBrains Mono',monospace;">{{ g.count }}</span></div></sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+              <span style="font-size:13px;font-weight:600;color:var(--text);">{{ t.allTags }}</span>
+              <span style="font-size:12px;color:var(--text-3);">14</span>
+              <div style="margin-left:auto;display:flex;gap:5px;">
+                <span style="font-size:12px;font-weight:500;color:var(--text);background:var(--surface-2);border:1px solid var(--border-2);border-radius:7px;padding:4px 10px;cursor:pointer;">{{ t.all }}</span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text-3);border-radius:7px;padding:4px 10px;cursor:pointer;" style-hover="color:var(--text)"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 2.5c.2 4.6 1 6.7 2.4 8.1 1.4 1.4 3.5 2.2 8.1 2.4-4.6.2-6.7 1-8.1 2.4-1.4 1.4-2.2 3.5-2.4 8.1-.2-4.6-1-6.7-2.4-8.1C8.2 13.5 6.1 12.7 1.5 12.5c4.6-.2 6.7-1 8.1-2.4C11 8.7 11.8 6.6 12 2.5Z"/></svg>{{ t.aiTag }}</span>
+                <span style="font-size:12px;font-weight:500;color:var(--text-3);border-radius:7px;padding:4px 10px;cursor:pointer;" style-hover="color:var(--text)">{{ t.manualTag }}</span>
+              </div>
+            </div>
+
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+              <sc-for list="{{ tagsList }}" as="tg" hint-placeholder-count="10">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);" style-hover="background:var(--surface-2)">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--text-3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 11.8V5.5a1.5 1.5 0 0 1 1.5-1.5h6.3a1.5 1.5 0 0 1 1.06.44l6.7 6.7a1.5 1.5 0 0 1 0 2.12l-5.74 5.74a1.5 1.5 0 0 1-2.12 0l-6.7-6.7A1.5 1.5 0 0 1 4 11.8z"/></svg>
+                  <span style="font-size:14px;font-weight:500;color:var(--text);">{{ tg.name }}</span>
+                  <sc-if value="{{ tg.isAi }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--olive);background:var(--olive-tint);border-radius:5px;padding:2px 7px;"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M12 2.5c.2 4.6 1 6.7 2.4 8.1 1.4 1.4 3.5 2.2 8.1 2.4-4.6.2-6.7 1-8.1 2.4-1.4 1.4-2.2 3.5-2.4 8.1-.2-4.6-1-6.7-2.4-8.1C8.2 13.5 6.1 12.7 1.5 12.5c4.6-.2 6.7-1 8.1-2.4C11 8.7 11.8 6.6 12 2.5Z"/></svg>{{ t.aiTag }}</span></sc-if>
+                  <span style="margin-left:auto;font-size:13px;color:var(--text-3);font-variant-numeric:tabular-nums;">{{ tg.count }}</span>
+                  <div style="display:flex;gap:3px;">
+                    <button title="Merge" style="width:28px;height:28px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border);color:var(--text)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6" r="2.4"/><circle cx="6.5" cy="18" r="2.4"/><circle cx="17.5" cy="12" r="2.4"/><path d="M6.5 8.4v7.2"/><path d="M6.5 11.4a8.4 8.4 0 0 0 8.6 1"/></svg></button>
+                    <button title="Rename" style="width:28px;height:28px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border);color:var(--text)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5V20h3.5L18 9.5 14.5 6z"/><path d="M13 7.5L16.5 11"/></svg></button>
+                    <button title="Delete" style="width:28px;height:28px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:var(--border);color:var(--copper)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/></svg></button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isExport }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div class="sx-scroll" style="height:100%;overflow-y:auto;">
+          <div style="max-width:960px;margin:0 auto;padding:30px 36px 70px;">
+            <div style="margin-bottom:24px;"><h1 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.025em;">{{ t.export }}</h1><p style="margin:6px 0 0;font-size:13px;color:var(--text-3);">{{ t.exportSub }}</p></div>
+
+            <div style="display:flex;gap:24px;align-items:flex-start;">
+              <div style="flex:1;min-width:0;">
+                <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:12px;">{{ t.chooseFormat }}</span>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:24px;">
+                  <div onClick="{{ setFmt.markdown }}" style="{{ fmtStyle.markdown }}">
+                    <div style="flex:none;width:38px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--text-2);">md</div>
+                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;margin-bottom:3px;">{{ t.markdown }}</div><div style="font-size:12px;line-height:1.45;color:var(--text-3);">One .md file per source with YAML front-matter.</div></div>
+                    <span style="{{ chkMd }}"><sc-if value="{{ isMd }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--primary-fg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></sc-if></span>
+                  </div>
+                  <div onClick="{{ setFmt.obsidian }}" style="{{ fmtStyle.obsidian }}">
+                    <div style="flex:none;width:38px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l7 5-2.5 11h-9L5 8z"/></svg></div>
+                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;margin-bottom:3px;">{{ t.obsidian }}</div><div style="font-size:12px;line-height:1.45;color:var(--text-3);">Folder structure with [[wikilinks]] between sources.</div></div>
+                    <span style="{{ chkObs }}"><sc-if value="{{ isObs }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--primary-fg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></sc-if></span>
+                  </div>
+                  <div onClick="{{ setFmt.json }}" style="{{ fmtStyle.json }}">
+                    <div style="flex:none;width:38px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--text-2);">{ }</div>
+                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;margin-bottom:3px;">JSON</div><div style="font-size:12px;line-height:1.45;color:var(--text-3);">Full structured archive with metadata & index.</div></div>
+                    <span style="{{ chkJson }}"><sc-if value="{{ isJson }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--primary-fg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></sc-if></span>
+                  </div>
+                  <div onClick="{{ setFmt.csv }}" style="{{ fmtStyle.csv }}">
+                    <div style="flex:none;width:38px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--text-2);">csv</div>
+                    <div style="flex:1;"><div style="font-size:14px;font-weight:600;margin-bottom:3px;">CSV</div><div style="font-size:12px;line-height:1.45;color:var(--text-3);">Flat table for spreadsheets — title, url, tags.</div></div>
+                    <span style="{{ chkCsv }}"><sc-if value="{{ isCsv }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--primary-fg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></sc-if></span>
+                  </div>
+                </div>
+
+                <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:12px;">{{ t.scope }}</span>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+                  <label style="display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--copper);display:flex;align-items:center;justify-content:center;"><span style="width:8px;height:8px;border-radius:50%;background:var(--copper);"></span></span><span style="font-size:13.5px;font-weight:500;color:var(--text);flex:1;">{{ t.entireLibrary }}</span><span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ t.items1248 }}</span></label>
+                  <label style="display:flex;align-items:center;gap:11px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;color:var(--text-3);"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-2);"></span><span style="font-size:13.5px;flex:1;">Tagged “local-first”</span><span style="font-size:12px;font-family:'JetBrains Mono',monospace;">128</span></label>
+                  <label style="display:flex;align-items:center;gap:11px;padding:13px 16px;cursor:pointer;color:var(--text-3);"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--border-2);"></span><span style="font-size:13.5px;flex:1;">Inbox only</span><span style="font-size:12px;font-family:'JetBrains Mono',monospace;">5</span></label>
+                </div>
+              </div>
+
+              <div style="width:344px;flex:none;">
+                <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:12px;">{{ t.preview }}</span>
+                <div class="sx-scroll" style="background:var(--surface-3);border:1px solid var(--border);border-radius:12px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;color:var(--text-2);overflow-x:auto;margin-bottom:18px;height:206px;">
+                  <sc-if value="{{ isMd }}" hint-placeholder-val="{{ true }}"><div><span style="color:var(--text-3);">---</span><br>title: Local-First Software<br>url: inkandswitch.com<br>saved: 2025-06-18<br>tags: [local-first, crdt]<br><span style="color:var(--text-3);">---</span><br><br><span style="color:var(--copper);"># Local-First Software</span><br><br>In the cloud, the data you create…</div></sc-if>
+                  <sc-if value="{{ isObs }}" hint-placeholder-val="{{ false }}"><div>Sourdex/<br>├── Local-First Software.md<br>├── SQLite everywhere.md<br>└── _index.md<br><br><span style="color:var(--copper);"># Local-First Software</span><br><br>See also [[CRDT minimal impl]]…</div></sc-if>
+                  <sc-if value="{{ isJson }}" hint-placeholder-val="{{ false }}"><div><span style="color:var(--text-3);">{</span><br>&nbsp;&nbsp;"id": 1,<br>&nbsp;&nbsp;"title": "Local-First…",<br>&nbsp;&nbsp;"url": "inkandswitch.com",<br>&nbsp;&nbsp;"tags": ["local-first"],<br>&nbsp;&nbsp;"savedAt": 1718…<br><span style="color:var(--text-3);">}</span></div></sc-if>
+                  <sc-if value="{{ isCsv }}" hint-placeholder-val="{{ false }}"><div>title,url,domain,tags,saved<br>"Local-First…",inkand…,"local-first",2025-06-18<br>"SQLite…",antonz.org,"sqlite",2025-06-15</div></sc-if>
+                </div>
+
+                <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:10px;">{{ t.destination }}</span>
+                <div style="display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:18px;">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--text-3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+                  <span style="flex:1;font-size:12px;color:var(--text-2);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">~/Documents/Sourdex-export</span>
+                  <button style="font-size:12px;color:var(--text-3);background:transparent;border:none;cursor:pointer;font-family:inherit;" style-hover="color:var(--text)">Change</button>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;"><span style="font-size:12px;color:var(--text-2);">{{ t.exporting }}</span><span style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">842 / 1,248</span></div>
+                  <div style="height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden;"><div style="height:100%;width:67%;border-radius:4px;background:var(--olive);"></div></div>
+                </div>
+
+                <button style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;height:42px;border-radius:10px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;" style-hover="opacity:.92"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8.4 10.6L12 14.2l3.6-3.6"/><path d="M5 15.5v2.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2.5"/></svg>{{ t.startExport }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}" data-screen="1">
+        <div style="height:100%;display:flex;">
+          <div style="width:212px;flex:none;border-right:1px solid var(--border);background:var(--surface);padding:24px 14px;">
+            <h1 style="margin:0 0 18px 10px;font-size:18px;font-weight:600;letter-spacing:-0.02em;">{{ t.settings }}</h1>
+            <div style="display:flex;flex-direction:column;gap:1px;">
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.general }}</span>
+              <span style="font-size:13px;font-weight:500;color:var(--text);background:var(--surface-3);padding:8px 10px;border-radius:8px;cursor:pointer;">{{ t.appearance }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.language }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.dataLocation }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.aiProviders }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.searchIndex }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.privacy }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.export }}</span>
+              <span style="font-size:13px;color:var(--text-2);padding:8px 10px;border-radius:8px;cursor:pointer;" style-hover="background:var(--surface-2)">{{ t.about }}</span>
+            </div>
+          </div>
+
+          <div class="sx-scroll" style="flex:1;min-width:0;overflow-y:auto;padding:34px 40px 70px;">
+            <div style="max-width:620px;">
+              <!-- appearance -->
+              <h2 style="margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.appearance }}</h2>
+              <p style="margin:0 0 16px;font-size:13px;color:var(--text-3);">{{ t.themeDesc }}</p>
+              <div style="display:flex;gap:10px;margin-bottom:34px;">
+                <div onClick="{{ setLight }}" style="{{ themeLightCard }}">
+                  <div style="height:54px;border-radius:7px;background:#F7F4EE;border:1px solid #E6DECF;margin-bottom:9px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 9px;"><div style="height:5px;width:60%;border-radius:2px;background:#D9D0BE;"></div><div style="height:5px;width:40%;border-radius:2px;background:#E6DECF;"></div></div>
+                  <span style="font-size:12.5px;font-weight:500;">{{ t.light }}</span>
+                </div>
+                <div onClick="{{ setDark }}" style="{{ themeDarkCard }}">
+                  <div style="height:54px;border-radius:7px;background:#11110F;border:1px solid #322D26;margin-bottom:9px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 9px;"><div style="height:5px;width:60%;border-radius:2px;background:#403A31;"></div><div style="height:5px;width:40%;border-radius:2px;background:#25231F;"></div></div>
+                  <span style="font-size:12.5px;font-weight:500;">{{ t.dark }}</span>
+                </div>
+                <div style="flex:1;border:1px solid var(--border);border-radius:11px;padding:10px;cursor:pointer;" style-hover="border-color:var(--border-2)">
+                  <div style="height:54px;border-radius:7px;background:linear-gradient(135deg,#F7F4EE 50%,#11110F 50%);border:1px solid var(--border);margin-bottom:9px;"></div>
+                  <span style="font-size:12.5px;font-weight:500;">{{ t.system }}</span>
+                </div>
+              </div>
+
+              <!-- language -->
+              <h2 style="margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.language }}</h2>
+              <p style="margin:0 0 14px;font-size:13px;color:var(--text-3);">{{ t.langDesc }}</p>
+              <div onClick="{{ toggleLang }}" style="display:inline-flex;gap:3px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:34px;cursor:pointer;">
+                <span style="{{ langEnStyle }}">English</span>
+                <span style="{{ langZhStyle }}">中文</span>
+              </div>
+
+              <!-- data location -->
+              <h2 style="margin:0 0 4px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.dataLocation }}</h2>
+              <p style="margin:0 0 14px;font-size:13px;color:var(--text-3);">{{ t.dataDir }}</p>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:34px;">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--text-3)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+                <span style="flex:1;font-size:12.5px;color:var(--text-2);font-family:'JetBrains Mono',monospace;">~/Library/Application Support/Sourdex</span>
+                <button style="font-size:12px;font-weight:500;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">{{ t.change }}</button>
+              </div>
+
+              <!-- AI providers -->
+              <h2 style="margin:0 0 14px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.aiProviders }}</h2>
+              <div style="display:flex;gap:10px;margin-bottom:14px;">
+                <div onClick="{{ setOpenai }}" style="{{ provOpenaiCard }}"><span style="{{ provDotOpenai }}"></span><div><div style="font-size:13.5px;font-weight:600;">OpenAI-compatible</div><div style="font-size:12px;color:var(--text-3);">api.openai.com</div></div></div>
+                <div onClick="{{ setOllama }}" style="{{ provOllamaCard }}"><span style="{{ provDotOllama }}"></span><div><div style="font-size:13.5px;font-weight:600;">Ollama</div><div style="font-size:12px;color:var(--text-3);">localhost · 本地模型</div></div></div>
+              </div>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:34px;display:flex;flex-direction:column;gap:13px;">
+                <div><label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:6px;">{{ t.endpoint }}</label><div style="display:flex;align-items:center;height:36px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 11px;font-size:12.5px;color:var(--text-2);font-family:'JetBrains Mono',monospace;">https://api.openai.com/v1</div></div>
+                <div style="display:flex;gap:13px;">
+                  <div style="flex:1;"><label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:6px;">{{ t.apiKey }}</label><div style="display:flex;align-items:center;height:36px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 11px;font-size:12.5px;color:var(--text-2);font-family:'JetBrains Mono',monospace;">sk-••••••••••••••••4f2a</div></div>
+                  <div style="width:160px;"><label style="font-size:12px;color:var(--text-3);display:block;margin-bottom:6px;">{{ t.model }}</label><div style="display:flex;align-items:center;justify-content:space-between;height:36px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0 11px;font-size:12.5px;color:var(--text);">gpt-4o-mini<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div></div>
+                </div>
+              </div>
+
+              <!-- toggles -->
+              <h2 style="margin:0 0 14px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.privacy }} &amp; AI</h2>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:34px;">
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:13.5px;font-weight:500;color:var(--text);">{{ t.enableSummary }}</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;">{{ t.enableSummaryDesc }}</div></div><div onClick="{{ togSum }}" style="{{ swStyleSum }}"><span style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);"></span></div></div>
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:13.5px;font-weight:500;color:var(--text);">{{ t.enableAutoTag }}</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;">{{ t.enableAutoTagDesc }}</div></div><div onClick="{{ togTag }}" style="{{ swStyleTag }}"><span style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);"></span></div></div>
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid var(--border);"><div style="flex:1;"><div style="font-size:13.5px;font-weight:500;color:var(--text);">{{ t.enableSemantic }}</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;">{{ t.enableSemanticDesc }}</div></div><div onClick="{{ togSem }}" style="{{ swStyleSem }}"><span style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);"></span></div></div>
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 16px;"><div style="flex:1;"><div style="font-size:13.5px;font-weight:500;color:var(--text);">{{ t.allowSend }}</div><div style="font-size:12px;color:var(--text-3);margin-top:2px;">{{ t.allowSendDesc }}</div></div><div onClick="{{ togSend }}" style="{{ swStyleSend }}"><span style="width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);"></span></div></div>
+              </div>
+
+              <!-- maintenance -->
+              <h2 style="margin:0 0 14px;font-size:17px;font-weight:600;letter-spacing:-0.015em;">{{ t.searchIndex }}</h2>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button style="display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--text-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M4 12a8 8 0 1 1 2.3 5.6"/><path d="M4 19v-4h4"/></svg><span style="font-size:13px;font-weight:500;color:var(--text);">{{ t.rebuildIndex }}</span></button>
+                <button style="display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--text-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M21 8v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M3 8l2-4h14l2 4"/><path d="M12 11v6M9 14l3 3 3-3"/></svg><span style="font-size:13px;font-weight:500;color:var(--text);">{{ t.backupDb }}</span></button>
+                <button style="display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--text-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/></svg><span style="font-size:13px;font-weight:500;color:var(--text);">{{ t.clearCache }}</span></button>
+                <button style="display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;font-family:inherit;text-align:left;" style-hover="border-color:var(--border-2)"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--text-2)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h5M8 13h8M8 17h6"/></svg><span style="font-size:13px;font-weight:500;color:var(--text);">{{ t.viewLogs }}</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <!--APPSCREENS-->
+
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ isBrowser }}" hint-placeholder-val="{{ false }}" data-screen="1">
+    <div class="sx-scroll" style="height:100%;overflow:auto;background:var(--bg-canvas);">
+      <div style="min-width:100%;width:max-content;min-height:100%;padding:40px 48px 60px;box-sizing:border-box;display:flex;gap:44px;align-items:flex-start;">
+
+        <!-- POPUP -->
+        <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+          <span style="font-size:12px;font-weight:500;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ t.browserPopup }} · 360 × 520</span>
+          <div style="position:relative;width:404px;">
+            <div style="display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:11px 11px 0 0;border-bottom:none;">
+              <span style="width:9px;height:9px;border-radius:50%;background:#E5705B;"></span><span style="width:9px;height:9px;border-radius:50%;background:#E5B24B;"></span><span style="width:9px;height:9px;border-radius:50%;background:#6FAE5B;"></span>
+              <div style="flex:1;height:22px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);margin:0 8px;display:flex;align-items:center;padding:0 9px;gap:6px;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--olive)" stroke-width="1.8"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg><span style="font-size:10px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">inkandswitch.com</span></div>
+              <div style="position:relative;width:24px;height:24px;border-radius:6px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--copper-tint);"><span style="font-family:'Literata',serif;font-weight:600;font-size:13px;color:var(--primary-fg);">S</span><span style="position:absolute;right:-2px;bottom:-2px;width:8px;height:8px;border-radius:50%;background:var(--copper);border:1.5px solid var(--surface);"></span></div>
+            </div>
+            <div style="position:absolute;top:36px;right:6px;width:360px;height:520px;background:var(--bg);border:1px solid var(--border-2);border-radius:14px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;z-index:2;">
+              <div style="display:flex;align-items:center;gap:9px;padding:14px 16px;border-bottom:1px solid var(--border);">
+                <div style="position:relative;width:26px;height:26px;border-radius:7px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-weight:600;font-size:15px;color:var(--primary-fg);margin-top:1px;">S</span><span style="position:absolute;right:3px;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--copper);"></span></div>
+                <span style="font-size:14px;font-weight:600;">Sourdex</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--olive);"><span style="width:6px;height:6px;border-radius:50%;background:var(--olive);"></span>{{ t.connected }}</span>
+                <button title="Settings" style="width:26px;height:26px;border-radius:6px;border:none;background:transparent;color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="background:var(--surface-2)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h9"/><circle cx="16.5" cy="8" r="2.1"/><path d="M4 16h4"/><circle cx="11" cy="16" r="2.1"/><path d="M13.5 16H20"/></svg></button>
+              </div>
+              <div style="padding:16px;flex:1;display:flex;flex-direction:column;">
+                <div style="display:flex;gap:11px;margin-bottom:16px;">
+                  <div style="flex:none;width:42px;height:42px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text-2);font-family:'JetBrains Mono',monospace;">I&S</div>
+                  <div style="min-width:0;"><div style="font-size:13.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">Local-First Software: You Own Your Data</div><div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-top:3px;">inkandswitch.com</div></div>
+                </div>
+
+                <sc-if value="{{ popSaved }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1;display:flex;flex-direction:column;animation:sxUp .3s ease;">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:18px 0 22px;">
+                      <div style="width:48px;height:48px;border-radius:50%;background:var(--olive-tint);display:flex;align-items:center;justify-content:center;animation:sxPop .4s ease;"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--olive)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"/></svg></div>
+                      <span style="font-size:15px;font-weight:600;">{{ t.savedToSourdex }}</span>
+                    </div>
+                    <span style="font-size:11px;color:var(--text-3);margin-bottom:8px;">{{ t.quickTags }}</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+                      <span style="font-size:12px;color:var(--text);background:var(--olive-tint);border-radius:6px;padding:4px 9px;">local-first</span>
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;cursor:pointer;">crdt</span>
+                      <span style="font-size:12px;color:var(--text-3);background:transparent;border:1px dashed var(--border-2);border-radius:6px;padding:4px 9px;cursor:pointer;">+ {{ t.addTag }}</span>
+                    </div>
+                    <button style="display:flex;align-items:center;gap:7px;width:100%;height:36px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit;justify-content:center;margin-bottom:8px;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 9h6M9 13h4"/></svg>{{ t.addNote }}</button>
+                    <button style="display:flex;align-items:center;gap:7px;width:100%;height:40px;border-radius:9px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;justify-content:center;margin-top:auto;" style-hover="opacity:.92">{{ t.openInSourdex }}<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v4"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg></button>
+                    <button onClick="{{ resetPopup }}" style="background:transparent;border:none;color:var(--text-3);font-size:11px;cursor:pointer;font-family:inherit;margin-top:9px;" style-hover="color:var(--text)">↺ reset demo</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ popSaving }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+                    <span style="width:30px;height:30px;border:2.5px solid var(--border-2);border-top-color:var(--copper);border-radius:50%;animation:sxSpin .7s linear infinite;"></span>
+                    <span style="font-size:13.5px;font-weight:500;color:var(--text-2);">{{ t.saving }}</span>
+                    <div style="width:160px;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden;"><div style="height:100%;width:60%;border-radius:3px;background:var(--copper);"></div></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ popReady }}" hint-placeholder-val="{{ true }}">
+                  <div style="flex:1;display:flex;flex-direction:column;">
+                    <button onClick="{{ savePopup }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:44px;border-radius:10px;background:var(--primary-bg);color:var(--primary-fg);font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:inherit;margin-bottom:9px;" style-hover="opacity:.92"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h9l4 4v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M9 4v5h5"/></svg>{{ t.savePage }}</button>
+                    <div style="display:flex;gap:8px;margin-bottom:16px;">
+                      <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v9a3 3 0 0 0 6 0V4"/><path d="M5 20h14"/></svg>{{ t.saveSelection }}</button>
+                      <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 9h6M9 13h4"/></svg>{{ t.addNote }}</button>
+                    </div>
+                    <span style="font-size:11px;color:var(--text-3);margin-bottom:9px;">{{ t.saveAs }}</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;">
+                      <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:7px;padding:5px 10px;cursor:pointer;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);"></span>Webpage</span>
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;">Selection</span>
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;">PDF</span>
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;cursor:pointer;">Video</span>
+                    </div>
+                    <span style="font-size:11px;color:var(--text-3);margin-bottom:9px;">{{ t.quickTags }}</span>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;cursor:pointer;" style-hover="border-color:var(--border-2)">local-first</span>
+                      <span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;cursor:pointer;" style-hover="border-color:var(--border-2)">architecture</span>
+                      <span style="font-size:12px;color:var(--text-3);background:transparent;border:1px dashed var(--border-2);border-radius:6px;padding:4px 9px;cursor:pointer;">+ {{ t.addTag }}</span>
+                    </div>
+                    <div style="margin-top:auto;padding-top:14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);">
+                      <span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">⌘⇧S</span>
+                      <span style="font-size:12px;color:var(--text-2);cursor:pointer;font-weight:500;" style-hover="color:var(--text)">{{ t.openInSourdex }} →</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDE PANEL -->
+        <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+          <span style="font-size:12px;font-weight:500;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ t.sidePanel }} · 420 × 900</span>
+          <div style="display:flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);background:var(--surface);">
+            <div style="width:420px;height:660px;background:repeating-linear-gradient(135deg,var(--surface-2),var(--surface-2) 11px,var(--surface-3) 11px,var(--surface-3) 22px);display:flex;align-items:center;justify-content:center;flex:none;"><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-3);background:var(--surface);padding:6px 12px;border-radius:7px;border:1px solid var(--border);">web page</span></div>
+            <div class="sx-scroll" style="width:380px;height:660px;flex:none;border-left:1px solid var(--border);background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;">
+              <div style="display:flex;align-items:center;gap:9px;padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;">
+                <div style="position:relative;width:24px;height:24px;border-radius:6px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-weight:600;font-size:14px;color:var(--primary-fg);">S</span></div>
+                <span style="font-size:13.5px;font-weight:600;">Sourdex</span>
+                <button style="margin-left:auto;display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2)">{{ t.openFullApp }}<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v4"/><path d="M20 4l-9 9"/></svg></button>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:18px;">
+                <div style="display:flex;align-items:center;gap:8px;padding:11px 13px;border-radius:10px;background:var(--olive-tint);border:1px solid var(--border);">
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--olive)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"/></svg>
+                  <span style="font-size:13px;font-weight:600;color:var(--olive);">{{ t.saved }}</span>
+                  <span style="margin-left:auto;font-size:11px;color:var(--text-3);">2h ago</span>
+                </div>
+                <div>
+                  <div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:5px;">inkandswitch.com</div>
+                  <h3 style="margin:0;font-size:15px;font-weight:600;line-height:1.35;">Local-First Software: You Own Your Data, in Spite of the Cloud</h3>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--olive)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.5 4L18 9.5l-3.6 2.6.9 4.4L12 14.6 8.7 16.5l.9-4.4L6 9.5 10.5 8z"/></svg><span style="font-size:11px;font-weight:600;color:var(--olive);">{{ t.aiSummary }}</span></div>
+                  <p style="margin:0;font-size:12.5px;line-height:1.55;color:var(--text-2);">Seven ideals for software that keeps data on the user’s device while still enabling realtime collaboration via CRDTs.</p>
+                </div>
+                <div>
+                  <span style="font-size:11px;color:var(--text-3);display:block;margin-bottom:8px;">{{ t.tags }}</span>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;"><span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;">local-first</span><span style="font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;">crdt</span><span style="font-size:12px;color:var(--text-3);border:1px dashed var(--border-2);border-radius:6px;padding:3px 9px;cursor:pointer;">+ {{ t.addTag }}</span></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:0 11px;height:38px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.2-3.2"/></svg><span style="font-size:12.5px;color:var(--text-3);">{{ t.searchWithin }}</span></div>
+                <div>
+                  <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em;font-family:'JetBrains Mono',monospace;display:block;margin-bottom:10px;">{{ t.relatedHere }}</span>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-2)"><div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:3px;">antonz.org</div><div style="font-size:12.5px;font-weight:500;line-height:1.35;">The web’s most reused database is SQLite</div></div>
+                    <div style="padding:10px 11px;border:1px solid var(--border);border-radius:9px;background:var(--surface);cursor:pointer;" style-hover="border-color:var(--border-2)"><div style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:3px;">juejin.cn</div><div style="font-size:12.5px;font-weight:500;line-height:1.35;">用 CRDT 实现协作编辑的最小实现</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT CLICK -->
+        <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+          <span style="font-size:12px;font-weight:500;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ t.rightClick }}</span>
+          <div style="position:relative;width:540px;height:660px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;">
+            <div style="padding:46px 48px;font-family:'Literata',serif;">
+              <div style="font-size:11px;color:var(--text-3);font-family:'Inter',sans-serif;margin-bottom:16px;">example.com/article</div>
+              <h2 style="margin:0 0 18px;font-size:26px;font-weight:600;line-height:1.25;color:var(--text);">Notes on building a durable index</h2>
+              <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:var(--text-2);">A good index is not a pile of links. It is a structure that lets you find a thing months after you’ve forgotten you saved it. <span style="background:var(--blue-tint);border-radius:2px;box-shadow:0 0 0 1px var(--blue);">The trick is to capture the source, not just the URL — the full text, the snapshot, and enough metadata to rank it later.</span> Everything else follows from that.</p>
+              <p style="margin:0;font-size:16px;line-height:1.7;color:var(--text-3);">Once the source is captured, search and citation become possible offline.</p>
+            </div>
+            <!-- context menu -->
+            <div style="position:absolute;top:236px;left:210px;width:280px;background:var(--bg);border:1px solid var(--border-2);border-radius:11px;box-shadow:var(--shadow-lg);padding:6px;z-index:3;">
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;color:var(--text);font-size:12.5px;cursor:pointer;background:var(--surface-2);"><div style="width:18px;height:18px;border-radius:5px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-size:10px;color:var(--primary-fg);">S</span></div>{{ t.saveSelectionMenu }}</div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;color:var(--text-2);font-size:12.5px;cursor:pointer;" style-hover="background:var(--surface-2)"><span style="width:18px;"></span>{{ t.savePageMenu }}</div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;color:var(--text-2);font-size:12.5px;cursor:pointer;" style-hover="background:var(--surface-2)"><span style="width:18px;"></span>{{ t.searchSelMenu }}</div>
+              <div style="height:1px;background:var(--border);margin:5px 9px;"></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;color:var(--text-3);font-size:12.5px;cursor:pointer;" style-hover="background:var(--surface-2)"><span style="width:18px;"></span>Copy</div>
+            </div>
+            <!-- floating saved overlay -->
+            <div style="position:absolute;top:20px;right:20px;width:248px;background:var(--bg);border:1px solid var(--border-2);border-radius:12px;box-shadow:var(--shadow-lg);padding:13px;z-index:4;animation:sxUp .35s ease;">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--olive-tint);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--olive)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"/></svg></div>
+                <span style="font-size:13px;font-weight:600;">{{ t.savedToSourdex }}</span>
+                <span style="margin-left:auto;color:var(--text-3);cursor:pointer;font-size:15px;line-height:1;">×</span>
+              </div>
+              <p style="margin:0 0 11px;font-size:11.5px;line-height:1.5;color:var(--text-3);">“The trick is to capture the source, not just the URL…”</p>
+              <div style="display:flex;gap:7px;">
+                <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:30px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">+ {{ t.addTag }}</button>
+                <button style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;height:30px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">{{ t.addNote }}</button>
+              </div>
+              <button style="width:100%;margin-top:7px;height:30px;border-radius:7px;background:transparent;border:none;color:var(--blue);font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="text-decoration:underline">{{ t.viewInSourdex }}</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}" data-screen="1">
+    <div class="sx-scroll" style="height:100%;overflow-y:auto;background:radial-gradient(120% 100% at 50% 0%, var(--surface-2), var(--bg-canvas));display:flex;align-items:center;justify-content:center;padding:40px;">
+      <div style="width:560px;background:var(--bg);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;">
+        <div style="display:flex;gap:6px;padding:20px 28px 0;">
+          <sc-for list="{{ obDots }}" as="d" hint-placeholder-count="6"><span style="{{ d.style }}"></span></sc-for>
+        </div>
+        <div style="padding:36px 40px 16px;min-height:300px;">
+          <sc-if value="{{ obIs.s1 }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;animation:sxUp .3s ease;">
+              <div style="position:relative;width:64px;height:64px;border-radius:16px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;margin-bottom:22px;box-shadow:var(--shadow);"><div style="position:absolute;top:11px;left:13px;right:13px;height:1.5px;background:rgba(247,244,238,.2);"></div><div style="position:absolute;top:17px;left:13px;right:22px;height:1.5px;background:rgba(247,244,238,.14);"></div><span style="font-family:'Literata',serif;font-weight:600;font-size:38px;color:var(--primary-fg);margin-top:4px;">S</span><span style="position:absolute;right:10px;bottom:10px;width:8px;height:8px;border-radius:50%;background:var(--copper);"></span></div>
+              <h1 style="margin:0 0 8px;font-size:28px;font-weight:600;letter-spacing:-0.02em;">{{ t.obWelcomeT }}</h1>
+              <p style="margin:0 0 16px;font-family:'Literata',serif;font-size:17px;font-style:italic;color:var(--copper);">{{ t.obWelcomeS }}</p>
+              <p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-2);max-width:400px;">{{ t.obWelcomeD }}</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ obIs.s2 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sxUp .3s ease;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-0.02em;">{{ t.obDataT }}</h1>
+              <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:var(--text-2);">{{ t.obDataD }}</p>
+              <div style="display:flex;align-items:center;gap:13px;padding:16px;border:1px solid var(--border-2);border-radius:12px;background:var(--surface);">
+                <div style="width:40px;height:40px;border-radius:9px;background:var(--copper-tint);display:flex;align-items:center;justify-content:center;flex:none;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--copper)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg></div>
+                <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Sourdex Library</div><div style="font-size:12px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">~/Documents/Sourdex</div></div>
+                <button style="font-size:12.5px;font-weight:500;color:var(--text);background:var(--surface-2);border:1px solid var(--border-2);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;" style-hover="background:var(--surface-3)">{{ t.chooseFolder }}</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ obIs.s3 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sxUp .3s ease;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-0.02em;">{{ t.obExtT }}</h1>
+              <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:var(--text-2);">{{ t.obExtD }}</p>
+              <div style="display:flex;align-items:center;gap:13px;padding:18px;border-radius:12px;background:var(--surface);border:1px solid var(--border);margin-bottom:14px;">
+                <div style="position:relative;width:42px;height:42px;border-radius:10px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;flex:none;"><span style="font-family:'Literata',serif;font-weight:600;font-size:22px;color:var(--primary-fg);">S</span><span style="position:absolute;right:5px;bottom:5px;width:6px;height:6px;border-radius:50%;background:var(--copper);"></span></div>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:600;">Sourdex Web Clipper</div><div style="font-size:12px;color:var(--text-3);">Chrome · Edge · Firefox</div></div>
+                <button style="display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--primary-fg);background:var(--primary-bg);border:none;border-radius:9px;padding:10px 16px;cursor:pointer;font-family:inherit;" style-hover="opacity:.92"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10M8.4 10.6L12 14.2l3.6-3.6M5 18h14"/></svg>{{ t.installChrome }}</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ obIs.s4 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sxUp .3s ease;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-0.02em;">{{ t.obAiT }}</h1>
+              <p style="margin:0 0 22px;font-size:14px;line-height:1.6;color:var(--text-2);">{{ t.obAiD }}</p>
+              <div style="display:flex;gap:10px;">
+                <div style="flex:1;padding:15px;border:1px solid var(--border-2);border-radius:11px;background:var(--surface);cursor:pointer;"><div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">OpenAI-compatible</div><div style="font-size:12px;color:var(--text-3);line-height:1.45;">Bring your own API key for summaries.</div></div>
+                <div style="flex:1;padding:15px;border:1px solid var(--border);border-radius:11px;background:var(--bg);cursor:pointer;" style-hover="border-color:var(--border-2)"><div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">Ollama</div><div style="font-size:12px;color:var(--text-3);line-height:1.45;">Run models fully local, no key needed.</div></div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ obIs.s5 }}" hint-placeholder-val="{{ false }}">
+            <div style="animation:sxUp .3s ease;">
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-0.02em;">{{ t.obThemeT }}</h1>
+              <p style="margin:0 0 22px;font-size:14px;line-height:1.6;color:var(--text-2);">{{ t.obThemeD }}</p>
+              <div style="display:flex;gap:10px;">
+                <div onClick="{{ setLight }}" style="{{ themeLightCard }}"><div style="height:60px;border-radius:7px;background:#F7F4EE;border:1px solid #E6DECF;margin-bottom:9px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 9px;"><div style="height:5px;width:60%;border-radius:2px;background:#D9D0BE;"></div><div style="height:5px;width:40%;border-radius:2px;background:#E6DECF;"></div></div><span style="font-size:12.5px;font-weight:500;">{{ t.light }}</span></div>
+                <div onClick="{{ setDark }}" style="{{ themeDarkCard }}"><div style="height:60px;border-radius:7px;background:#11110F;border:1px solid #322D26;margin-bottom:9px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 9px;"><div style="height:5px;width:60%;border-radius:2px;background:#403A31;"></div><div style="height:5px;width:40%;border-radius:2px;background:#25231F;"></div></div><span style="font-size:12.5px;font-weight:500;">{{ t.dark }}</span></div>
+                <div style="flex:1;border:1px solid var(--border);border-radius:11px;padding:10px;cursor:pointer;" style-hover="border-color:var(--border-2)"><div style="height:60px;border-radius:7px;background:linear-gradient(135deg,#F7F4EE 50%,#11110F 50%);border:1px solid var(--border);margin-bottom:9px;"></div><span style="font-size:12.5px;font-weight:500;">{{ t.system }}</span></div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ obIs.s6 }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;animation:sxUp .3s ease;">
+              <div style="width:60px;height:60px;border-radius:50%;background:var(--olive-tint);display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:sxPop .45s ease;"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--olive)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4.5 4.5L19 7"/></svg></div>
+              <h1 style="margin:0 0 8px;font-size:26px;font-weight:600;letter-spacing:-0.02em;">{{ t.obDoneT }}</h1>
+              <p style="margin:0;font-size:14px;line-height:1.6;color:var(--text-2);max-width:380px;">{{ t.obDoneD }}</p>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 28px 24px;">
+          <button onClick="{{ obBack }}" style="font-size:13px;font-weight:500;color:var(--text-3);background:transparent;border:none;cursor:pointer;font-family:inherit;padding:8px 4px;" style-hover="color:var(--text)">{{ t.back }}</button>
+          <sc-if value="{{ obIs.s6 }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ go.library }}" style="display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:10px;background:var(--primary-bg);color:var(--primary-fg);font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:inherit;" style-hover="opacity:.92">{{ t.getStarted }}<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></button>
+          </sc-if>
+          <sc-if value="{{ obNotLast }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ obNext }}" style="display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:10px;background:var(--primary-bg);color:var(--primary-fg);font-size:13.5px;font-weight:600;border:none;cursor:pointer;font-family:inherit;" style-hover="opacity:.92">{{ t.next }}<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></button>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ isSystem }}" hint-placeholder-val="{{ false }}" data-screen="1">
+    <div class="sx-scroll" style="height:100%;overflow-y:auto;background:var(--bg);">
+      <div style="max-width:980px;margin:0 auto;padding:44px 48px 80px;">
+        <div style="margin-bottom:40px;">
+          <h1 style="margin:0;font-size:28px;font-weight:600;letter-spacing:-0.025em;">Sourdex Design System</h1>
+          <p style="margin:8px 0 0;font-size:14px;color:var(--text-3);">Archive Desk · Quiet Index · warm minimalism, source-aware.</p>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;color:var(--text-3);margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px;">Brand</div>
+        <div style="display:flex;gap:18px;margin-bottom:44px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:14px;padding:22px 26px;border:1px solid var(--border);border-radius:14px;background:var(--surface);">
+            <div style="position:relative;width:48px;height:48px;border-radius:12px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><div style="position:absolute;top:9px;left:10px;right:10px;height:1.5px;background:rgba(247,244,238,.2);"></div><span style="font-family:'Literata',serif;font-weight:600;font-size:28px;color:var(--primary-fg);margin-top:3px;">S</span><span style="position:absolute;right:8px;bottom:8px;width:6px;height:6px;border-radius:50%;background:var(--copper);"></span></div>
+            <div><div style="font-size:20px;font-weight:600;letter-spacing:-0.02em;">Sourdex</div><div style="font-size:12px;color:var(--text-3);font-family:'Literata',serif;font-style:italic;">Save once. Find forever.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:18px 22px;border:1px solid var(--border);border-radius:14px;background:var(--surface);">
+            <div style="position:relative;width:38px;height:38px;border-radius:9px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-weight:600;font-size:22px;color:var(--primary-fg);">S</span><span style="position:absolute;right:5px;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--copper);"></span></div>
+            <div style="position:relative;width:38px;height:38px;border-radius:50%;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-weight:600;font-size:21px;color:var(--primary-fg);">S</span></div>
+            <div style="position:relative;width:38px;height:38px;border-radius:9px;background:var(--copper);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Literata',serif;font-weight:600;font-size:22px;color:#fff;">S</span></div>
+            <span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;max-width:90px;line-height:1.4;">app · favicon · avatar</span>
+          </div>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;color:var(--text-3);margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px;">Colors</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:16px;">
+          <sc-for list="{{ palette }}" as="c" hint-placeholder-count="7">
+            <div><div style="{{ c.swatch }}"></div><div style="font-size:12px;font-weight:600;">{{ c.name }}</div><div style="font-size:10.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ c.hex }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:44px;">
+          <sc-for list="{{ paletteDark }}" as="c" hint-placeholder-count="7">
+            <div><div style="{{ c.swatch }}"></div><div style="font-size:12px;font-weight:600;">{{ c.name }}</div><div style="font-size:10.5px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ c.hex }}</div></div>
+          </sc-for>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;color:var(--text-3);margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px;">Type</div>
+        <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:44px;">
+          <div style="display:flex;align-items:baseline;gap:18px;"><span style="width:130px;flex:none;font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">Literata · display</span><span style="font-family:'Literata',serif;font-size:34px;font-weight:600;letter-spacing:-0.02em;">The quiet index</span></div>
+          <div style="display:flex;align-items:baseline;gap:18px;"><span style="width:130px;flex:none;font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">Literata · reading</span><span style="font-family:'Literata',serif;font-size:18px;line-height:1.6;">Everything worth saving, captured and indexed for the long now. 值得保存的一切。</span></div>
+          <div style="display:flex;align-items:baseline;gap:18px;"><span style="width:130px;flex:none;font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">Inter · UI</span><span style="font-size:15px;font-weight:500;">Save Page · Open in Sourdex · 保存网页 · 在 Sourdex 中打开</span></div>
+          <div style="display:flex;align-items:baseline;gap:18px;"><span style="width:130px;flex:none;font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">JetBrains Mono</span><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-2);">inkandswitch.com · 6,210 words · 24 min</span></div>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;color:var(--text-3);margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px;">Radii &amp; Spacing</div>
+        <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:22px;">
+          <div style="text-align:center;"><div style="width:64px;height:64px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:6px;margin-bottom:7px;"></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">6 · sm</span></div>
+          <div style="text-align:center;"><div style="width:64px;height:64px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:10px;margin-bottom:7px;"></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">10 · md</span></div>
+          <div style="text-align:center;"><div style="width:64px;height:64px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:16px;margin-bottom:7px;"></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">16 · lg</span></div>
+          <div style="text-align:center;"><div style="width:64px;height:64px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:20px;margin-bottom:7px;"></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">20 · panel</span></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:44px;">
+          <sc-for list="{{ spacing }}" as="sp" hint-placeholder-count="7"><div style="text-align:center;"><div style="{{ sp.bar }}"></div><span style="font-size:11px;color:var(--text-3);font-family:'JetBrains Mono',monospace;">{{ sp.label }}</span></div></sc-for>
+        </div>
+
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;color:var(--text-3);margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:10px;">Components</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div style="border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--surface);">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:14px;font-family:'JetBrains Mono',monospace;">Buttons</div>
+            <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;">
+              <button style="height:36px;padding:0 16px;border-radius:9px;background:var(--primary-bg);color:var(--primary-fg);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;">Primary</button>
+              <button style="height:36px;padding:0 16px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--border-2);color:var(--text)">Secondary</button>
+              <button style="height:36px;padding:0 16px;border-radius:9px;background:transparent;border:none;color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;" style-hover="color:var(--text)">Ghost</button>
+              <button style="width:36px;height:36px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--surface);">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:14px;font-family:'JetBrains Mono',monospace;">Inputs &amp; switch</div>
+            <div style="display:flex;flex-direction:column;gap:11px;">
+              <div style="display:flex;align-items:center;gap:8px;height:36px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:0 11px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--text-3)" stroke-width="1.7" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-3.2-3.2"/></svg><span style="font-size:13px;color:var(--text-3);">Search…</span></div>
+              <div style="display:flex;align-items:center;gap:14px;"><div style="width:38px;height:22px;border-radius:12px;padding:2px;display:flex;justify-content:flex-end;background:var(--olive);"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div><div style="width:38px;height:22px;border-radius:12px;padding:2px;display:flex;justify-content:flex-start;background:var(--border-2);"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div><span style="width:16px;height:16px;border-radius:5px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--primary-fg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></svg></span><span style="width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border-2);"></span></div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--surface);">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:14px;font-family:'JetBrains Mono',monospace;">Badges &amp; tags</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--blue);"></span>Webpage</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--olive);background:var(--olive-tint);border-radius:6px;padding:3px 9px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--olive);"></span>High</span>
+              <span style="font-size:11px;font-weight:500;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;">local-first</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:4px;background:var(--copper-tint);color:var(--copper);font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;">1</span>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:14px;padding:22px;background:var(--surface);">
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:14px;font-family:'JetBrains Mono',monospace;">Progress &amp; skeleton</div>
+            <div style="height:6px;border-radius:4px;background:var(--surface-3);overflow:hidden;margin-bottom:14px;"><div style="height:100%;width:64%;border-radius:4px;background:var(--olive);"></div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><div style="width:60%;height:11px;border-radius:4px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);background-size:400px 100%;animation:sxShimmer 1.4s infinite linear;"></div><div style="width:90%;height:11px;border-radius:4px;background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);background-size:400px 100%;animation:sxShimmer 1.4s infinite linear;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+    <!--SECTIONS-->
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    theme:'light', lang:'en', section:'app', screen:'desk',
+    selectedId:1, searchMode:'keyword', askScope:'all', exportFmt:'markdown',
+    obStep:1, popup:'ready', sideSaved:true, ext:'popup',
+    sumOn:true, autoTagOn:true, semanticOn:true, sendOn:false, provider:'openai', setCat:'appearance',
+  };
+  tog(k){ return ()=>this.setState({[k]:!this.state[k]}); }
+  savePopup(){ this.setState({popup:'saving'}); clearTimeout(this._pt); this._pt=setTimeout(()=>this.setState({popup:'saved'}),1300); }
+  resetPopup(){ clearTimeout(this._pt); this.setState({popup:'ready'}); }
+
+  data(){
+    return [
+      {id:1,type:'webpage',typeLabel:'Webpage',title:'Local-First Software: You Own Your Data, in Spite of the Cloud',domain:'inkandswitch.com',fav:'I&S',author:'Ink & Switch',savedAt:'2h ago',readingTime:'24 min',words:'6,210',status:'unread',summary:'Seven ideals for software that keeps data on the user’s device while still enabling realtime collaboration and sync via CRDTs.',tags:['local-first','architecture','crdt']},
+      {id:2,type:'selection',typeLabel:'Selection',title:'Full-text search in the browser with SQLite WASM',domain:'fly.io',fav:'FLY',author:'Selected passage',savedAt:'5h ago',readingTime:'3 min',words:'640',status:'unread',summary:'A selected passage on running SQLite FTS5 client-side and shipping a prebuilt index over HTTP range requests.',tags:['search','sqlite','wasm']},
+      {id:3,type:'pdf',typeLabel:'PDF',title:'Designing Data-Intensive Applications — Ch. 3: Storage and Retrieval',domain:'oreilly.com',fav:'PDF',author:'Martin Kleppmann',savedAt:'Yesterday',readingTime:'41 min',words:'11,300',status:'read',summary:'LSM-trees vs B-trees, indexing strategies, and the trade-offs behind log-structured storage engines.',tags:['databases','indexing']},
+      {id:4,type:'video',typeLabel:'Video',title:'How Raycast keeps the UI at 120fps',domain:'youtube.com',fav:'▶',author:'Raycast',savedAt:'Yesterday',readingTime:'18 min',words:'—',status:'unread',summary:'Notes on render scheduling, native bridges, and keeping work off the main thread for instant interaction.',tags:['performance','dx']},
+      {id:5,type:'webpage',typeLabel:'Webpage',title:'用 CRDT 实现协作编辑的最小实现',domain:'juejin.cn',fav:'掘',author:'稀土掘金',savedAt:'2 days ago',readingTime:'12 min',words:'3,800',status:'archived',summary:'从零实现一个支持多人协作的文本 CRDT，并讨论合并冲突、因果序与离线编辑的处理方式。',tags:['crdt','协作']},
+      {id:6,type:'webpage',typeLabel:'Webpage',title:'The web’s most reused database is SQLite',domain:'antonz.org',fav:'AZ',author:'Anton Zhiyanov',savedAt:'3 days ago',readingTime:'9 min',words:'2,400',status:'read',summary:'Why SQLite ended up everywhere — phones, browsers, the edge — and what makes the file format so durable.',tags:['sqlite','databases']},
+      {id:7,type:'selection',typeLabel:'Selection',title:'Obsidian plugin API — vault events',domain:'docs.obsidian.md',fav:'OB',author:'Selected reference',savedAt:'4 days ago',readingTime:'2 min',words:'310',status:'unread',summary:'Selected reference on listening to create / modify / delete events emitted on the vault object.',tags:['obsidian','api']},
+      {id:8,type:'screenshot',typeLabel:'Screenshot',title:'Readwise Reader inline highlight toolbar',domain:'readwise.io',fav:'RW',author:'Captured screenshot',savedAt:'5 days ago',readingTime:'—',words:'—',status:'read',summary:'A captured screenshot of the inline highlight toolbar pattern, kept for reference on reading UX.',tags:['ux','reading']},
+    ];
+  }
+
+  typeTone(t){ return ({webpage:'var(--blue)',selection:'var(--copper)',pdf:'var(--copper)',video:'var(--olive)',screenshot:'var(--blue)'})[t]||'var(--text-3)'; }
+  statusDotStyle(st){
+    const base='width:8px;height:8px;border-radius:50%;flex:none;';
+    if(st==='unread') return base+'background:var(--copper);';
+    if(st==='read') return base+'background:transparent;border:1.5px solid var(--border-2);';
+    return base+'background:var(--border-2);';
+  }
+
+  hl(text, terms){
+    const parts=[]; let rest=text;
+    const re=new RegExp('('+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','ig');
+    let last=0, m;
+    while((m=re.exec(text))!==null){
+      if(m.index>last) parts.push({t:text.slice(last,m.index),m:false,notM:true});
+      parts.push({t:m[0],m:true,notM:false});
+      last=m.index+m[0].length;
+      if(m[0].length===0) re.lastIndex++;
+    }
+    if(last<text.length) parts.push({t:text.slice(last),m:false,notM:true});
+    return parts;
+  }
+
+  pick(id){ this.setState({selectedId:id}); }
+  go(k){ return ()=>this.setState({section:'app',screen:k}); }
+  sec(k){ return ()=>this.setState({section:k}); }
+
+  T(en,zh){ return this.state.lang==='zh'?zh:en; }
+
+  renderVals(){
+    const S=this.state, L=S.lang;
+    const t=this.T.bind(this);
+    const railBase='position:relative;width:42px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--text-3);cursor:pointer;transition:background .12s;';
+    const railActive='background:var(--surface-3);color:var(--text);box-shadow:inset 2.5px 0 0 var(--copper);';
+    const railStyle={}, railDot={};
+    ['desk','inbox','library','search','ask','tags','export','settings'].forEach(k=>{
+      railStyle[k]=railBase+(S.screen===k?railActive:'');
+      railDot[k]='position:absolute;top:5px;right:5px;min-width:15px;height:15px;padding:0 3px;border-radius:7px;background:var(--copper);color:#fff;font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;';
+    });
+
+    const tabBase='height:22px;padding:0 9px;border-radius:6px;border:none;background:transparent;color:var(--text-3);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:.12s;';
+    const tabActive='background:var(--surface);color:var(--text-2);box-shadow:var(--shadow-sm);';
+    const tabStyle={};
+    ['app','browser','onboarding','system'].forEach(k=>{ tabStyle[k]=tabBase+(S.section===k?tabActive:''); });
+
+    const sources=this.data().map(s=>({
+      ...s,
+      onSelect:()=>this.pick(s.id),
+      openReader:()=>this.setState({selectedId:s.id,section:'app',screen:'reader'}),
+      typeTone:this.typeTone(s.type),
+      typePill:'display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;font-family:\'JetBrains Mono\',monospace;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;',
+      statusDot:this.statusDotStyle(s.status),
+      cardStyle:'cursor:pointer;border-radius:12px;border:1px solid '+(s.id===S.selectedId?'var(--border-2)':'var(--border)')+';background:'+(s.id===S.selectedId?'var(--surface)':'var(--bg)')+';padding:15px 16px;transition:.12s;'+(s.id===S.selectedId?'box-shadow:var(--shadow-sm);':''),
+    }));
+    const selected=sources.find(s=>s.id===S.selectedId)||sources[0];
+
+    const hl=this.hl.bind(this);
+    const searchResults=[
+      {id:1,typeLabel:'Webpage',domain:'inkandswitch.com',savedAt:'2h ago',score:'98%',title:hl('Local-First Software: You Own Your Data, in Spite of the Cloud',['Local-First']),snippet:hl('The promise of local-first software is to reverse the cloud arrangement: your data lives on your own devices first, and the network becomes an enhancement rather than a dependency for sync.',['local-first','sync'])},
+      {id:6,typeLabel:'Webpage',domain:'antonz.org',savedAt:'3 days ago',score:'81%',title:hl('The web’s most reused database is SQLite',['SQLite']),snippet:hl('Because the database is a single file on the local disk, local-first apps can ship a prebuilt index and run search entirely offline before any sync round-trip.',['local-first','sync'])},
+      {id:3,typeLabel:'PDF',domain:'oreilly.com',savedAt:'Yesterday',score:'74%',title:hl('Designing Data-Intensive Applications — Storage and Retrieval',['Storage']),snippet:hl('Log-structured merge trees favour fast writes locally, which is exactly the access pattern a local-first index needs when capturing sources in bulk.',['local-first'])},
+      {id:5,typeLabel:'Webpage',domain:'juejin.cn',savedAt:'2 days ago',score:'69%',title:hl('用 CRDT 实现协作编辑的最小实现',['CRDT']),snippet:hl('CRDT 让多个副本在离线时各自编辑，再在 sync 时自动合并，这正是 local-first 协作的核心机制。',['local-first','sync'])},
+    ];
+
+    return {
+      theme:L && S.theme, // theme value
+      // chrome
+      themeIcon: S.theme==='dark'?'☾':'☀',
+      langLabel: L==='zh'?'中 / EN':'EN / 中',
+      toggleTheme:()=>this.setState({theme:S.theme==='dark'?'light':'dark'}),
+      toggleLang:()=>this.setState({lang:L==='zh'?'en':'zh'}),
+      sec:{app:this.sec('app'),browser:this.sec('browser'),onboarding:this.sec('onboarding'),system:this.sec('system')},
+      go:{desk:this.go('desk'),inbox:this.go('inbox'),library:this.go('library'),search:this.go('search'),ask:this.go('ask'),tags:this.go('tags'),export:this.go('export'),settings:this.go('settings'),reader:this.go('reader')},
+      tabStyle, railStyle, railDot,
+      // section flags
+      isApp:S.section==='app', isBrowser:S.section==='browser', isOnboarding:S.section==='onboarding', isSystem:S.section==='system',
+      popup:S.popup, popReady:S.popup==='ready', popSaving:S.popup==='saving', popSaved:S.popup==='saved',
+      savePopup:()=>this.savePopup(), resetPopup:()=>this.resetPopup(),
+      sideSaved:S.sideSaved, toggleSide:this.tog('sideSaved'),
+      obStep:S.obStep,
+      obNext:()=>this.setState({obStep:Math.min(6,S.obStep+1)}), obBack:()=>this.setState({obStep:Math.max(1,S.obStep-1)}),
+      obIs:{s1:S.obStep===1,s2:S.obStep===2,s3:S.obStep===3,s4:S.obStep===4,s5:S.obStep===5,s6:S.obStep===6},
+      obNotLast:S.obStep<6,
+      palette:[
+        {name:'Paper White',hex:'#F7F4EE'},{name:'Warm Canvas',hex:'#EFEAE1'},{name:'Ink Black',hex:'#171717'},
+        {name:'Slate Brown',hex:'#4A4037'},{name:'Archive Olive',hex:'#6F7B55'},{name:'Muted Copper',hex:'#B2754B'},{name:'Source Blue',hex:'#5F7182'},
+      ].map(c=>({...c,swatch:{height:'64px',borderRadius:'10px',border:'1px solid var(--border)',background:c.hex,marginBottom:'8px'}})),
+      paletteDark:[
+        {name:'Deep Ink',hex:'#11110F'},{name:'Charcoal',hex:'#1B1916'},{name:'Soft Graphite',hex:'#25231F'},
+        {name:'Warm Line',hex:'#3A352E'},{name:'Dust Olive',hex:'#9BA67A'},{name:'Muted Amber',hex:'#C7965B'},{name:'Pale Paper',hex:'#E7DED0'},
+      ].map(c=>({...c,swatch:{height:'64px',borderRadius:'10px',border:'1px solid var(--border)',background:c.hex,marginBottom:'8px'}})),
+      spacing:[4,8,12,16,24,32,48].map(n=>({label:String(n),bar:{width:n+'px',height:'24px',background:'var(--copper)',borderRadius:'3px',marginBottom:'7px'}})),
+      obDots:[1,2,3,4,5,6].map(n=>({n,style:'width:'+(n===S.obStep?'22px':'7px')+';height:7px;border-radius:4px;transition:.2s;background:'+(n===S.obStep?'var(--copper)':(n<S.obStep?'var(--text-3)':'var(--border-2)'))+';'})),
+      // screen flags
+      isDesk:S.screen==='desk', isLibrary:S.screen==='library', isInbox:S.screen==='inbox', isReader:S.screen==='reader', isSearch:S.screen==='search', isAsk:S.screen==='ask', isTags:S.screen==='tags', isExport:S.screen==='export', isSettings:S.screen==='settings',
+      sources, selected,
+      searchResults: searchResults.map(r=>({...r,onOpen:()=>this.setState({selectedId:r.id,section:'app',screen:'reader'})})),
+      query:S.query, searchMode:S.searchMode,
+      setKeyword:()=>this.setState({searchMode:'keyword'}), setSemantic:()=>this.setState({searchMode:'semantic'}),
+      modeKwStyle:'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:30px;border-radius:7px;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:.12s;'+(S.searchMode==='keyword'?'background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);':'background:transparent;color:var(--text-3);'),
+      modeSemStyle:'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:30px;border-radius:7px;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:.12s;'+(S.searchMode==='semantic'?'background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);':'background:transparent;color:var(--text-3);'),
+      related: sources.filter(s=>s.id!==S.selectedId).slice(0,3),
+      deskToday: sources.filter(s=>['2h ago','5h ago'].includes(s.savedAt)),
+      deskRecent: sources.slice(0,5),
+      continueSrc: sources[0],
+      deskTags: [{name:'local-first',count:128},{name:'sqlite',count:96},{name:'crdt',count:74},{name:'databases',count:61},{name:'search',count:58},{name:'协作',count:27}],
+      inbox:[
+        {id:101,state:'review',typeLabel:'Webpage',domain:'news.ycombinator.com',title:'Show HN: A local-first bookmarking tool that extracts full text',savedAt:'4 min ago',summary:'Discussion thread with 142 comments on extraction quality and offline indexing approaches.',tags:['hn','local-first']},
+        {id:102,state:'summarizing',typeLabel:'PDF',domain:'arxiv.org',title:'Conflict-free Replicated Data Types — a comprehensive survey',savedAt:'9 min ago'},
+        {id:103,state:'review',typeLabel:'Selection',domain:'developer.mozilla.org',title:'IndexedDB transactions and durability guarantees',savedAt:'22 min ago',summary:'Selected passage on the durability hint and when writes are flushed to disk.',tags:['indexeddb']},
+        {id:104,state:'failed',typeLabel:'Webpage',domain:'paywall.example.com',title:'Couldn’t extract readable content from this page',savedAt:'40 min ago'},
+        {id:105,state:'skeleton',typeLabel:'Video',domain:'youtube.com',title:'',savedAt:'1h ago'},
+      ].map(it=>({...it,isReview:it.state==='review',isSummarizing:it.state==='summarizing',isFailed:it.state==='failed',isSkeleton:it.state==='skeleton',hasSummary:!!it.summary})),
+      tagsList:[
+        {name:'local-first',count:128,kind:'manual'},{name:'sqlite',count:96,kind:'ai'},{name:'crdt',count:74,kind:'manual'},
+        {name:'databases',count:61,kind:'ai'},{name:'search',count:58,kind:'ai'},{name:'performance',count:43,kind:'manual'},
+        {name:'architecture',count:39,kind:'ai'},{name:'reading',count:31,kind:'manual'},{name:'协作',count:27,kind:'ai'},
+        {name:'wasm',count:22,kind:'ai'},{name:'obsidian',count:19,kind:'manual'},{name:'ux',count:17,kind:'ai'},
+        {name:'indexing',count:14,kind:'ai'},{name:'api',count:11,kind:'manual'},
+      ].map(tg=>({...tg,isAi:tg.kind==='ai',cloudStyle:'font-size:'+(13+Math.min(20,Math.round(tg.count/6)))+'px;font-weight:'+(tg.count>60?600:500)+';color:'+(tg.count>60?'var(--text)':'var(--text-2)')+';cursor:pointer;line-height:1;'})),
+      growing:[{name:'local-first',count:'+34'},{name:'crdt',count:'+18'},{name:'sqlite',count:'+12'}],
+      sw:(on)=>({width:'38px',height:'22px',borderRadius:'12px',padding:'2px',display:'flex',cursor:'pointer',transition:'.16s',background:on?'var(--olive)':'var(--border-2)',justifyContent:on?'flex-end':'flex-start'}),
+      swSum:S.sumOn, swTag:S.autoTagOn, swSem:S.semanticOn, swSend:S.sendOn,
+      togSum:this.tog('sumOn'), togTag:this.tog('autoTagOn'), togSem:this.tog('semanticOn'), togSend:this.tog('sendOn'),
+      swStyleSum:'width:38px;height:22px;border-radius:12px;padding:2px;display:flex;cursor:pointer;transition:.16s;'+(S.sumOn?'background:var(--olive);justify-content:flex-end;':'background:var(--border-2);justify-content:flex-start;'),
+      swStyleTag:'width:38px;height:22px;border-radius:12px;padding:2px;display:flex;cursor:pointer;transition:.16s;'+(S.autoTagOn?'background:var(--olive);justify-content:flex-end;':'background:var(--border-2);justify-content:flex-start;'),
+      swStyleSem:'width:38px;height:22px;border-radius:12px;padding:2px;display:flex;cursor:pointer;transition:.16s;'+(S.semanticOn?'background:var(--olive);justify-content:flex-end;':'background:var(--border-2);justify-content:flex-start;'),
+      swStyleSend:'width:38px;height:22px;border-radius:12px;padding:2px;display:flex;cursor:pointer;transition:.16s;'+(S.sendOn?'background:var(--olive);justify-content:flex-end;':'background:var(--border-2);justify-content:flex-start;'),
+      isLight:S.theme==='light', isDark:S.theme==='dark',
+      themeLightCard:'flex:1;border-radius:11px;padding:10px;cursor:pointer;border:1px solid '+(S.theme==='light'?'var(--copper)':'var(--border)')+';'+(S.theme==='light'?'box-shadow:0 0 0 3px var(--copper-tint);':''),
+      themeDarkCard:'flex:1;border-radius:11px;padding:10px;cursor:pointer;border:1px solid '+(S.theme==='dark'?'var(--copper)':'var(--border)')+';'+(S.theme==='dark'?'box-shadow:0 0 0 3px var(--copper-tint);':''),
+      langEnStyle:'font-size:12.5px;font-weight:500;padding:6px 14px;border-radius:7px;'+(L==='en'?'background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);':'color:var(--text-3);'),
+      langZhStyle:'font-size:12.5px;font-weight:500;padding:6px 14px;border-radius:7px;'+(L==='zh'?'background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);':'color:var(--text-3);'),
+      provOpenaiCard:'flex:1;display:flex;align-items:center;gap:11px;border-radius:11px;padding:13px 15px;cursor:pointer;border:1px solid '+(S.provider==='openai'?'var(--border-2)':'var(--border)')+';background:'+(S.provider==='openai'?'var(--surface)':'var(--bg)')+';',
+      provOllamaCard:'flex:1;display:flex;align-items:center;gap:11px;border-radius:11px;padding:13px 15px;cursor:pointer;border:1px solid '+(S.provider==='ollama'?'var(--border-2)':'var(--border)')+';background:'+(S.provider==='ollama'?'var(--surface)':'var(--bg)')+';',
+      provDotOpenai:'flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid '+(S.provider==='openai'?'var(--copper)':'var(--border-2)')+';'+(S.provider==='openai'?'box-shadow:inset 0 0 0 3px var(--copper);':''),
+      provDotOllama:'flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid '+(S.provider==='ollama'?'var(--copper)':'var(--border-2)')+';'+(S.provider==='ollama'?'box-shadow:inset 0 0 0 3px var(--copper);':''),
+      setLight:()=>this.setState({theme:'light'}), setDark:()=>this.setState({theme:'dark'}),
+      provOpenai:S.provider==='openai', provOllama:S.provider==='ollama',
+      setOpenai:()=>this.setState({provider:'openai'}), setOllama:()=>this.setState({provider:'ollama'}),
+      exportFmt:S.exportFmt,
+      setFmt:{markdown:()=>this.setState({exportFmt:'markdown'}),obsidian:()=>this.setState({exportFmt:'obsidian'}),json:()=>this.setState({exportFmt:'json'}),csv:()=>this.setState({exportFmt:'csv'})},
+      fmtStyle:Object.fromEntries(['markdown','obsidian','json','csv'].map(k=>[k,'cursor:pointer;display:flex;gap:13px;align-items:flex-start;padding:16px;border-radius:12px;transition:.12s;border:1px solid '+(S.exportFmt===k?'var(--border-2)':'var(--border)')+';background:'+(S.exportFmt===k?'var(--surface)':'var(--bg)')+';'+(S.exportFmt===k?'box-shadow:var(--shadow-sm);':'')])),
+      isMd:S.exportFmt==='markdown', isObs:S.exportFmt==='obsidian', isJson:S.exportFmt==='json', isCsv:S.exportFmt==='csv',
+      ...Object.fromEntries(['markdown','obsidian','json','csv'].map(k=>{
+        const on=S.exportFmt===k; const key='chk'+({markdown:'Md',obsidian:'Obs',json:'Json',csv:'Csv'})[k];
+        return [key, 'flex:none;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;'+(on?'background:var(--primary-bg);':'border:1.5px solid var(--border-2);')];
+      })),
+      askScope:S.askScope,
+      setScope:{all:()=>this.setState({askScope:'all'}),tag:()=>this.setState({askScope:'tag'}),sel:()=>this.setState({askScope:'sel'})},
+      scopeStyle:{
+        all:'display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid '+(S.askScope==='all'?'var(--border-2)':'var(--border)')+';background:'+(S.askScope==='all'?'var(--surface)':'transparent')+';color:'+(S.askScope==='all'?'var(--text)':'var(--text-3)')+';',
+        tag:'display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid '+(S.askScope==='tag'?'var(--border-2)':'var(--border)')+';background:'+(S.askScope==='tag'?'var(--surface)':'transparent')+';color:'+(S.askScope==='tag'?'var(--text)':'var(--text-3)')+';',
+        sel:'display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1px solid '+(S.askScope==='sel'?'var(--border-2)':'var(--border)')+';background:'+(S.askScope==='sel'?'var(--surface)':'transparent')+';color:'+(S.askScope==='sel'?'var(--text)':'var(--text-3)')+';',
+      },
+      evidence:[
+        {n:1,domain:'inkandswitch.com',title:'Local-First Software: You Own Your Data',quote:'CRDTs allow independent replicas to be merged automatically, without a server arbitrating every change.'},
+        {n:2,domain:'juejin.cn',title:'用 CRDT 实现协作编辑的最小实现',quote:'离线编辑各自记录操作，重连后按因果序合并，冲突可被确定性地解决。'},
+        {n:3,domain:'antonz.org',title:'The web’s most reused database is SQLite',quote:'A single-file database makes it trivial to snapshot and merge state across devices on reconnect.'},
+      ],
+      // labels
+      t:{
+        searchPlaceholder:t('Search your library…','搜索你的资料库…'),
+        globalSearch:t('Search or ask your sources…','搜索或向你的资料库提问…'),
+        sourceDesk:t('Source Desk','资料工作台'),
+        deskGreeting:t('Your source index','你的资料索引'),
+        deskSub:t('Save once. Find forever.','保存一次，随时找回。'),
+        dataLocal:t('Your data lives locally','数据保存在本地'),
+        dataLocalSub:t('Indexed on this device. Nothing leaves without you.','索引存于本设备，未经允许不会外传。'),
+        today:t('Saved today','今日保存'),
+        recent:t('Recently saved','最近保存'),
+        continueReading:t('Continue reading','继续阅读'),
+        needsReviewN:t('in your Inbox need review','条收件箱待处理'),
+        review:t('Review','去处理'),
+        recentSearchesL:t('Recent searches','最近搜索'),
+        topTags:t('Top tags','常用标签'),
+        quickSave:t('Save','保存'), quickAsk:t('Ask','提问'),
+        askDesk:t('Ask your saved sources','向你的资料库提问'),
+        connected:t('Local service connected','本地服务已连接'),
+        sourcesSaved:t('sources','条来源'),
+        library:t('Library','资料库'),
+        librarySub:t('Everything worth saving, indexed and findable.','值得保存的一切，皆已建立索引、随时可查。'),
+        allTypes:t('All types','全部类型'),
+        newest:t('Newest','最新'),
+        all:t('All','全部'), unread:t('Unread','未读'), archived:t('Archived','已归档'),
+        viewSnapshot:t('View snapshot','查看快照'),
+        words:t('Words','字数'), readTime:t('Read time','阅读时间'), status:t('Status','状态'),
+        aiSummary:t('AI Summary','AI 摘要'),
+        tags:t('Tags','标签'), addTag:t('Add tag','添加标签'),
+        openReader:t('Open in Reader','在阅读器中打开'),
+        openReaderShort:t('Reader','阅读器'),
+        askThis:t('Ask this','向它提问'),
+        openOriginal:t('Open original','打开原文'), copyMd:t('Copy Markdown','复制 Markdown'),
+        backToLibrary:t('Library','资料库'),
+        highlight:t('Highlight','高亮'), note:t('Note','备注'), export:t('Export','导出'),
+        summary:t('Summary','摘要'), keyPoints:t('Key points','要点'),
+        relatedSources:t('Related sources','相关资料'),
+        readingNow:t('Reading','正在阅读'),
+        original:t('Original','原文'),
+        search:t('Search','搜索'),
+        searchBig:t('Search everything you’ve saved','搜索你保存的全部资料'),
+        keyword:t('Keyword','关键词'), semantic:t('Semantic','语义'),
+        relevant:t('Relevant','相关度'), filters:t('Filters','过滤'),
+        recentSearches:t('Recent searches','最近搜索'),
+        results:t('results','条结果'), match:t('match','匹配'),
+        type:t('Type','类型'), domain:t('Domain','域名'), time:t('Time','时间'),
+        ask:t('Ask','提问'),
+        askPlaceholder:t('Ask your saved sources','向你的资料库提问'),
+        allLibrary:t('All Library','全部资料库'), currentTag:t('Current tag','当前标签'), selectedSources:t('Selected','已选来源'),
+        answer:t('Answer','回答'), confidence:t('Confidence','可信度'), high:t('High','高'),
+        basedOn:t('Based on 3 sources','基于 3 条来源'),
+        openSource:t('Open source','打开来源'),
+        copyCitations:t('Copy answer with citations','复制含引用的回答'),
+        sources_:t('Sources','来源'),
+        inbox:t('Inbox','收件箱'),
+        inboxSub:t('New saves waiting to be reviewed and filed.','新保存的资料，等待处理与归档。'),
+        needsReview:t('Needs review','待处理'),
+        selectAll:t('Select all','全选'),
+        archiveAll:t('Archive','批量归档'), del:t('Delete','删除'), quickTag:t('Tag','快速标签'),
+        generating:t('Generating summary…','正在生成摘要…'),
+        extractFailed:t('Extraction failed','正文提取失败'), retry:t('Retry','重试'),
+        extracting:t('Extracting content…','正在提取正文…'),
+        keepReading:t('Keep','保留'),
+        tagsSub:t('Manage how your library is organized.','管理资料库的组织方式。'),
+        allTags:t('All tags','全部标签'), aiTag:t('AI','自动'), manualTag:t('Manual','手动'),
+        recentlyGrowing:t('Recently growing','最近增长'),
+        merge:t('Merge','合并'), rename:t('Rename','重命名'),
+        exportSub:t('Your data, free to take anywhere.','你的数据，可自由迁移到任何地方。'),
+        chooseFormat:t('Choose a format','选择导出格式'),
+        scope:t('Scope','范围'), entireLibrary:t('Entire library','整个资料库'), items1248:t('1,248 items','1,248 条'),
+        preview:t('Preview','导出预览'), destination:t('Destination','本地路径'),
+        startExport:t('Export','开始导出'), exporting:t('Exporting…','正在导出…'),
+        markdown:t('Markdown','Markdown'), obsidian:t('Obsidian Vault','Obsidian 仓库'),
+        settings:t('Settings','设置'),
+        general:t('General','通用'), appearance:t('Appearance','外观'), language:t('Language','语言'),
+        dataLocation:t('Data location','数据目录'), aiProviders:t('AI providers','AI 服务'),
+        searchIndex:t('Search index','搜索索引'), privacy:t('Privacy','隐私'), about:t('About','关于'),
+        theme:t('Theme','主题'), light:t('Light','浅色'), dark:t('Dark','深色'), system:t('System','跟随系统'),
+        themeDesc:t('Choose how Sourdex looks.','选择 Sourdex 的外观。'),
+        langDesc:t('Interface language.','界面语言。'),
+        enableSummary:t('Enable AI summaries','启用 AI 摘要'), enableSummaryDesc:t('Generate a summary when a source is saved.','保存来源时自动生成摘要。'),
+        enableAutoTag:t('Enable auto-tagging','启用自动标签'), enableAutoTagDesc:t('Suggest tags from content automatically.','根据内容自动建议标签。'),
+        enableSemantic:t('Enable semantic search','启用语义搜索'), enableSemanticDesc:t('Build embeddings for meaning-based search.','建立向量索引以支持语义搜索。'),
+        allowSend:t('Allow sending content to AI','允许发送内容给 AI'), allowSendDesc:t('Off by default — your sources stay local.','默认关闭——你的资料保留在本地。'),
+        rebuildIndex:t('Rebuild index','重建索引'), backupDb:t('Backup database','备份数据库'), clearCache:t('Clear cache','清理缓存'), viewLogs:t('View local logs','查看本地日志'),
+        apiKey:t('API key','API 密钥'), endpoint:t('Endpoint','接口地址'), model:t('Model','模型'),
+        dataDir:t('Data directory','数据目录'), change:t('Change','更改'),
+        savePage:t('Save Page','保存网页'), saveSelection:t('Save Selection','保存选中文本'),
+        addNote:t('Add note','添加备注'), quickTags:t('Quick tags','快速标签'),
+        saveAs:t('Save as','保存为'), saving:t('Saving…','正在保存…'), savedToSourdex:t('Saved to Sourdex','已保存到 Sourdex'),
+        openInSourdex:t('Open in Sourdex','在 Sourdex 中打开'),
+        currentPage:t('Current page','当前网页'),
+        notSaved:t('Not saved','未保存'), saved:t('Saved','已保存'), updated:t('Updated','有更新'),
+        searchWithin:t('Search within Sourdex','在 Sourdex 中搜索'),
+        recentlySaved:t('Recently saved','最近保存'),
+        relatedHere:t('Related to this page','与本页相关'),
+        openFullApp:t('Open full app','打开完整应用'),
+        savePageMenu:t('Save page to Sourdex','保存网页到 Sourdex'),
+        saveSelectionMenu:t('Save selection to Sourdex','保存选中文本到 Sourdex'),
+        saveLinkMenu:t('Save link to Sourdex','保存链接到 Sourdex'),
+        searchSelMenu:t('Search selection in Sourdex','在 Sourdex 中搜索选中文本'),
+        addTag:t('Add tag','添加标签'), viewInSourdex:t('View in Sourdex','在 Sourdex 中查看'),
+        browserPopup:t('Browser Popup','浏览器插件'), sidePanel:t('Side Panel','侧边栏'), rightClick:t('Right-click','右键菜单'),
+        back:t('Back','上一步'), next:t('Continue','下一步'), getStarted:t('Get started','开始使用'),
+        obWelcomeT:t('Welcome to Sourdex','欢迎使用 Sourdex'),
+        obWelcomeS:t('Save once. Find forever.','保存一次，随时找回。'),
+        obWelcomeD:t('A local-first source index for everything worth saving — pages, selections, PDFs and videos.','本地优先的全网资料索引库，保存值得留存的一切——网页、片段、PDF 和视频。'),
+        obDataT:t('Choose where your data lives','选择数据存放位置'),
+        obDataD:t('Sourdex keeps everything on your machine. Pick a folder you can back up and sync yourself.','Sourdex 将一切保存在你的设备上。选择一个你可以自行备份与同步的目录。'),
+        obExtT:t('Install the browser extension','安装浏览器插件'),
+        obExtD:t('Save pages and selections from anywhere with one click or a right-click.','在任何网页上一键或右键保存网页与选中文本。'),
+        obAiT:t('Connect AI (optional)','连接 AI（可选）'),
+        obAiD:t('Add a provider for summaries and semantic search, or skip and stay fully offline.','添加一个 AI 服务以启用摘要和语义搜索，或跳过，保持完全离线。'),
+        obThemeT:t('Pick your theme','选择你的主题'),
+        obThemeD:t('You can change this any time in Settings.','你可以随时在设置中更改。'),
+        obDoneT:t('You’re all set','一切就绪'),
+        obDoneD:t('Start by saving your first page from the browser.','从浏览器保存第一个网页开始吧。'),
+        addProvider:t('Add provider','添加服务'), skipForNow:t('Skip for now','暂时跳过'),
+        installChrome:t('Add to Chrome','添加到 Chrome'), connectLater:t('I’ll do this later','稍后再说'),
+        chooseFolder:t('Choose folder','选择文件夹'),
+        designSystem:t('Design System','设计系统'),
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

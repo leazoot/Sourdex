@@ -1,0 +1,26 @@
+{
+  "name": "@sourdex/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "typecheck": "wxt prepare && tsc --noEmit -p tsconfig.json",
+    "postinstall": "wxt prepare"
+  },
+  "dependencies": {
+    "@sourdex/core": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@wxt-dev/module-react": "^1.1.3",
+    "tailwindcss": "^4.0.0",
+    "wxt": "^0.20.0"
+  }
+}

@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/*
+ * Sourdex design tokens (design/screenshots/11-design-system.png).
+ * Warm minimalism, source-aware. Light values here; dark overrides below.
+ * Names map to Tailwind utilities, e.g. bg-bg, text-text2, border-border.
+ */
+@theme {
+  --color-bg: #f7f3ea;
+  --color-surface: #fbf8f1;
+  --color-surface2: #f1ebdf;
+  --color-surface3: #e9e1d2;
+  --color-text: #1d1b18;
+  --color-text2: #544c42;
+  --color-text3: #857b6d;
+  --color-border: #ded4c4;
+  --color-border2: #cfc4b1;
+  --color-olive: #7d875f;
+  --color-copper: #ae7149;
+  --color-blue: #5f7182;
+  --color-clay: #b5694f;
+  --color-primary: #221e18;
+  --color-primaryfg: #f7f3ea;
+
+  --font-sans: "Inter", "Noto Sans SC", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Dark theme (design/screenshots/17-browser-dark.png). Follows system by default. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #11100e;
+    --color-surface: #1c1a16;
+    --color-surface2: #24211c;
+    --color-surface3: #2c2820;
+    --color-text: #e8ded0;
+    --color-text2: #b4aa98;
+    --color-text3: #897f70;
+    --color-border: #3a342b;
+    --color-border2: #473f34;
+    --color-olive: #a4b07b;
+    --color-copper: #c58a5a;
+    --color-blue: #92a2b2;
+    --color-clay: #c37861;
+    --color-primary: #e8ded0;
+    --color-primaryfg: #1a1815;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
