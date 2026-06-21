@@ -667,9 +667,9 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 ### STAGE-12：AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）
 
-- 阶段目标：LLMProvider/EmbeddingProvider 适配（OpenAI 兼容 / Ollama）、API Key 安全存储（OQ-T7：Keychain/加密）、Settings AI 配置页；AI 默认关闭。
-- 阶段状态：TODO
-- 是否需要人工确认：是（**OQ-T7** API Key 加密实现，进入本阶段前确认）
+- 阶段目标：LLMProvider/EmbeddingProvider 适配（OpenAI 兼容 / Ollama）、API Key 安全存储（OQ-T7 已定：本地加密文件 AES-256-GCM）、Settings AI 配置页；AI 默认关闭。
+- 阶段状态：TODO（OQ-T7 已确认，待用户下发 /goal 启动）
+- 是否需要人工确认：OQ-T7 已确认（2026-06-21）：本地加密文件
 
 ### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BACKLOG-001
 ### STAGE-14：AI 自动标签（规范化复用）— BACKLOG-002
@@ -728,7 +728,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-T3 i18n 库选型~~ ✅ 已定（2026-06-20）：i18next + react-i18next（EN/简中）（STAGE-07 落地）
 - ~~OQ-T4 测试框架~~ ✅ 已定：Vitest + Playwright（STAGE-01 落地）
 - ~~OQ-T5 Node/pnpm/Turborepo 版本基线~~ ✅ 已定：Node 22 / pnpm 10.30.3 / turbo ^2（STAGE-01 落地）
-- OQ-T7 API Key 加密存储实现 — 影响 v0.2（非当前 Batch）
+- ~~OQ-T7 API Key 加密存储实现~~ ✅ 已定（2026-06-21，用户决定）：**本地加密文件**（数据目录 `secrets.enc`，AES-256-GCM 加密，主密钥 scrypt 派生，仅依赖 `node:crypto`；零原生依赖、跨平台一致、临时目录即可测）。系统 Keychain 留作后续增强。影响 STAGE-12。
 - ~~OQ-D1 设计稿页面命名与 PRD/IA 映射~~ ✅ 已定（2026-06-20）：source-desk→Inbox、library→Library、reader→Reader、search→Search、settings→Settings（STAGE-07 落地）
 - ~~OQ-D2 v0.2 页面（ask/tags/export）v0.1 是否预留入口~~ ✅ 已定（2026-06-20）：rail 渲染但禁用占位（"Coming in v0.2"），不实现功能（STAGE-07 落地）
 

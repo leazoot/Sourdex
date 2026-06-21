@@ -4,7 +4,8 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-11（抓取质量硬化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（TASK-051/052/053）：占位噪声预清理 + Discourse 适配器 + 扩展抓取前滚动加载；test 165 全绿。按 /goal 停在 STAGE-11，下一阶段 STAGE-12（AI 基础设施）需用户确认 OQ-T7。
+**BATCH-02（v0.2）进行中 — STAGE-11（抓取质量硬化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（TASK-051/052/053）：占位噪声预清理 + Discourse 适配器 + 扩展抓取前滚动加载；test 165 全绿。按 /goal 停在 STAGE-11。
+- **OQ-T7 已确认（2026-06-21，用户决定）：API Key 安全存储 = 本地加密文件**（数据目录 `secrets.enc`，AES-256-GCM + scrypt 派生主密钥，仅依赖 `node:crypto`；零原生依赖、跨平台一致、临时目录即可测）；系统 Keychain 留作后续增强。已同步 08_TASKS / 04_TECH_STACK / security 规则。STAGE-12（AI 基础设施）阻塞已解除，待用户下发 /goal 启动。
 - 今日另提交：UI/bug 修复（Select 箭头间距、设置外观预览、capture 32MB 体积上限+413）已推送 `e6c5f97`。
 
 ### STAGE-11 进度记录（2026-06-21）

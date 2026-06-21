@@ -55,5 +55,5 @@
 
 ## Open Questions
 
-- OQ-A1 ⛔ 插件↔服务握手/鉴权机制（token 生成/存储/交换 + 首次连接确认）— STAGE-06 前必须确认。
-- OQ-T7 API Key 加密存储具体实现（Keychain 库 vs 加密文件）— v0.2 前确认。
+- ~~OQ-A1 ⛔ 插件↔服务握手/鉴权机制~~ ✅ 已定（STAGE-06）：配对码换取 Bearer token。
+- ~~OQ-T7 API Key 加密存储具体实现~~ ✅ 已定（2026-06-21）：本地加密文件（`secrets.enc`，AES-256-GCM + scrypt 派生主密钥，仅 `node:crypto`）；Keychain 留作后续增强。

@@ -108,4 +108,4 @@
 - OQ-T4：测试框架是否采用 Vitest + Playwright 默认组合？需确认（影响 09_TEST_PLAN 命令）。
 - OQ-T5（=OQ-08）：Node / pnpm / Turborepo 版本基线锁定。STAGE-01 启动时确认。
 - OQ-T6（=OQ-04）：License（AGPL-3.0 vs Apache-2.0）。**已解决（STAGE-10，用户决定）：Apache-2.0。**
-- OQ-T7：API Key 加密存储具体实现（系统 Keychain 库 vs 本地加密文件方案）。v0.2 AI 启用前确认（PRD 17.2）。
+- OQ-T7：API Key 加密存储具体实现。**已解决（2026-06-21，用户决定）：本地加密文件**（`secrets.enc`，AES-256-GCM，scrypt 派生主密钥，仅 `node:crypto`）；系统 Keychain 留作后续增强（PRD 17.2）。

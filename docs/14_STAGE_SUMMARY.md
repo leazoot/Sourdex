@@ -71,8 +71,8 @@
 - 验证结果（本地）：typecheck ✅ / lint ✅ / format:check ✅ / test ✅(165，+13) / build ✅(8)；真实 linux.do 原文实测。
 - 重要决策：站点适配器作为 WebpageExtractStrategy 内的兜底优先路径（收编 BACKLOG-016）；自动滚动默认 6s 预算、静态页 ~0.5s 退出以兼顾「保存优先」；注入脚本无法 import，故滚动决策抽成可测纯逻辑 + 注入端镜像。
 - 遗留问题：滚动加载在超长帖仍只取时间预算内加载的楼层（非全量）；Discourse 适配器 byline 取首个已加载楼层作者（非楼主，因楼主常未加载）；无 GUI 不能目视核对插件内滚动行为（以单测 + 真实原文提取为准）。
-- 下一阶段目标：STAGE-12 AI 基础设施（Provider 适配 + API Key 安全存储 OQ-T7 + 设置）。
-- 下一步建议：⛔ 进入 STAGE-12 前确认 **OQ-T7**（API Key 加密存储实现：系统 Keychain vs 加密文件）；AI 默认关闭、发送前明示数据外发。
+- 下一阶段目标：STAGE-12 AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）。
+- 下一步建议：**OQ-T7 已确认（2026-06-21）：本地加密文件**（`secrets.enc`，AES-256-GCM + scrypt 主密钥，仅 `node:crypto`；Keychain 留作后续增强），STAGE-12 阻塞已解除；实现时 AI 默认关闭、发送前明示数据外发。待用户下发 /goal 启动。
 
 ### STAGE-10：v0.1 发布准备（文档 / License / E2E / 打包 / 发布）
 
