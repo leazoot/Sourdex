@@ -12,7 +12,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - **Batch ID**: BATCH-02
 - **Batch Name**: Sourdex v0.2 — 抓取质量硬化 + AI 价值层（摘要 / 标签 / 语义检索 / Ask）
 - **Batch Goal**: 先把「存进来的东西干净完整」（动态页/Discourse/占位噪声），再叠加 AI 价值层让工具作用显性化。抓取硬化排在 AI 之前。
-- **Batch Status**: IN_PROGRESS（STAGE-11~19 DONE；剩 STAGE-20）
+- **Batch Status**: DONE（STAGE-11~20 全部 DONE；v0.2.0 发布）
 - **Batch Acceptance Criteria**: 动态/论坛页提取干净完整（无占位 byline 噪声）；AI 摘要/标签/语义检索/Ask 可用且默认关闭、可溯源；API Key 安全存储；CI/核心测试通过。
 - 计划见下方「## BATCH-02 Stages」。
 
@@ -884,6 +884,32 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 与设计稿冲突则 Decision Required
 
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）
+
+- 阶段目标：收官 BATCH-02（v0.2）——全量回归（typecheck/lint/format/test/build + E2E 关键链路）、发布文档更新（README/CHANGELOG/RELEASE_NOTES/ROADMAP 反映 v0.2 的 AI 摘要/标签/语义/Ask/高亮备注/Tags/Export）、仓库治理（BACKLOG-017：issue/PR 模板 + CODEOWNERS）、版本号 bump 与 v0.2.0 发布（tag → release.yml）。PRD §20 / §21–22 / §28。
+- 阶段状态：DONE（2026-06-21，TASK-083~086 全部 DONE）
+- 口径：不改 PRD §12 数据模型；不新增运行期依赖；发布沿用既有 `release.yml`（`v*` tag 触发，`RELEASE_NOTES.md` 作 notes）+ leazoot 身份与 `github-leazoot` 远程；E2E 按 09_TEST_PLAN §5（先 build + playwright install chromium，再 `pnpm test:e2e`）。
+- 是否需要人工确认：发布为对外不可逆动作——沿用 v0.1 已建立的 leazoot/Sourdex 授权与发布机制执行；如失败或缺凭据则记录并交维护者。
+- 阶段验收标准：① 全量检查全绿 + E2E 关键链路通过；② README/CHANGELOG/RELEASE_NOTES/ROADMAP 反映 v0.2 功能与状态；③ BACKLOG-017 治理文件齐备（bug/feature issue 模板、PR 模板、CODEOWNERS）；④ 版本 bump 到 0.2.0；⑤ v0.2.0 tag 推送触发 release.yml 成功发布（或在缺凭据时给出可执行发布清单）。
+
+#### TASK-083：v0.2 回归与全量检查（含 E2E）— STATUS: DONE
+- 运行 typecheck/lint/format/test/build 全绿；运行 E2E 关键链路（save→inbox→search→reader→export）确认核心闭环未被 v0.2 改动破坏。
+- 验收：六项检查 + E2E 通过并记录结果；既有 provider-config 同毫秒 flake 如复现需标注非阻塞。
+- 是否需要人工确认：否
+
+#### TASK-084：发布文档更新（README/CHANGELOG/RELEASE_NOTES/ROADMAP）— STATUS: DONE
+- README（EN+中）功能区补 v0.2（AI 摘要/自动标签/语义检索/Ask/高亮备注/Tags/Export），版本提示更新；ROADMAP 勾选 v0.2 完成项；CHANGELOG 把 [0.1.0] 标记已发布日期 + 新增 [0.2.0] 条目；RELEASE_NOTES 改写为 v0.2.0（release.yml 用作 notes-file）。
+- 验收：四份文档反映 v0.2；format/lint 通过；保持 EN/中一致。
+- 是否需要人工确认：否
+
+#### TASK-085：仓库治理 BACKLOG-017（issue/PR 模板 + CODEOWNERS）— STATUS: DONE
+- 新增 `.github/ISSUE_TEMPLATE/bug_report.md` + `feature_request.md`（+ `config.yml`）、`.github/PULL_REQUEST_TEMPLATE.md`、`.github/CODEOWNERS`；conventional commits 与 CI 门槛已在 CONTRIBUTING/ci.yml（changeset 以 RELEASE_NOTES/CHANGELOG 替代，记说明）。
+- 验收：模板文件齐备且格式正确；PR 模板含检查清单（conventional commit、检查通过）。
+- 是否需要人工确认：否
+
+#### TASK-086：版本 bump + v0.2.0 发布 — STATUS: DONE
+- 根 + apps/web + apps/extension 版本 bump 到 0.2.0；提交全部 STAGE-20 改动；打 `v0.2.0` tag 并推送触发 `release.yml`（构建扩展 zip + web 包，建 GitHub Release）。
+- 验收：tag 推送后 release.yml 成功、Release 发布并附产物；若环境缺凭据则给出可执行发布清单并标注。
+- 是否需要人工确认：发布为对外动作，沿用既有授权执行
 
 ---
 

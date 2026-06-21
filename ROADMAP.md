@@ -2,7 +2,7 @@
 
 > 路线图随实际进度演进；权威范围以 [docs/PRD.md](docs/PRD.md) 为准，任务细节见 [docs/08_TASKS.md](docs/08_TASKS.md)。
 
-## v0.1 — MVP（当前）
+## v0.1 — MVP
 
 **目标：闭合本地优先的「保存 → 提取 → 入库/索引 → 搜索 → 阅读 → 导出」核心闭环。**
 
@@ -13,18 +13,19 @@
 - [x] Web UI：Inbox / Library / Reader / Search / Settings（浅 + 深主题，i18n）
 - [x] Markdown / Obsidian 导出
 - [x] 单元 / 集成 / E2E 测试，CI
-- [ ] 发布文档与产物打包（进行中）
+- [x] 发布文档与产物打包（v0.1.0 已发布）
 
-## v0.2 — AI 增强（可选、默认关闭）
+## v0.2 — AI 增强（可选、默认关闭）（当前）
 
-- AI 摘要（OpenAI 兼容 / Ollama，后台执行，可关闭）
-- AI 自动标签（规范化复用已有标签）
-- 语义检索（embedding + sqlite-vec，chunk 分块）
-- Ask 页面（RAG，强制引用，证据不足时说明）
-- 高亮与备注（annotations，导出含高亮）
-- Tags / Export 页面完整化
-- 混合搜索排序（keyword + semantic + tag + recency）
-- API Key 安全存储（系统 Keychain / 加密文件）
+- [x] 抓取质量硬化（动态页滚动加载、Discourse 适配、占位噪声过滤）
+- [x] AI 基础设施（Provider 适配 OpenAI 兼容 / Ollama、API Key 加密文件存储、设置页）
+- [x] AI 摘要（后台执行，可关闭）
+- [x] AI 自动标签（规范化、复用已有标签）
+- [x] 语义检索（embedding + chunk 分块，brute-force 余弦）
+- [x] Ask 页面（RAG，强制引用，证据不足时说明）
+- [x] 高亮与备注（annotations，备注可搜，导出含高亮）
+- [x] Tags / Export 页面完整化（导出补齐 JSON / CSV + 范围）
+- [x] 混合搜索排序（keyword + semantic + tag + recency + user_signal）
 
 ## v0.3+ — 扩展
 

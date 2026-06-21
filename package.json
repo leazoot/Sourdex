@@ -1,6 +1,6 @@
 {
   "name": "sourdex",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Sourdex — local-first index for everything you save on the web. Save once. Find forever.",
   "license": "SEE LICENSE IN LICENSE",

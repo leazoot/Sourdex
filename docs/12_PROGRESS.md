@@ -4,7 +4,22 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-19（Tags/Export 页面完整化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~18 = DONE（抓取硬化 / AI 基础设施 / 摘要 / 自动标签 / 语义检索 / 混合搜索 / Ask / 高亮备注）。STAGE-19 = DONE（TASK-079~082）：标签管理后端（`TagRepository` listAllWithCounts/rename/mergeInto/deleteTag + `TagService` + REST `/api/tags`，tags 在 FTS 列、变更后经共享 `reindexItem` 重建受影响 item 索引，AnnotationService 复用）；导出补齐 JSON/CSV + 范围解析（all/status/tag）；Tags 页（标签云 + Recently added + All/AI/Manual + 行内重命名/合并/删除）与 Export 页（四格式 + 范围 + 预览 + 目标路径 + 导出）按设计 06/07；Rail 将 Tags/Export 移入主导航。**test 321/322 全绿**（1 = STAGE-16 已记录的 provider-config 同毫秒计时 flake，非本阶段）。按 /goal 停在 STAGE-19。
+**BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
+
+### STAGE-20 进度记录（2026-06-21，v0.2 测试/文档/发布 DONE）
+
+#### TASK-083（v0.2 回归与全量检查含 E2E）— DONE
+- typecheck 全部 ✅；eslint 0；prettier --check 全绿；**vitest 322/322（67 文件）**；`pnpm build` 9/9 ✅；**E2E 关键链路 `pnpm test:e2e` 1 passed**（save→inbox→search→reader→export，含 Reader 的 annotations/providers 调用，核心闭环未被 v0.2 改动破坏）。provider-config 同毫秒 flake 本轮未触发（非确定性、非阻塞）。
+
+#### TASK-084（发布文档更新）— DONE
+- README（EN+中）功能区补 v0.2（高亮备注 / Tags 管理 / 四格式导出 / 可选 AI：摘要·自动标签·语义·Ask），版本提示 v0.1→v0.2；ROADMAP v0.1 全勾、v0.2 各项勾选完成（标「当前」）；CHANGELOG 把 [0.1.0] 标记 2026-06-21 已发布 + 新增 [0.2.0] 条目与链接；RELEASE_NOTES 改写为 v0.2.0（release.yml 的 notes-file）。
+
+#### TASK-085（仓库治理 BACKLOG-017）— DONE
+- `.github/ISSUE_TEMPLATE/{bug_report.md,feature_request.md,config.yml}`（config 关闭空白 issue + 安全报告引导 SECURITY）、`.github/PULL_REQUEST_TEMPLATE.md`（conventional commit + 检查清单 + 无密钥 + 数据模型守则）、`.github/CODEOWNERS`（`* @leazoot`）。conventional commits 与 CI 门槛已在 CONTRIBUTING/ci.yml；changeset 以 RELEASE_NOTES/CHANGELOG 替代（记说明）。
+
+#### TASK-086（版本 bump + v0.2.0 发布）— DONE
+- root / apps/web / apps/extension 版本 0.0.0→0.2.0；`pnpm install --frozen-lockfile` 仍有效；本地试跑 `scripts/package-release.sh` 产出 `sourdexextension-0.2.0-chrome.zip` + `sourdex-web.tar.gz`（dist-release 已 gitignore，CI 全新检出仅产 0.2.0）。提交全部 STAGE-20 改动 + 打 `v0.2.0` tag 推送触发 `release.yml`。
+- 收尾：BATCH-02（STAGE-11~20）全部完成；不动 PRD §12 数据模型、无新增运行期依赖。
 
 ### STAGE-19 进度记录（2026-06-21，Tags/Export 页面完整化 DONE）
 

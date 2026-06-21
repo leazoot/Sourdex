@@ -58,6 +58,24 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-20：v0.2 测试/文档/发布 + 仓库治理 — BATCH-02（收官）
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：收官 BATCH-02（v0.2）——全量回归 + E2E、发布文档更新、仓库治理（BACKLOG-017）、版本 bump 与 v0.2.0 发布（PRD §20 / §21–22 / §28）。
+- 已完成内容：
+  - TASK-083：全量回归——typecheck/lint/format ✅、**vitest 322/322**、build 9/9 ✅、**E2E 关键链路 1 passed**（save→inbox→search→reader→export）。
+  - TASK-084：README（EN+中）补 v0.2 功能 + 版本号；ROADMAP v0.1 全勾、v0.2 勾选完成；CHANGELOG [0.1.0] 标记已发布 + 新增 [0.2.0]；RELEASE_NOTES 改写 v0.2.0。
+  - TASK-085：`.github/ISSUE_TEMPLATE/{bug_report,feature_request}.md + config.yml`、`PULL_REQUEST_TEMPLATE.md`、`CODEOWNERS`。
+  - TASK-086：版本 0.0.0→0.2.0（root/web/extension）；frozen-lockfile 有效；本地打包脚本产出 0.2.0 扩展 zip + web 包；打 `v0.2.0` tag 推送触发 release.yml。
+- 关键产出：v0.2.0 发布（AI 价值层可选默认关闭 + 抓取硬化 + 高亮备注 + Tags/Export 完整化）；仓库治理文件齐备；发布文档反映 v0.2。
+- 验证结果（本地）：typecheck/lint/format ✅ / **test 322/322** / build 9/9 ✅ / **E2E 1 passed** / 打包脚本产出齐全。**无 schema/迁移改动、无新增运行期依赖**。
+- 重要决策：版本 bump 到 0.2.0（用户面产物 root/web/extension）；changeset 以 RELEASE_NOTES + CHANGELOG 替代；发布沿用 v0.1 既有 leazoot/Sourdex 授权 + `release.yml`（`v*` tag 触发，RELEASE_NOTES 作 notes）。
+- 遗留问题：provider-config 同毫秒计时 flake（非确定性、非阻塞，跨阶段既有）；OQ-A9（sqlite-vec ANN）/OQ-A11（annotations 专用 FTS 列 + 正文内联高亮）/OQ-A12（标签增长时间序列、导出目标路径选择）均为 v0.3+ 优化项。
+- **BATCH-02（STAGE-11~20）收官**：抓取硬化 + AI 价值层（摘要/标签/语义/Ask）+ 高亮备注 + Tags/Export 完整化 + v0.2.0 发布。
+- 下一阶段目标：按 Batch Planning Protocol 规划 BATCH-03（≤10 阶段，候选见 Future Backlog：PDF/视频/OCR、备份/书签导入、去重/死链、WebDAV/S3 同步、第三方导入、Tauri 桌面端等）。
+- 下一步建议：**不自动进入下一 Batch**；待用户下发 /goal 后，基于实际进度重读文档并输出 BATCH-03 阶段计划等待确认。**当前按 /goal 停在 STAGE-20。**
+
 ### STAGE-19：Tags 页面 / Export 页面完整化 — BATCH-02
 
 - 阶段状态：DONE

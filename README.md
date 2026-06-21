@@ -15,7 +15,7 @@ search index. Later you can search, read, or export what you saved.
 
 Everything stays on your own machine. Nothing is uploaded.
 
-> This is **v0.1**, a developer preview — you run it from source.
+> This is **v0.2**, a developer preview — you run it from source.
 
 ### What it does
 
@@ -24,11 +24,14 @@ Everything stays on your own machine. Nothing is uploaded.
 - Store everything in a local SQLite database (data dir is configurable).
 - Full-text search across your library (Chinese and English).
 - Read clips in a built-in reader; browse them in Inbox and Library.
-- Export to Markdown — a single file, or a folder laid out for Obsidian.
+- Highlight passages and attach notes; notes are searchable and travel with exports.
+- Manage tags on a dedicated page — rename, merge, delete.
+- Export to Markdown, Obsidian, JSON or CSV — a single item, your whole library, or a scope.
 
-AI features (summaries, auto-tags, semantic search, Q&A) are planned for v0.2.
-They are optional and off by default; saving, reading, search and export all
-work without them.
+**Optional AI (off by default)** — only after you configure a provider (OpenAI-compatible
+or Ollama): background summaries and auto-tags, semantic search, and an **Ask** page that
+answers from your saved sources with citations. Saving, reading, search and export all work
+fully without AI, and nothing is sent anywhere until you enable it.
 
 ### Requirements
 
@@ -88,7 +91,7 @@ Sourdex 会提取正文、转成 Markdown、留存原始快照，并写入本地
 
 所有数据都在你自己的电脑上，不会上传。
 
-> 这是 **v0.1** 开发者预览版，从源码运行。
+> 这是 **v0.2** 开发者预览版，从源码运行。
 
 ### 功能
 
@@ -97,10 +100,13 @@ Sourdex 会提取正文、转成 Markdown、留存原始快照，并写入本地
 - 存入本地 SQLite 数据库（数据目录可配置）。
 - 全文搜索（支持中英文）。
 - 内置阅读器；用 Inbox 和 Library 浏览。
-- 导出 Markdown——单个文件，或按 Obsidian 结构组织的文件夹。
+- 高亮正文、添加备注；备注可被搜索，并随导出一并带出。
+- 专门的标签页管理标签——重命名、合并、删除。
+- 导出 Markdown / Obsidian / JSON / CSV——单条、整个库，或按范围。
 
-AI 功能（摘要、自动标签、语义检索、问答）计划在 v0.2 提供，默认关闭；不开 AI
-时，保存、阅读、搜索、导出都正常可用。
+**可选 AI（默认关闭）**——仅在你配置 Provider（OpenAI 兼容或 Ollama）后启用：后台摘要与
+自动标签、语义检索，以及基于你保存资料、带引用作答的 **Ask** 页面。不开 AI 时保存、阅读、
+搜索、导出全部正常可用；在你启用前不会向任何外部发送内容。
 
 ### 环境要求
 
