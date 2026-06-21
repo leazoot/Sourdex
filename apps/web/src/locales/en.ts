@@ -183,6 +183,11 @@ export const en = {
     aiProviders: "AI providers",
     aiProvidersDesc:
       "Add an AI provider to enable summaries and semantic search, or skip and stay fully offline. AI stays off until you configure and enable it.",
+    aiChatRole: "Chat model (in use)",
+    aiEmbeddingRole: "Embedding model (in use)",
+    aiRoleNone: "Not configured",
+    aiRoleHint:
+      "Chat and embedding are picked independently — set a chat model on one provider and an embedding model on another if your gateway has no embeddings.",
     aiAddProvider: "Add provider",
     aiNoProviders: "No providers yet. Sourdex works fully offline without one.",
     aiProviderName: "Name",

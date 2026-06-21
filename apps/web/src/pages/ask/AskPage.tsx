@@ -20,7 +20,8 @@ export function AskPage() {
   const [copied, setCopied] = useState(false);
 
   const providerList = Array.isArray(providers.data) ? providers.data : [];
-  const aiOn = providerList.some((p) => p.enabled);
+  // Ask needs a chat-capable provider (chat & embedding are configured separately).
+  const aiOn = providerList.some((p) => p.enabled && Boolean(p.chatModel));
 
   const submit = () => {
     const q = question.trim();

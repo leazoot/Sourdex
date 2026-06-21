@@ -32,6 +32,7 @@ async function enableProvider(): Promise<void> {
       name: "P",
       type: "openai-compatible",
       baseUrl: "https://api.example.com/v1",
+      chatModel: "gpt-test",
       enabled: true,
       apiKey: "sk-x",
     },

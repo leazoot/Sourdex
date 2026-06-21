@@ -185,6 +185,11 @@ export const zh: Resources = {
     aiProviders: "AI 服务",
     aiProvidersDesc:
       "添加一个 AI 服务以启用摘要和语义搜索，或跳过、保持完全离线。在你配置并启用前，AI 始终关闭。",
+    aiChatRole: "对话模型（生效中）",
+    aiEmbeddingRole: "嵌入模型（生效中）",
+    aiRoleNone: "未配置",
+    aiRoleHint:
+      "对话与嵌入分别独立选取——若你的中转站没有嵌入，可在一个服务上填对话模型、在另一个服务上填嵌入模型。",
     aiAddProvider: "添加服务",
     aiNoProviders: "尚未配置服务。没有它 Sourdex 也能完全离线使用。",
     aiProviderName: "名称",

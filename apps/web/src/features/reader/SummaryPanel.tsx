@@ -14,8 +14,9 @@ export function SummaryPanel({ item, summary }: { item: Item; summary: SummaryOu
   const providers = useProviders();
   const summarize = useSummarize(item.id);
 
+  // Summaries need a chat-capable provider (chat & embedding are configured separately).
   const hasEnabledProvider = (Array.isArray(providers.data) ? providers.data : []).some(
-    (p) => p.enabled,
+    (p) => p.enabled && Boolean(p.chatModel),
   );
   const pending = item.aiStatus === "pending" || summarize.isPending;
 

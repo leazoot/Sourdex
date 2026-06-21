@@ -91,7 +91,7 @@ describe("SummaryPanel", () => {
         name: "P",
         type: "ollama",
         baseUrl: null,
-        chatModel: null,
+        chatModel: "llama3",
         embeddingModel: null,
         enabled: true,
         hasApiKey: false,

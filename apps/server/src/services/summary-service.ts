@@ -45,9 +45,17 @@ export interface SummaryServiceDeps {
 export class SummaryService {
   constructor(private readonly deps: SummaryServiceDeps) {}
 
-  /** The first enabled provider config, or null when AI is effectively off. */
+  /**
+   * The active chat provider: the first enabled provider that has a chat model. Chat and
+   * embedding are selected independently (embedding needs `embedding_model`), so you can run
+   * chat on one provider and embeddings on another regardless of order.
+   */
   enabledProvider(): ProviderConfig | null {
-    return this.deps.providerConfigRepo.list().find((c) => c.enabled) ?? null;
+    return (
+      this.deps.providerConfigRepo
+        .list()
+        .find((c) => c.enabled && (c.chatModel ?? "").trim().length > 0) ?? null
+    );
   }
 
   async summarizeItem(itemId: string): Promise<void> {

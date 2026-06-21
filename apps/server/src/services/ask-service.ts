@@ -61,9 +61,13 @@ export interface AskServiceDeps {
 export class AskService {
   constructor(private readonly deps: AskServiceDeps) {}
 
-  /** First enabled provider (used for chat), or null when AI is off. */
+  /** The active chat provider: first enabled provider with a chat model (or null when off). */
   enabledProvider(): ProviderConfig | null {
-    return this.deps.providerConfigRepo.list().find((c) => c.enabled) ?? null;
+    return (
+      this.deps.providerConfigRepo
+        .list()
+        .find((c) => c.enabled && (c.chatModel ?? "").trim().length > 0) ?? null
+    );
   }
 
   async ask(question: string, scope: AskScope = {}): Promise<AskResult> {

@@ -6,6 +6,14 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### 维护性改动（2026-06-21，v0.2 发布后）：AI 对话/嵌入分开选择
+
+- 用户反馈「AI 嵌入与大模型应分开配置」（见 memory `ai-provider-split-config`）。采用**方案 A（不改 PRD §12 数据模型）**：
+  - 后端：`SummaryService`/`AskService` 的 `enabledProvider()` 由「第一个 enabled」改为「第一个 enabled 且**有 chat_model**」（`EmbeddingService` 原本即要求 embedding_model）。→ chat 与 embedding 各按能力独立选取、与创建顺序无关；并修掉「chat 误选嵌入-only provider 致模型名变 type 字符串」的潜在 bug。
+  - 前端：Reader SummaryPanel / Ask 的可用门控收紧为「存在 enabled 且有 chatModel 的 provider」；Settings 的 AI 区新增「对话模型(生效中)/嵌入模型(生效中)」角色摘要 + 说明（中转站无嵌入时，可一个 provider 填对话模型、另一个填嵌入模型）。
+  - 测试：summary-service 新增分离选择单测（忽略嵌入-only、与顺序无关）；对齐受影响 fixture（chat fixture 补 chatModel）。**全量 test 323/323、typecheck/lint/format/build 全绿**。
+  - 仍待评估：方案 B（显式「活动对话/嵌入 provider」选择，需数据模型变更）记入 BATCH-03 候选。
+
 ### STAGE-20 进度记录（2026-06-21，v0.2 测试/文档/发布 DONE）
 
 #### TASK-083（v0.2 回归与全量检查含 E2E）— DONE

@@ -75,6 +75,7 @@ async function seed(opts: { enabled?: boolean } = {}) {
       name: "P",
       type: "openai-compatible",
       baseUrl: "https://x",
+      chatModel: "gpt-test",
       enabled: true,
     });
     await secrets.set(cfg.id, "sk-key");
@@ -159,5 +160,26 @@ describe("SummaryService", () => {
     expect(updated?.aiStatus).toBe("none");
     expect(updated?.summary).toBeNull();
     expect(aiOutputRepo.findLatestByItem(item.id, "summary")).toBeNull();
+  });
+
+  it("selects the chat-capable provider, ignoring an embedding-only one regardless of order", () => {
+    // Embedding-only provider created first; chat provider second.
+    providerRepo.create({
+      name: "Embeds",
+      type: "openai-compatible",
+      baseUrl: "https://e",
+      embeddingModel: "text-embedding-3-small",
+      enabled: true,
+    });
+    const chat = providerRepo.create({
+      name: "Chat",
+      type: "openai-compatible",
+      baseUrl: "https://c",
+      chatModel: "gpt-test",
+      enabled: true,
+    });
+    const svc = service(async () => ({ content: summaryJson, model: "m" }));
+    // Chat role resolves to the provider that actually has a chat model.
+    expect(svc.enabledProvider()?.id).toBe(chat.id);
   });
 });
