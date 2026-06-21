@@ -576,7 +576,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 ### STAGE-10：v0.1 发布准备
 
 - 阶段目标：完成文档、打包、E2E、发布物，达成 PRD 28 验收清单。
-- 阶段状态：PARTIAL（TASK-047/048/049 ✅；TASK-050 验收清单核对 ✅；GitHub release 由**用户决定「暂不发布」**而延后——非阻塞，发布物与流程已 turnkey）
+- 阶段状态：PARTIAL（TASK-047/048/049 ✅；TASK-050 验收清单核对 ✅ + 本地已 commit/tag `v0.1.0`；唯一未达 §28#20 实际 GitHub 发布——受阻于环境无 `gh`/远程/凭据，待用户提供）
 - 是否需要人工确认：是（OQ-04 已由用户决定 = Apache-2.0；TASK-050 release 为对外动作，用户选择「暂不发布」）
 - 阶段验收标准：新用户可按文档跑通；插件 zip 可构建；E2E 通过；CI 通过；GitHub release 可发布。
 
@@ -611,7 +611,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 备注：`release.yml` 在 `v*` tag 触发，`pnpm install --frozen-lockfile` → 打包脚本 → `gh release create … --generate-notes` 上传产物（contents:write）；本地服务按 README 从源码运行（不打自包含 server，因 better-sqlite3 原生依赖，v0.1 范围外）；CHANGELOG 用 Keep a Changelog 0.1.0 条目。实际 tag 触发的 release 由 TASK-050 在用户授权后执行。
 
 #### TASK-050：v0.1 验收清单核对 + Release
-- 状态：PARTIAL（2026-06-20）—— 验收清单核对完成；GitHub release 由用户决定「暂不发布」而延后（发布物 + 流程已 turnkey，待用户择期执行）
+- 状态：PARTIAL（2026-06-20）—— 验收清单核对完成；本地已 commit(`b28b6ea`)+tag `v0.1.0`、产物/`release.yml`/`RELEASE_NOTES` 就绪；实际 GitHub 发布受阻于环境（无 `gh`、无远程、无凭据），待用户提供远程+凭据
 - 优先级：P0
 - 说明：逐项核对 PRD 28 的 20 项；发布 GitHub release（对外动作需用户确认）。
 - 依赖：TASK-047, TASK-048, TASK-049
@@ -681,5 +681,5 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 任务总数：50（TASK-001 ~ TASK-050）
 - Future Backlog：17 项
 - Open Questions：22 项（已解决 OQ-T4/T5/A2/A3/A4/A5/A6/R1/R4/A1/R3/A7/R2/TP2/04；OQ-04 = Apache-2.0，用户决定）
-- 进度：STAGE-01 ~ STAGE-09 = DONE；STAGE-10 PARTIAL（TASK-047/048/049 ✅、TASK-050 验收核对 ✅）；唯一剩项 = GitHub release，**用户决定「暂不发布」延后**。v0.1 功能与质量已全部就绪（License = Apache-2.0）。BATCH-01 进入收尾 + 下一 Batch 规划（待确认）。
+- 进度：STAGE-01 ~ STAGE-09 = DONE；STAGE-10 PARTIAL（TASK-047/048/049 ✅、TASK-050 验收核对 ✅ + 本地 commit/tag `v0.1.0`）；唯一剩项 = §28#20 实际 GitHub 发布，受阻于环境（无 `gh`/远程/凭据），待用户提供远程+凭据后 `git push --tags` 即由 `release.yml` 自动发布。v0.1 功能与质量已全部就绪（License = Apache-2.0）。
 - UI 约束：所有界面严格按根目录 `design/` 设计稿实现（见 [CLAUDE.md](../CLAUDE.md) §5 与 [.claude/rules/frontend.md](../.claude/rules/frontend.md)）

@@ -4,14 +4,14 @@
 
 ## 当前项目状态
 
-**STAGE-10（v0.1 发布准备）已完成全部可自动化部分（TASK-047 文档+License、TASK-048 E2E、TASK-049 打包、TASK-050 验收清单核对）。STAGE-10 状态 = PARTIAL：唯一剩项 GitHub release（PRD §28 第 20 项）由用户决定「暂不发布」而延后（发布物 + 流程已 turnkey）。License = Apache-2.0（用户决定）。v0.1 功能与质量已全部就绪。BATCH-01 进入收尾 + 下一 Batch 规划（待确认）。**
+**STAGE-10（v0.1 发布准备）已完成全部环境内可执行工作：TASK-047 文档+License、TASK-048 E2E、TASK-049 打包、TASK-050 验收核对 + 本地 commit(`b28b6ea`)+tag `v0.1.0`。STAGE-10 = PARTIAL：唯一未达 §28#20 实际 GitHub 发布——受阻于环境（无 `gh` CLI、无 git 远程、无凭据）。License = Apache-2.0（用户决定）。v0.1 功能与质量已全部就绪。**
 
 - 当前 Batch：**BATCH-01**（Sourdex v0.1 MVP）— 状态 IN_PROGRESS（收尾中）
-- 已完成 Stage：**STAGE-01 ~ STAGE-09** 均 DONE；**STAGE-10 = PARTIAL**（仅 GitHub release 用户延后）
-- PRD §28 验收：第 1–16、18、19 项 ✅；第 17（CI）本地全绿、GitHub 实跑待首次 push；第 20（release）⏸ 用户决定暂不发布。
+- 已完成 Stage：**STAGE-01 ~ STAGE-09** 均 DONE；**STAGE-10 = PARTIAL**（仅 §28#20 实际发布受环境阻塞）
+- PRD §28 验收：第 1–16、18、19 项 ✅；第 17（CI）本地全绿、GitHub 实跑待首次 push；第 20（release）⏸ 本地 commit/tag 就绪，发布受阻于环境无 `gh`/远程/凭据。
 - 最终检查全绿：typecheck(13) / lint / format / test(152) / build(8) / e2e(1，五步关键链路)。
 - **OQ-04（License）= Apache-2.0（用户决定）**：初按 PRD §20.1 采用 AGPL-3.0，后由用户改定为 Apache-2.0（LICENSE 官方全文 + 文档引用已更新）。
-- 发布延后，待用户择期（turnkey）：`git init`+commit（含 `pnpm-lock.yaml`）+ 关联远程 + push；打 `v0.1.0` tag 触发 `release.yml`。
+- 完成发布待用户提供基础设施：`git remote add origin <url>` + 凭据 → `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`），或安装/登录 `gh` 后 `gh release create`。
 - **v0.1 核心闭环已全部贯通并经 E2E 验证：保存 → 提取 → 入库/索引 → 搜索 → 阅读 → 导出 Markdown。**
 - 已确认 OQ：OQ-R2=批量单条失败跳过并 `failed[]` 报告（STAGE-09）；OQ-TP2=E2E 经 capture API 覆盖保存路径、扩展 UI 由单测/集成覆盖（STAGE-10/TASK-048）。
 - **v0.1 核心闭环已全部贯通并经 E2E 验证：保存 → 提取 → 入库/索引 → 搜索 → 阅读 → 导出 Markdown。** UI 严格按 `design/`。
@@ -21,8 +21,10 @@
 ### TASK-050（v0.1 验收清单核对 + Release）— PARTIAL（release 阻塞）
 - 逐项核对 PRD §28（20 项）：第 1–16、18、19 项 ✅ 已实现并经测试/E2E 核对（详见 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目的核对表）；第 17（CI）本地六步等价全绿、GitHub 实跑待首次 push；**第 20（GitHub release）未满足 ⛔**——本环境非 git 仓库、无 GitHub 远程，且对外发布需用户授权，无法在此执行。
 - 最终全套检查（2026-06-20）：`typecheck`✅(13) `lint`✅ `format:check`✅ `test`✅(152) `build`✅(8) `test:e2e`✅(1, 五步)。
-- 补齐发布交付物：`RELEASE_NOTES.md`（v0.1.0 发布说明 + 维护者发布清单/命令），`release.yml` 改用 `--notes-file RELEASE_NOTES.md`，发布已 turnkey。
-- 完成 release 待用户（对外/不可逆，按 CLAUDE.md 助手不自行 commit/push/release）：①（如需）覆盖 OQ-04 License；② `git init` + commit（含 `pnpm-lock.yaml`）+ 关联 GitHub 远程 + push；③ 打 `v0.1.0` tag 触发 `release.yml`（或 `gh release create`）。
+- 补齐发布交付物：`RELEASE_NOTES.md`（v0.1.0 发布说明 + 维护者发布清单/命令），`release.yml` 改用 `--notes-file RELEASE_NOTES.md`。
+- License 切换：用户改定 Apache-2.0 → LICENSE 换官方全文 + README/CONTRIBUTING/RELEASE_NOTES 引用更新。
+- **本地发布准备（重新下达完成目标后执行）**：仓库已是 git repo（main，原无提交），建立首个 release 提交 `b28b6ea`（277 文件，含 `pnpm-lock.yaml`，build/deps/db 经 .gitignore 排除）+ 注释 tag `v0.1.0`（提交信息含 Co-Authored-By 尾注）。
+- §28#20 实际 GitHub 发布**受阻于环境**：无 `gh` CLI、无 git 远程、无凭据，无法 push/publish。待用户提供远程+凭据后 `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`）即完成发布。
 - 文件：`RELEASE_NOTES.md`、`.github/workflows/release.yml`、`docs/08_TASKS.md`、`docs/12_PROGRESS.md`、`docs/14_STAGE_SUMMARY.md`。
 
 ### TASK-047（README / 安装 / 隐私文档 + License）— DONE

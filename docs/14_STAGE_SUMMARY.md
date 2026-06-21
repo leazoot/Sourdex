@@ -91,11 +91,11 @@
   | 17 | CI 通过 | ⚠️ | ci.yml 六步本地等价全绿；GitHub 实跑待首次 push（无远程） |
   | 18 | 核心测试通过 | ✅ | test 152 + e2e 1 全绿 |
   | 19 | 插件 zip 可构建 | ✅ | wxt zip |
-  | 20 | GitHub release 可发布 | ⏸ | 流程/产物已 turnkey；用户决定「暂不发布」而延后 |
+  | 20 | GitHub release 可发布 | ⏸ | 本地已 commit(`b28b6ea`)+tag `v0.1.0`、产物/`release.yml`/`RELEASE_NOTES` 就绪；实际 GitHub 发布受阻于环境（无 `gh` CLI、无 git 远程、无凭据），需用户提供远程+凭据 |
 
 - 验证结果（本地）：typecheck ✅(13) / lint ✅ / format:check ✅ / test ✅(152) / build ✅(8) / e2e ✅(1，五步)。
 - 重要决策：**OQ-04 = Apache-2.0（用户决定）**——初按 PRD §20.1 推荐采用 AGPL-3.0，后由用户在两候选中改定为 Apache-2.0（LICENSE 官方全文 + README/CONTRIBUTING/RELEASE_NOTES 引用已更新）；**OQ-TP2** E2E 经 capture API 覆盖保存路径（headless 加载 MV3 脆弱），扩展 UI 由单测/集成覆盖；Vite dev 需 `--host 127.0.0.1` 以匹配 Playwright/CORS；**用户决定 v0.1 暂不对外发布**。
-- 遗留问题：GitHub release（§28#20）延后，待用户择期执行（流程 turnkey）：① `git init` + commit（含 `pnpm-lock.yaml`）+ 关联 GitHub 远程 + push；② 打 `v0.1.0` tag 触发 `release.yml`（或 `gh release create`）。issue/PR 模板、CODEOWNERS、changesets 属 BACKLOG-017（下一 Batch）。
+- 遗留问题：GitHub release（§28#20）——本地仓库已 commit(`b28b6ea`)+tag `v0.1.0`、产物/工作流/发布说明就绪；**实际发布受阻于环境**（无 `gh` CLI、无 git 远程、无 GitHub 凭据）。完成发布需用户：① 提供 GitHub 远程（`git remote add origin <url>`）+ 推送凭据；② `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`），或安装并登录 `gh` 后 `gh release create v0.1.0 dist-release/* --notes-file RELEASE_NOTES.md`。issue/PR 模板、CODEOWNERS、changesets 属 BACKLOG-017（下一 Batch）。
 - 下一阶段目标：BATCH-01 收尾；按 Batch Planning Protocol 规划下一 Batch（v0.2：AI 摘要/标签/语义检索/Ask 等）。
 - 下一步建议：v0.1 功能与质量已全部就绪（License = Apache-2.0），发布按用户意愿延后。进入 Batch Planning Protocol，输出下一 Batch 计划并等待确认，不自动进入下一阶段。
 
