@@ -58,6 +58,23 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-19：Tags 页面 / Export 页面完整化 — BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：把 v0.1 占位的 Tags / Export 两个导航页按设计稿（tags 06 / export 07）做完整——标签管理（重命名/合并/删除）+ 四种导出格式（Markdown/Obsidian/JSON/CSV）+ 导出范围（PRD §6.2 / §8.9 / BACKLOG-006）。
+- 已完成内容：
+  - TASK-079：`TagRepository`（listAllWithCounts/findById/itemIdsForTag/rename/mergeInto/deleteTag）+ core `TagWithCount` + 共享 `reindexItem` 助手（AnnotationService 复用）+ `TagService` + REST `/api/tags`（GET/PATCH/POST merge/DELETE）。tag-repo +4 / service 6 / 集成 4 测试。
+  - TASK-080：`@sourdex/exporter` `toJsonExport`/`toCsvExport` + core `ExportInput.scope`（all/status/tag，itemIds 改可选）+ `ExportService` 范围解析与按 format 分支 + route 扩展。structured 4 / export 集成 +5 测试。
+  - TASK-081：Tags 页（标签云 + Recently added + All/AI/Manual 过滤 + 行内重命名/合并/删除）+ api/hooks/icons/i18n。TagsPage 3 测试。
+  - TASK-082：Export 页（四格式卡 + 范围 全部/仅收件箱/按标签 + 预览 + 目标路径 + 导出结果）+ `runExport`/useExport(scope) + i18n；Rail 将 Tags/Export 移入主导航 + 路由。ExportPage 2 测试。
+- 关键产出：标签治理闭环（计数/重命名/合并/删除且 FTS 随之重建）；导出四格式 + 三种范围；两个导航页从占位转为可用。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 321/322（67 文件，295→322，+27；1 失败 = provider-config 同毫秒计时 flake，非本阶段、单独亦随机复现）** / `pnpm build` 9/9 ✅。**无 schema/迁移改动**（不动 PRD §12）。
+- 重要决策：标签变更经共享 `reindexItem` 重建受影响 item 的 FTS（tags 在 FTS 列）；rename 到已存在标签名即合并；导出范围在服务端解析为 itemIds（保留 itemIds 兼容 Reader/Library 入口）；JSON/CSV 为单文件聚合；目标路径展示数据目录（无浏览器下载/原生目录选择器）。
+- 遗留问题：OQ-A12（非阻塞）「Recently growing」真实增长需 item_tags 时间戳（属 schema 变更，延后，当前以最近创建标签近似、不编造增量）；Export 目标路径选择/浏览器下载留待 v0.2+；标签合并目标经行内 Select 选择（无搜索式选择器）。
+- 下一阶段目标：STAGE-20 v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）。
+- 下一步建议：进入 STAGE-20 前明确 v0.2 发布范围（CHANGELOG/RELEASE_NOTES、版本号、扩展/web 打包）、回归测试与文档更新清单。**当前按 /goal 停在 STAGE-19，等待用户下发 /goal 再进入 STAGE-20。**
+
 ### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BATCH-02
 
 - 阶段状态：DONE

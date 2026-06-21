@@ -9,4 +9,5 @@ export const queryKeys = {
   status: () => ["status"] as const,
   providers: () => ["providers"] as const,
   annotations: (itemId: string) => ["annotations", itemId] as const,
+  tags: () => ["tags"] as const,
 };

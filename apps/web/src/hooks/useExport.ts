@@ -1,11 +1,7 @@
-import type { ExportFormat } from "@sourdex/core";
 import { useMutation } from "@tanstack/react-query";
-import { exportMarkdown } from "@/lib/api/export";
+import { runExport, type ExportRequest } from "@/lib/api/export";
 
-/** Trigger a Markdown/Obsidian export (PRD §5.1.7). Returns the produced file path. */
+/** Trigger an export (PRD §5.1.7 / §6.2). Accepts an item list or a scope. */
 export function useExport() {
-  return useMutation({
-    mutationFn: ({ itemIds, format }: { itemIds: string[]; format?: ExportFormat }) =>
-      exportMarkdown(itemIds, format),
-  });
+  return useMutation({ mutationFn: (input: ExportRequest) => runExport(input) });
 }

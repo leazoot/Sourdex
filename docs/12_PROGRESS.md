@@ -4,7 +4,29 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-18（高亮与备注）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~17 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础 / 混合搜索排序 / Ask 页面 RAG）。STAGE-18 = DONE（TASK-075~078）：`AnnotationRepository` + `AnnotationService`（高亮/备注 CRUD，变更重建 FTS 含笔记→备注可搜）+ REST API；备注笔记折叠进 FTS summary 列、高亮独立存储不改原文；导出 Markdown 含「Highlights & Notes」；混合排序 user_signal 由 annotation 数接入（消解 STAGE-16 预留）；Reader 工具栏 Highlight/Note + HighlightsPanel（颜色/备注/删除）；**test 295 全绿**。按 /goal 停在 STAGE-18。
+**BATCH-02（v0.2）进行中 — STAGE-19（Tags/Export 页面完整化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~18 = DONE（抓取硬化 / AI 基础设施 / 摘要 / 自动标签 / 语义检索 / 混合搜索 / Ask / 高亮备注）。STAGE-19 = DONE（TASK-079~082）：标签管理后端（`TagRepository` listAllWithCounts/rename/mergeInto/deleteTag + `TagService` + REST `/api/tags`，tags 在 FTS 列、变更后经共享 `reindexItem` 重建受影响 item 索引，AnnotationService 复用）；导出补齐 JSON/CSV + 范围解析（all/status/tag）；Tags 页（标签云 + Recently added + All/AI/Manual + 行内重命名/合并/删除）与 Export 页（四格式 + 范围 + 预览 + 目标路径 + 导出）按设计 06/07；Rail 将 Tags/Export 移入主导航。**test 321/322 全绿**（1 = STAGE-16 已记录的 provider-config 同毫秒计时 flake，非本阶段）。按 /goal 停在 STAGE-19。
+
+### STAGE-19 进度记录（2026-06-21，Tags/Export 页面完整化 DONE）
+
+#### TASK-079（标签管理后端 db/server）— DONE
+- core 加 `TagWithCount`。`TagRepository`：`findById`、`listAllWithCounts`（leftJoin item_tags+items 排除软删，count(items.id)、按计数降序）、`itemIdsForTag`、`rename`、`mergeInto`（事务迁移关联保留 source/confidence、onConflictDoNothing 去重、删源标签，返回受影响 itemIds）、`deleteTag`（事务删关联+标签，返回 itemIds）。
+- 抽共享 `services/reindex-item.ts`（item+capture 正文+tags+annotation 笔记 → searchRepo.index），`AnnotationService` 重构复用、`TagService` 复用。
+- `TagService`：list / rename（规范名冲突即合并）/ merge（自合并/缺失守卫）/ delete，变更后重建受影响 item FTS。routes `GET /api/tags`、`PATCH /api/tags/:id`、`POST /api/tags/:id/merge`、`DELETE /api/tags/:id`；container + app 接线。
+- 测试：tag-repository +4、tag-service 6、tags.integration 4。
+
+#### TASK-080（导出 JSON/CSV + 范围解析 exporter/server）— DONE
+- `structured.ts`：`toJsonExport`（元数据/标签/annotations/content）、`toCsvExport`（RFC4180 转义、中文保留）。core `ExportInput` 加可选 `scope`（all/status/tag）+ itemIds 改可选。`ExportService`：scope→itemIds 分页解析、按 format 分支（json/csv 单文件；md/obsidian 维持单文件/zip）。route 扩展 format 枚举 + scope（discriminatedUnion）+ refine。
+- 测试：structured 4、export.integration +5。
+
+#### TASK-081（Tags 页面 UI apps/web）— DONE
+- `lib/api/tags.ts` + `hooks/useTags.ts` + query-keys.tags；icons 加 Merge/Rename/Trash（设计稿精确路径）。`features/tags/TagCloud.tsx`（计数加权字号云 + Recently added 按 createdAt 近似，OQ-A12 不编造增量）、`TagRow.tsx`（行内重命名/合并/删除）；`pages/tags/TagsPage.tsx`（云 + All/AI/Manual 过滤 + 列表 + 删除二次确认 + 三态）。i18n EN/简中。
+- 测试：TagsPage 3（云+列表+计数+AI 徽标、重命名 PATCH、删除确认 DELETE）。
+
+#### TASK-082（Export 页面 UI apps/web）— DONE
+- `lib/api/export.ts` 加 `runExport`（保留 exportMarkdown 兼容 Reader/Library）；`useExport` 接受 ExportRequest（含 scope）。`features/export/FormatPicker.tsx`、`ExportPreview.tsx`；`pages/export/ExportPage.tsx`（格式 + 范围 全部/仅收件箱/按标签 + 预览 + 目标路径展示数据目录 + 结果横幅）。Rail 将 Tags/Export 移入主导航；App 加 `/tags`、`/export` 路由。i18n EN/简中。
+- 测试：ExportPage 2（渲染、选 CSV+导出→POST format=csv&scope.type=all + 结果横幅）。
+- STAGE-19 收尾全量检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿；**vitest 321/322（67 文件，295→322，+27；1 失败 = provider-config 同毫秒 flake，非本阶段、单独亦随机复现）**；`pnpm build` 9/9 ✅。
+- 非阻塞 OQ-A12：「Recently growing」真实增长需 item_tags 时间戳（schema 变更，延后）；Export 目标路径选择/浏览器下载 v0.2+ 暂以展示数据目录代替。
 
 ### STAGE-18 进度记录（2026-06-21，高亮与备注 DONE）
 

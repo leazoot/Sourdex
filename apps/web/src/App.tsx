@@ -6,6 +6,8 @@ import { LibraryPage } from "@/pages/library/LibraryPage";
 import { ReaderPage } from "@/pages/reader/ReaderPage";
 import { SearchPage } from "@/pages/search/SearchPage";
 import { AskPage } from "@/pages/ask/AskPage";
+import { TagsPage } from "@/pages/tags/TagsPage";
+import { ExportPage } from "@/pages/export/ExportPage";
 import { SettingsPage } from "@/pages/settings/SettingsPage";
 
 const queryClient = new QueryClient({
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="reader/:id" element={<ReaderPage />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="ask" element={<AskPage />} />
+            <Route path="tags" element={<TagsPage />} />
+            <Route path="export" element={<ExportPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

@@ -16,6 +16,11 @@ export interface Tag {
   createdAt: string;
 }
 
+/** A tag with how many (non-deleted) items reference it — for the Tags page (PRD §6.2). */
+export interface TagWithCount extends Tag {
+  count: number;
+}
+
 /** Association between an item and a tag (PRD §12.5). */
 export interface ItemTag {
   itemId: string;

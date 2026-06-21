@@ -14,20 +14,24 @@ import {
 
 type IconType = ComponentType<{ size?: number }>;
 
-const PRIMARY: { to: string; icon: IconType; key: "inbox" | "library" | "search" | "ask" }[] = [
+type PrimaryKey = "inbox" | "library" | "search" | "ask" | "export";
+
+const PRIMARY: { to: string; icon: IconType; key: PrimaryKey }[] = [
   { to: "/", icon: HomeIcon, key: "inbox" },
   { to: "/library", icon: LibraryIcon, key: "library" },
   { to: "/search", icon: SearchIcon, key: "search" },
   { to: "/ask", icon: AskIcon, key: "ask" },
+  { to: "/export", icon: ExportIcon, key: "export" },
 ];
 
-// v0.2 surfaces still pending — shown for design parity but disabled (OQ-D2).
-const SOON: { icon: IconType; key: "export" | "tags" }[] = [
-  { icon: ExportIcon, key: "export" },
-  { icon: TagsIcon, key: "tags" },
+const SECONDARY: { to: string; icon: IconType; key: "tags" | "settings" }[] = [
+  { to: "/tags", icon: TagsIcon, key: "tags" },
+  { to: "/settings", icon: SettingsIcon, key: "settings" },
 ];
 
 const itemBase = "flex h-10 w-10 items-center justify-center rounded-[10px] transition-colors";
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  `${itemBase} ${isActive ? "bg-surface-raised text-text shadow-sm" : "text-text3 hover:bg-surface2 hover:text-text2"}`;
 
 export function Rail() {
   const { t } = useTranslation();
@@ -45,9 +49,7 @@ export function Rail() {
             end={to === "/"}
             title={t(`nav.${key}`)}
             aria-label={t(`nav.${key}`)}
-            className={({ isActive }) =>
-              `${itemBase} ${isActive ? "bg-surface-raised text-text shadow-sm" : "text-text3 hover:bg-surface2 hover:text-text2"}`
-            }
+            className={linkClass}
           >
             <Icon />
           </NavLink>
@@ -55,26 +57,17 @@ export function Rail() {
       </div>
 
       <div className="mt-auto flex flex-col gap-1">
-        {SOON.map(({ icon: Icon, key }) => (
-          <span
+        {SECONDARY.map(({ to, icon: Icon, key }) => (
+          <NavLink
             key={key}
-            title={`${t(`nav.${key}`)} · ${t("nav.soon")}`}
-            aria-disabled
-            className={`${itemBase} cursor-not-allowed text-text3 opacity-40`}
+            to={to}
+            title={t(`nav.${key}`)}
+            aria-label={t(`nav.${key}`)}
+            className={linkClass}
           >
             <Icon size={18} />
-          </span>
+          </NavLink>
         ))}
-        <NavLink
-          to="/settings"
-          title={t("nav.settings")}
-          aria-label={t("nav.settings")}
-          className={({ isActive }) =>
-            `${itemBase} ${isActive ? "bg-surface-raised text-text shadow-sm" : "text-text3 hover:bg-surface2 hover:text-text2"}`
-          }
-        >
-          <SettingsIcon size={18} />
-        </NavLink>
       </div>
     </nav>
   );

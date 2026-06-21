@@ -63,6 +63,29 @@ export const TagsIcon = (p: { size?: number }) => (
   </Icon>
 );
 
+export const MergeIcon = (p: { size?: number }) => (
+  <Icon {...p}>
+    <circle cx="6.5" cy="6" r="2.4" />
+    <circle cx="6.5" cy="18" r="2.4" />
+    <circle cx="17.5" cy="12" r="2.4" />
+    <path d="M6.5 8.4v7.2" />
+    <path d="M6.5 11.4a8.4 8.4 0 0 0 8.6 1" />
+  </Icon>
+);
+
+export const RenameIcon = (p: { size?: number }) => (
+  <Icon {...p}>
+    <path d="M4 16.5V20h3.5L18 9.5 14.5 6z" />
+    <path d="M13 7.5L16.5 11" />
+  </Icon>
+);
+
+export const TrashIcon = (p: { size?: number }) => (
+  <Icon {...p}>
+    <path d="M5 7h14M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12" />
+  </Icon>
+);
+
 export const SettingsIcon = (p: { size?: number }) => (
   <Icon {...p}>
     <path d="M4 8h9" />

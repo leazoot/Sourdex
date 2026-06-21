@@ -36,6 +36,7 @@ import { SemanticSearchService } from "./services/semantic-search-service.js";
 import { HybridSearchService } from "./services/hybrid-search-service.js";
 import { AskService } from "./services/ask-service.js";
 import { AnnotationService } from "./services/annotation-service.js";
+import { TagService } from "./services/tag-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -59,6 +60,7 @@ export interface Container {
   hybridSearchService: HybridSearchService;
   askService: AskService;
   annotationService: AnnotationService;
+  tagService: TagService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -154,6 +156,14 @@ export function createContainer(config: ServerConfig): Container {
     searchRepo,
     storage,
   });
+  const tagService = new TagService({
+    annotationRepo,
+    itemRepo,
+    captureRepo,
+    tagRepo,
+    searchRepo,
+    storage,
+  });
   const askService = new AskService({
     providerConfigRepo,
     secrets,
@@ -197,6 +207,7 @@ export function createContainer(config: ServerConfig): Container {
     hybridSearchService,
     askService,
     annotationService,
+    tagService,
     auth,
     worker,
     close: () => sqlite.close(),

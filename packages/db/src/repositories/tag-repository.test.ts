@@ -7,12 +7,14 @@ import { TagRepository, normalizeTagName } from "./tag-repository.js";
 let sqlite: SqliteDatabase;
 let db: Db;
 let tagRepo: TagRepository;
+let itemRepo: ItemRepository;
 let itemId: string;
 
 beforeEach(() => {
   ({ sqlite, db } = createMemoryDb());
   tagRepo = new TagRepository(db);
-  itemId = new ItemRepository(db).create({ type: "webpage", title: "Host" }).id;
+  itemRepo = new ItemRepository(db);
+  itemId = itemRepo.create({ type: "webpage", title: "Host" }).id;
 });
 
 afterEach(() => {
@@ -45,6 +47,60 @@ describe("TagRepository", () => {
     const tag = tagRepo.upsert("temp");
     tagRepo.attachToItem(itemId, tag.id);
     tagRepo.detachFromItem(itemId, tag.id);
+    expect(tagRepo.listByItem(itemId)).toHaveLength(0);
+  });
+});
+
+describe("TagRepository management (STAGE-19)", () => {
+  it("lists all tags with non-deleted item counts, ordered by count desc", () => {
+    const other = itemRepo.create({ type: "webpage", title: "Other" }).id;
+    const deleted = itemRepo.create({ type: "webpage", title: "Gone" }).id;
+    const popular = tagRepo.upsert("popular");
+    const rare = tagRepo.upsert("rare");
+    tagRepo.upsert("empty");
+    tagRepo.attachToItem(itemId, popular.id);
+    tagRepo.attachToItem(other, popular.id);
+    tagRepo.attachToItem(itemId, rare.id);
+    tagRepo.attachToItem(deleted, rare.id);
+    itemRepo.softDelete(deleted);
+
+    const counts = tagRepo.listAllWithCounts();
+    const byName = Object.fromEntries(counts.map((t) => [t.name, t.count]));
+    expect(byName.popular).toBe(2);
+    expect(byName.rare).toBe(1); // deleted item excluded
+    expect(byName.empty).toBe(0);
+    expect(counts[0]?.name).toBe("popular"); // ordered by count desc
+  });
+
+  it("renames a tag (name + normalized name)", () => {
+    const tag = tagRepo.upsert("oldname");
+    const renamed = tagRepo.rename(tag.id, "New Name");
+    expect(renamed?.name).toBe("New Name");
+    expect(renamed?.normalizedName).toBe("new name");
+    expect(tagRepo.findById(tag.id)?.name).toBe("New Name");
+  });
+
+  it("merges a tag into another, re-pointing associations and dropping the source", () => {
+    const other = itemRepo.create({ type: "webpage", title: "Other" }).id;
+    const source = tagRepo.upsert("sqlite");
+    const target = tagRepo.upsert("databases");
+    tagRepo.attachToItem(itemId, source.id);
+    tagRepo.attachToItem(other, source.id);
+    tagRepo.attachToItem(itemId, target.id); // already on target — dedup on merge
+
+    const affected = tagRepo.mergeInto(source.id, target.id);
+    expect(affected.sort()).toEqual([itemId, other].sort());
+    expect(tagRepo.findById(source.id)).toBeNull();
+    expect(tagRepo.listByItem(itemId).map((t) => t.name)).toEqual(["databases"]);
+    expect(tagRepo.listByItem(other).map((t) => t.name)).toEqual(["databases"]);
+  });
+
+  it("deletes a tag and its associations, returning affected items", () => {
+    const tag = tagRepo.upsert("temp");
+    tagRepo.attachToItem(itemId, tag.id);
+    const affected = tagRepo.deleteTag(tag.id);
+    expect(affected).toEqual([itemId]);
+    expect(tagRepo.findById(tag.id)).toBeNull();
     expect(tagRepo.listByItem(itemId)).toHaveLength(0);
   });
 });

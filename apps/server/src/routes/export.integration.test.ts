@@ -120,4 +120,92 @@ describe("POST /api/export/markdown (TASK-045)", () => {
     });
     expect(res.statusCode).toBe(400);
   });
+
+  it("rejects a request with neither itemIds nor scope (400)", async () => {
+    const res = await auth({
+      method: "POST",
+      url: "/api/export/markdown",
+      payload: { format: "json" },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});
+
+describe("Export formats & scope (STAGE-19)", () => {
+  it("exports JSON as a single structured file", async () => {
+    const id = await saveAndExtract({
+      url: "https://example.com/j",
+      title: "JSON Source",
+      html: "<html><body><article><h1>JSON Source</h1><p>Body content that extracts cleanly enough.</p></article></body></html>",
+    });
+
+    const res = await auth({
+      method: "POST",
+      url: "/api/export/markdown",
+      payload: { itemIds: [id], format: "json" },
+    });
+    const body = res.json() as ExportResp;
+    expect(body.path.endsWith(".json")).toBe(true);
+    expect(body.count).toBe(1);
+
+    const parsed = JSON.parse(strFromU8(readExport(body.path))) as {
+      count: number;
+      items: { title: string; content: string }[];
+    };
+    expect(parsed.count).toBe(1);
+    expect(parsed.items[0]?.title).toBe("JSON Source");
+    expect(parsed.items[0]?.content).toContain("Body content");
+  });
+
+  it("exports CSV with a header row and resolves scope=all", async () => {
+    await saveAndExtract({
+      url: "https://a.com/1",
+      title: "First",
+      html: "<html><body><article><h1>First</h1><p>First body long enough to extract here.</p></article></body></html>",
+    });
+    await saveAndExtract({
+      url: "https://b.com/2",
+      title: "Second",
+      html: "<html><body><article><h1>Second</h1><p>Second body long enough to extract here.</p></article></body></html>",
+    });
+
+    const res = await auth({
+      method: "POST",
+      url: "/api/export/markdown",
+      payload: { scope: { type: "all" }, format: "csv" },
+    });
+    const body = res.json() as ExportResp;
+    expect(body.path.endsWith(".csv")).toBe(true);
+    expect(body.count).toBe(2);
+
+    const csv = strFromU8(readExport(body.path));
+    expect(csv.split("\r\n")[0]).toBe("title,url,domain,type,saved_at,tags");
+  });
+
+  it("resolves scope=tag to the items carrying that tag", async () => {
+    const tagged = await saveAndExtract({
+      url: "https://t.com/1",
+      title: "Tagged Item",
+      html: "<html><body><article><h1>Tagged Item</h1><p>Tagged body long enough to extract here.</p></article></body></html>",
+    });
+    await saveAndExtract({
+      url: "https://t.com/2",
+      title: "Untagged Item",
+      html: "<html><body><article><h1>Untagged Item</h1><p>Untagged body long enough to extract.</p></article></body></html>",
+    });
+    const tag = server.container.tagRepo.upsert("local-first");
+    server.container.tagRepo.attachToItem(tagged, tag.id);
+
+    const res = await auth({
+      method: "POST",
+      url: "/api/export/markdown",
+      payload: { scope: { type: "tag", tagId: tag.id }, format: "json" },
+    });
+    const body = res.json() as ExportResp;
+    expect(body.count).toBe(1);
+    const parsed = JSON.parse(strFromU8(readExport(body.path))) as {
+      items: { title: string }[];
+    };
+    expect(parsed.items[0]?.title).toBe("Tagged Item");
+  });
 });

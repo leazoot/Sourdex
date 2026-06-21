@@ -1,11 +1,23 @@
 /** Export contract (PRD §8.9, §13.5). Implemented in packages/exporter. */
 
-/** Supported export formats. v0.1 implements `markdown` and `obsidian`. */
+import type { ItemStatus } from "../types/item.js";
+
+/** Supported export formats (PRD §8.9). */
 export type ExportFormat = "markdown" | "obsidian" | "json" | "csv";
 
-/** Export request. */
+/**
+ * Which items to export when not passing an explicit `itemIds` list (Export page, PRD §6.2):
+ * the whole library, items in a given status (e.g. Inbox), or items carrying a given tag.
+ */
+export type ExportScope =
+  | { type: "all" }
+  | { type: "status"; status: ItemStatus }
+  | { type: "tag"; tagId: string };
+
+/** Export request. Provide either an explicit `itemIds` list or a `scope` to resolve. */
 export interface ExportInput {
-  itemIds: string[];
+  itemIds?: string[];
+  scope?: ExportScope;
   format: ExportFormat;
 }
 

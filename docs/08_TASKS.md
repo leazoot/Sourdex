@@ -12,7 +12,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - **Batch ID**: BATCH-02
 - **Batch Name**: Sourdex v0.2 — 抓取质量硬化 + AI 价值层（摘要 / 标签 / 语义检索 / Ask）
 - **Batch Goal**: 先把「存进来的东西干净完整」（动态页/Discourse/占位噪声），再叠加 AI 价值层让工具作用显性化。抓取硬化排在 AI 之前。
-- **Batch Status**: IN_PROGRESS（STAGE-11 进行中）
+- **Batch Status**: IN_PROGRESS（STAGE-11~19 DONE；剩 STAGE-20）
 - **Batch Acceptance Criteria**: 动态/论坛页提取干净完整（无占位 byline 噪声）；AI 摘要/标签/语义检索/Ask 可用且默认关闭、可溯源；API Key 安全存储；CI/核心测试通过。
 - 计划见下方「## BATCH-02 Stages」。
 
@@ -852,6 +852,37 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 与设计稿冲突则 Decision Required
 
 ### STAGE-19：Tags 页面 / Export 页面完整化 — BACKLOG-006
+
+- 阶段目标：把 v0.1 占位的 Tags / Export 两个导航页按 `design/` 设计稿（tags 06 / export 07）做完整：① Tags 页——标签云 + 全部标签列表（All/AI/Manual 过滤）+ 每条 重命名/合并/删除；② Export 页——四种格式（Markdown/Obsidian/JSON/CSV）+ 导出范围（全部/按标签/Inbox）+ 预览 + 目标路径 + 开始导出。PRD §6.2（Tags/Export 主导航）、§8.9（exporter 含 Markdown/Obsidian/JSON/CSV）。
+- 阶段状态：DONE（2026-06-21，TASK-079~082 全部 DONE）
+- 口径（无新表/迁移，不动 PRD §12）：标签管理在既有 `tags`/`item_tags` 上操作（重命名/合并/删除），因 tags 进入 FTS 索引列，变更后必须重建受影响 item 的 FTS（抽共享 `reindexItem` 助手，AnnotationService 复用）；导出新增 JSON/CSV 纯函数（`ExportFormat` 契约已含），导出范围在服务端解析为 itemIds（all/status/tag），导出仍落数据目录 `files/exports/`（v0.1 无浏览器下载/原生目录选择器，目标路径展示数据目录，记 OQ-A12）。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required；非阻塞模糊项见 OQ-A12（“Recently growing” 无 item_tags 时间戳）。
+- 阶段验收标准：① Tags 页可见标签云 + 列表 + All/AI/Manual 过滤，可重命名/合并/删除且搜索结果随之更新（FTS 重建）；② Export 页四格式可选、范围可选、可触发导出并显示结果；③ JSON/CSV 导出内容正确（exporter 单测）；④ Rail 将 Tags/Export 由占位移入主导航并接路由；⑤ typecheck/lint/format/test/build 全绿。
+
+#### TASK-079：标签管理后端（TagRepository + TagService + API）— STATUS: DONE
+- `TagRepository`：`listAllWithCounts()`（全部标签 + 引用计数，排除软删除 item）、`rename`、`mergeInto`（迁移 item_tags、删源标签）、`deleteTag`（删 item_tags + 标签），并返回受影响 itemIds 以供重建 FTS。
+- 抽共享 `reindexItem(itemId, deps)`（item+capture+tags+annotations → searchRepo.index），`TagService` 与 `AnnotationService` 复用。
+- `TagService`：list / rename（规范名冲突即合并）/ merge / delete，变更后重建受影响 item 的 FTS。REST `GET /api/tags`、`PATCH /api/tags/:id`（重命名）、`POST /api/tags/:id/merge`、`DELETE /api/tags/:id`；Zod、沿用鉴权。
+- 验收：repo 单测（计数、重命名、合并迁移去重、删除）+ service 单测（重命名/合并/删除后 FTS 含/不含相应标签词、404）+ 集成（CRUD + 404）。
+- 是否需要人工确认：否
+
+#### TASK-080：导出格式 JSON/CSV + 范围解析（exporter + export-service + API）— STATUS: DONE
+- `packages/exporter`：`toJsonExport`（结构化档案 + 元数据/标签/索引）、`toCsvExport`（title,url,domain,tags,saved 等，CSV 转义）；`index.ts` 导出。
+- `ExportService`：支持 `format` ∈ {markdown,obsidian,json,csv}（json/csv 单文件聚合；md/obsidian 维持现状）；新增 `scope` 解析（all / status / tag → itemIds）；缺失/软删项跳过并 `failed[]`（沿用 OQ-R2）。
+- API：`POST /api/export/markdown` 扩展 format 枚举 + 可选 scope（保留 itemIds 兼容既有调用）；Zod。
+- 验收：exporter 单测（JSON 结构 + CSV 转义/中文）；export 集成（json/csv 产物 + scope=all/tag/status 解析 + 缺失跳过）；既有 markdown/obsidian 导出集成保持通过。
+- 是否需要人工确认：否
+
+#### TASK-081：Tags 页面 UI（apps/web）— STATUS: DONE
+- 对照设计稿 tags（06）：标题/副标题 + 标签云（按计数加权字号）+ “Recently growing” 卡（OQ-A12：无增长时间序列，以真实信号近似——最新创建标签/计数，不编造增量）+ All tags 列表（All/AI/Manual 过滤 + 计数）+ 每行 合并/重命名/删除（删除二次确认）。`lib/api/tags.ts` + `hooks/useTags.ts`；i18n EN/简中。Rail 将 Tags 移入主导航 + `/tags` 路由。
+- 验收：组件测试（渲染标签云+列表、过滤、重命名/删除交互）；组件 < 150 行、无硬编码文案/颜色。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
+#### TASK-082：Export 页面 UI（apps/web）— STATUS: DONE
+- 对照设计稿 export（07）：标题/副标题 + 四格式卡（选中态）+ 范围（全部/按标签/Inbox，单选）+ 预览（按格式静态示例）+ 目标路径（展示数据目录 `files/exports/`，v0.1 无目录选择器——记 OQ）+ 开始导出（结果横幅/计数）。`lib/api/export.ts` 扩展 format/scope；`hooks/useExport.ts`；i18n EN/简中。Rail 将 Export 移入主导航 + `/export` 路由。
+- 验收：组件测试（选格式/选范围 → 触发导出请求并显示结果路径）；既有 Reader/Library 导出入口保持；组件 < 150 行、无硬编码。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）
 
 ---
@@ -897,6 +928,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-A6 Storage 是否抽象接口~~ ✅ 已定：是（core 接口 + LocalStorage 实现）（STAGE-04 落地）
 - OQ-A8（新增，非阻塞）AI 功能级开关粒度（单独禁用「自动标签」而不关摘要）— 当前默认：由 AI 总开关（enabled provider）统一覆盖；用户可手动改/删标签、手动标签优先。若后续需要功能级独立开关，再评估新增设置项（不动 PRD §12 现有表）。STAGE-14 不阻塞。
 - OQ-A11（新增，非阻塞）备注全文索引与正文内联高亮 — 备注搜索当前折叠进 FTS `summary` 列（命中归为 summary match），专用 `annotations` FTS 列需重建 items_fts 虚表 + 全量重提取，故延后；Reader 正文内联高亮渲染（在文章中标记选区）延后，当前以 HighlightsPanel 列表 + 工具栏 Highlight/Note 呈现（高亮独立存储不改原文，满足 §5.2.5 验收）。STAGE-18 不阻塞。
+- OQ-A12（新增，非阻塞）Tags 页「Recently growing」增长数据 + Export 目标路径选择 — `item_tags` 无创建时间戳（PRD §12 不增列），无法计算标签增长时间序列，故「Recently growing」以真实近似（最新创建标签 + 当前计数）呈现、不编造增量；真实增长统计需为 item_tags 加时间戳（属 schema 变更，留待后续）。Export 目标路径：v0.1/v0.2 导出落数据目录 `files/exports/`，无浏览器下载端点/原生目录选择器，UI 以展示数据目录为准、「Change」暂不实现。STAGE-19 不阻塞。
 - OQ-A10（新增，非阻塞）Ask scope 的「当前标签 / 选中资料」上下文来源 — 独立 Ask 页暂无「当前标签/选中集」，tag/selected chip 当前无 ID 即等同 all；当前 all 完整可用。后续可从 Library/Reader 进入 Ask 时带入 tagIds/itemIds（API 已支持 scope.tagIds/itemIds）。STAGE-17 不阻塞。
 - OQ-A9（新增，非阻塞）向量检索后端与队列优先级 — 当前默认：embedding 存 `ai_outputs(type='embedding')`，语义检索用 **brute-force 余弦**（零原生依赖、可测、v0.2 规模足够）；**sqlite-vec ANN** 作为后续规模化加速（PRD §5.2.3.6「可使用」非必须）。jobs 表无 priority 列，embedding「低优先级」（§14.6.6）以 FIFO 后置近似；若需严格优先级再评估（不动 PRD §12）。STAGE-15 不阻塞。
 - ~~OQ-R1 重复 URL 默认行为~~ ✅ 已定：status="exists" + forceNew 新建（STAGE-04 落地）
