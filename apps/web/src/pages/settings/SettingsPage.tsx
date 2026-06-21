@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useStatus } from "@/hooks/useItems";
 import { useTheme, type ThemePref } from "@/lib/theme";
 import { currentLang, setLang } from "@/lib/i18n";
+import { ProvidersSection } from "@/features/settings/ProvidersSection";
 
 type Section = "appearance" | "language" | "dataLocation" | "aiProviders" | "privacy" | "about";
 const SECTIONS: Section[] = [
@@ -138,14 +139,7 @@ export function SettingsPage() {
             </section>
           )}
 
-          {section === "aiProviders" && (
-            <section>
-              <h2 className="text-[20px] font-semibold">{t("settings.aiProviders")}</h2>
-              <p className="mt-3 max-w-[460px] text-[13px] text-text2">
-                {t("settings.aiProvidersDesc")}
-              </p>
-            </section>
-          )}
+          {section === "aiProviders" && <ProvidersSection />}
 
           {section === "privacy" && (
             <section>

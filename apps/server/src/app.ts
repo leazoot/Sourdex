@@ -1,5 +1,5 @@
 import cors from "@fastify/cors";
-import { isSourdexError, NotFoundError, ValidationError } from "@sourdex/core";
+import { AIProviderError, isSourdexError, NotFoundError, ValidationError } from "@sourdex/core";
 import Fastify, { type FastifyInstance } from "fastify";
 import { ZodError } from "zod";
 import type { ServerConfig } from "./config.js";
@@ -10,6 +10,7 @@ import { registerItemRoutes } from "./routes/items.js";
 import { registerPairRoutes } from "./routes/pair.js";
 import { registerSearchRoutes } from "./routes/search.js";
 import { registerExportRoutes } from "./routes/export.js";
+import { registerProviderRoutes } from "./routes/providers.js";
 
 /** Endpoints reachable without a paired token: liveness + the pairing handshake itself. */
 const PUBLIC_PATHS = new Set(["/api/health", "/api/pair/initiate", "/api/pair/complete"]);
@@ -72,6 +73,11 @@ export async function buildApp(
       reply.code(404).send({ error: error.code, message: error.message });
       return;
     }
+    // Upstream AI provider failure: the message is safe (no key/body) and readable.
+    if (error instanceof AIProviderError) {
+      reply.code(502).send({ error: error.code, message: error.message });
+      return;
+    }
     // Oversized capture payload: return a readable 413 instead of a generic 500.
     if ((error as { code?: unknown }).code === "FST_ERR_CTP_BODY_TOO_LARGE") {
       reply.code(413).send({ error: "BODY_TOO_LARGE", message: "This page is too large to save." });
@@ -89,6 +95,7 @@ export async function buildApp(
   registerItemRoutes(app, container);
   registerSearchRoutes(app, container);
   registerExportRoutes(app, container);
+  registerProviderRoutes(app, container);
 
   return app;
 }

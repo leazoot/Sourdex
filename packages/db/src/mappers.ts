@@ -1,6 +1,6 @@
 /** Map database rows (snake_case columns, nullable defaults) to core domain DTOs. */
-import type { Capture, Item, Job, Tag } from "@sourdex/core";
-import type { CaptureRow, ItemRow, JobRow, TagRow } from "./schema.js";
+import type { Capture, Item, Job, ProviderConfig, Tag } from "@sourdex/core";
+import type { CaptureRow, ItemRow, JobRow, ProviderConfigRow, TagRow } from "./schema.js";
 
 export function mapItem(row: ItemRow): Item {
   return {
@@ -63,5 +63,19 @@ export function mapJob(row: JobRow): Job {
     updatedAt: row.updatedAt,
     startedAt: row.startedAt,
     completedAt: row.completedAt,
+  };
+}
+
+export function mapProviderConfig(row: ProviderConfigRow): ProviderConfig {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    baseUrl: row.baseUrl,
+    chatModel: row.chatModel,
+    embeddingModel: row.embeddingModel,
+    enabled: row.enabled,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }

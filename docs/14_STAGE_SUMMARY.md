@@ -58,6 +58,24 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-12：AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：搭建 AI 的「基础设施」——Provider 抽象/适配、API Key 安全存储、Provider 配置 CRUD + 设置页；AI 默认关闭、发送前明示数据外发。不含摘要/标签/embedding/RAG（STAGE-13~17）。
+- 已完成内容：
+  - TASK-054：契约 `core/contracts/secret-store.ts` + `SecretStoreError`；实现 `apps/server/.../encrypted-file-secret-store.ts`——单 `secrets.enc` AES-256-GCM，密钥 scrypt 派生自 0600 `secret.key` + 每文件随机 salt，仅 `node:crypto`；写临时文件再 rename；解密失败/损坏抛 SecretStoreError。5 单测。
+  - TASK-055：`@sourdex/ai`——`OpenAICompatibleProvider`/`OllamaProvider`（Adapter，实现 LLM+Embedding）+ `createLLMProvider`/`createEmbeddingProvider` 工厂（未实现类型抛错）+ 可注入 `fetch`；错误统一 `AIProviderError`，不含 Key/正文。9 单测。
+  - TASK-056：`ProviderConfigRepository`（CRUD，Key 不入库）+ `ProviderConfigService`（配置经 repo、Key 经 `SecretStore`，返回含 `hasApiKey` 的视图，update apiKey 三态，testConnection）。接入 config/container。repo 6 + service 7 测试。
+  - TASK-057：`/api/settings/providers` 路由（GET/POST/PATCH/DELETE/:id/test，Zod 校验，响应绝不回传明文 Key）；errorHandler 加 `AIProviderError→502`。5 集成测试。
+  - TASK-058：Settings AI 配置页（apps/web，对照设计稿 08）——provider 类型卡 + endpoint + model + API Key + 启停 + 测试连接 + 删除确认 + 数据外发说明；新增 Input/Switch 组件；i18n EN/简中；组件 < 150 行。3 组件测试。
+- 关键产出：用户可配置 AI Provider 并安全保存 Key（不入库/不入日志/不回传），为 STAGE-13+（摘要/标签/语义/RAG）提供 Provider 抽象 + 配置 + 密钥基座；AI 默认关闭，关闭时保存/搜索/导出不受影响。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 200（42 文件，+35）** / `pnpm build` 9/9 ✅。
+- 重要决策：OQ-T7 = 本地加密文件（非 Keychain，诚实标注威胁模型）；Key 以 config.id 为键存 SecretStore；UI 仅暴露两种已实现 Provider 类型（openai-compatible/ollama），与设计稿一致；摘要/标签/语义/外发开关因无持久化表（PRD §12 不增表）推迟到 STAGE-13+。
+- 遗留问题：testConnection 走真实网络（仅单测以 mock 覆盖，集成测试只验 404 路径）；Provider 类型 anthropic/gemini/lm-studio 工厂未实现（lm-studio 走 OpenAI 形已可用，UI 暂不暴露）；`secret.key` 与 `secrets.enc` 同目录，安全性弱于 OS Keychain（后续增强）。
+- 下一阶段目标：STAGE-13 AI 摘要（后台任务，ai_outputs 启用，可关闭）。
+- 下一步建议：进入 STAGE-13 前确认摘要 prompt/JSON schema 约束（PRD §14.3）与「AI 不阻塞保存主流程」的任务编排；AI 开关/数据外发开关的持久化方式（是否需设置表，PRD §12 不增表的边界）需作为 Open Question 先澄清。
+
 ### STAGE-11：抓取质量硬化（动态页 / Discourse / 占位噪声过滤）— BATCH-02
 
 - 阶段状态：DONE

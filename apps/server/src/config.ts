@@ -9,6 +9,8 @@ export interface ServerConfig {
   dbPath: string;
   /** Path to the local-service token file (OQ-A1, plugin pairing). */
   tokenPath: string;
+  /** Path to the encrypted secret store (OQ-T7, AI API keys). */
+  secretsPath: string;
   /** Extra allowed CORS origins (in addition to localhost + chrome-extension). */
   corsOrigins: string[];
 }
@@ -36,6 +38,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     dataDir,
     dbPath: join(dataDir, "sourdex.db"),
     tokenPath: join(dataDir, "config", "auth.json"),
+    secretsPath: join(dataDir, "config", "secrets.enc"),
     corsOrigins: (env.SOURDEX_CORS_ORIGINS ?? "")
       .split(",")
       .map((s) => s.trim())

@@ -667,9 +667,40 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 ### STAGE-12：AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）
 
-- 阶段目标：LLMProvider/EmbeddingProvider 适配（OpenAI 兼容 / Ollama）、API Key 安全存储（OQ-T7 已定：本地加密文件 AES-256-GCM）、Settings AI 配置页；AI 默认关闭。
-- 阶段状态：TODO（OQ-T7 已确认，待用户下发 /goal 启动）
+- 阶段目标：LLMProvider/EmbeddingProvider 适配（OpenAI 兼容 / Ollama）、API Key 安全存储（OQ-T7 已定：本地加密文件 AES-256-GCM）、Settings AI 配置页；AI 默认关闭、发送前明示数据外发。
+- 阶段状态：DONE（2026-06-21，TASK-054~058 全部 DONE）
 - 是否需要人工确认：OQ-T7 已确认（2026-06-21）：本地加密文件
+- 阶段范围说明：仅做「基础设施」——Provider 抽象/适配、密钥安全存储、Provider 配置 CRUD + 设置页。**不含**摘要/标签/embedding/RAG 任务本身（属 STAGE-13~17）。
+
+#### TASK-054：SecretStore（本地加密文件密钥库）— STATUS: DONE
+- 契约 `packages/core/contracts/secret-store.ts`：`SecretStore { get/set/delete/has(key) }`（异步）。
+- 实现 `apps/server/src/infrastructure/encrypted-file-secret-store.ts`：数据目录 `secrets.enc`，AES-256-GCM；主密钥 scrypt 派生（机器盐 + 持久随机盐，文件权限 600）；仅 `node:crypto`，零原生依赖。
+- DI：构造函数注入文件路径 + 主密钥来源，便于临时目录单测。
+- 验收：加密/解密往返、缺失键返回 null、覆盖写、删除、文件损坏报明确错误；单测在临时目录、测试后清理；密文不含明文 Key。
+- 是否需要人工确认：否
+
+#### TASK-055：packages/ai —— Provider 适配 + 工厂 + 错误类型 — STATUS: DONE
+- 新建 `@sourdex/ai`：`OpenAICompatibleProvider`、`OllamaProvider` 实现 `LLMProvider`/`EmbeddingProvider`（Adapter）；`createLLMProvider(config,{apiKey})` / `createEmbeddingProvider(...)` 工厂；`AIProviderError`。
+- HTTP 经注入 `fetch`（DI，便于 mock）；不记录正文/Key。
+- 验收：工厂按 type 返回对应 Provider、未知 type 抛错；chat/embed 用 mock fetch 单测正常+错误路径；OpenAI 与 Ollama 报文映射各有单测。
+- 是否需要人工确认：否
+
+#### TASK-056：ProviderConfig Repository + Service — STATUS: DONE
+- `packages/db` ProviderConfigRepository：provider_configs CRUD（返回 core DTO，Key 不入库）；确认 provider_configs 已在迁移中（v0.2 启用）。
+- `apps/server` ProviderConfigService：编排配置 CRUD + 通过 `SecretStore` 存取 API Key（DI）；`enabled` 切换；可选「测试连接」用注入的 Provider 工厂。
+- 验收：repository 用测试 SQLite 单测 CRUD；service 单测（mock repo + mock SecretStore）：保存配置时 Key 走 SecretStore 不入库、读取不回传明文 Key。
+- 是否需要人工确认：否
+
+#### TASK-057：AI Provider 设置 API 路由 — STATUS: DONE
+- 路由 `/api/settings/providers`（GET 列表 / POST 新建 / PUT 更新 / DELETE）：Zod 校验；响应**绝不回传明文 API Key**（仅返回是否已配置）；沿用 Bearer 鉴权 + CORS 白名单。
+- 验收：路由集成测试覆盖 CRUD + 校验失败 + Key 不出现在响应；错误经统一 errorHandler 映射。
+- 是否需要人工确认：否
+
+#### TASK-058：Settings AI 配置页（apps/web）— STATUS: DONE
+- 先对照 `design/`（settings 截图 08/系统规范 11）确认 AI 配置区呈现；设计稿若无 AI 区块 → 记 Open Question 后按设计系统 token 最小实现，不自由发挥。
+- 功能：Provider 列表/新增/编辑/删除/启停；API Key 输入（写入后不回显）；**数据外发说明**（发送前明示，PRD §14.1/§17.1）；AI 默认关闭。i18n（EN/简中）、浅深主题。
+- 验收：TanStack Query 走既有 API 客户端；组件 < 150 行、无硬编码文案/颜色；与设计稿一致；关闭 AI 时保存/搜索/导出不受影响。
+- 是否需要人工确认：UI 呈现若与设计稿冲突则 Decision Required
 
 ### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BACKLOG-001
 ### STAGE-14：AI 自动标签（规范化复用）— BACKLOG-002

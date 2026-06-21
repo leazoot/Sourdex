@@ -30,6 +30,7 @@ export async function createTestServer(): Promise<TestServer> {
     dataDir,
     dbPath: ":memory:",
     tokenPath: join(dataDir, "config", "auth.json"),
+    secretsPath: join(dataDir, "config", "secrets.enc"),
     corsOrigins: [],
   };
   const container = createContainer(config);

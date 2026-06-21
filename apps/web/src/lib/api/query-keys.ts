@@ -7,4 +7,5 @@ export const queryKeys = {
   itemContent: (id: string) => ["item-content", id] as const,
   search: (params: SearchInput) => ["search", params] as const,
   status: () => ["status"] as const,
+  providers: () => ["providers"] as const,
 };

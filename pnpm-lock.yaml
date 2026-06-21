@@ -82,6 +82,9 @@ importers:
       '@fastify/cors':
         specifier: ^10.0.1
         version: 10.1.0
+      '@sourdex/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@sourdex/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -161,6 +164,12 @@ importers:
       vite:
         specifier: 6.4.3
         version: 6.4.3(@types/node@22.20.0)(jiti@2.7.0)(lightningcss@1.32.0)
+
+  packages/ai:
+    dependencies:
+      '@sourdex/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core: {}
 

@@ -55,6 +55,13 @@ export class NotFoundError extends SourdexError {
   }
 }
 
+/** Failure reading/writing the encrypted secret store (PRD §17.2). */
+export class SecretStoreError extends SourdexError {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, "SECRET_STORE_ERROR", options);
+  }
+}
+
 /** Invalid input that failed validation before reaching the domain. */
 export class ValidationError extends SourdexError {
   constructor(message: string, options?: { cause?: unknown }) {

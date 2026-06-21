@@ -4,9 +4,51 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-11（抓取质量硬化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（TASK-051/052/053）：占位噪声预清理 + Discourse 适配器 + 扩展抓取前滚动加载；test 165 全绿。按 /goal 停在 STAGE-11。
+**BATCH-02（v0.2）进行中 — STAGE-12（AI 基础设施）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（TASK-054~058）：SecretStore 加密文件 + `@sourdex/ai` Provider 适配/工厂 + ProviderConfig 仓储/服务 + 设置 API 路由 + Settings AI 配置页；AI 默认关闭、明示数据外发；**test 200 全绿**。按 /goal 停在 STAGE-12。
 - **OQ-T7 已确认（2026-06-21，用户决定）：API Key 安全存储 = 本地加密文件**（数据目录 `secrets.enc`，AES-256-GCM + scrypt 派生主密钥，仅依赖 `node:crypto`；零原生依赖、跨平台一致、临时目录即可测）；系统 Keychain 留作后续增强。已同步 08_TASKS / 04_TECH_STACK / security 规则。STAGE-12（AI 基础设施）阻塞已解除，待用户下发 /goal 启动。
 - 今日另提交：UI/bug 修复（Select 箭头间距、设置外观预览、capture 32MB 体积上限+413）已推送 `e6c5f97`。
+
+### STAGE-12 进度记录（2026-06-21，AI 基础设施 DONE）
+
+#### TASK-058（Settings AI 配置页 apps/web）— DONE
+- 对照设计稿 settings 08（AI providers 区：provider 类型卡 + endpoint + API key + model）实现，不自由发挥。摘要/自动标签/语义/数据外发开关属 STAGE-13+ 功能（无持久化表，PRD §12 不增表），本阶段不做，仅保留**数据外发说明**文案。
+- API 客户端 `lib/api/providers.ts`（list/create/update/delete/test，`ProviderConfigView` 不含明文 Key）；`query-keys` 加 providers；hooks `useProviders.ts`（增删改查 + 测试连接，invalidate）。
+- UI 组件：`components/ui/Input.tsx`、`Switch.tsx`（设计 token）；`features/settings/ProviderForm.tsx`（类型卡 openai-compatible/ollama、name/endpoint/model/apiKey/enabled，新建/编辑；ollama 不显示 Key；编辑留空保持原 Key）、`ProviderRow.tsx`（启停 switch、测试连接结果、编辑、删除、Key 徽章）、`ProvidersSection.tsx`（列表 + 新增 + 删除确认 + 外发说明）；接入 SettingsPage aiProviders 区。组件均 < 150 行。
+- i18n：en/zh 新增 settings.ai* 与 provider.* 文案；无硬编码文案/颜色；浅深主题用 token。
+- 测试：`ProvidersSection.test.tsx`（3，jsdom + QueryClient + i18n）：空态 + 外发说明 + 新增按钮、打开表单含两种已实现类型、已配置项显示 Key 徽章与操作；既有 SettingsPage 测试不受影响。
+- 检查：web typecheck ✅；vitest 6/6（含既有）✅；eslint 0；web build ✅。
+
+#### STAGE-12 收尾全量检查（2026-06-21）
+- typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 200/200（42 文件，165→200，+35）**；`pnpm build` 9/9 ✅。
+- 测试增量：secret-store 5、ai 9、provider-config repo 6、provider-config service 7、provider routes 5、providers-section 3 = 35。
+
+#### TASK-054（SecretStore：本地加密文件密钥库）— DONE
+- 新增契约 `packages/core/src/contracts/secret-store.ts`：`SecretStore { get/set/delete/has }`（异步）；core errors 新增 `SecretStoreError`；contracts barrel 导出。
+- 新增实现 `apps/server/src/infrastructure/security/encrypted-file-secret-store.ts`：单 blob `secrets.enc`，AES-256-GCM；密钥 scrypt 派生自 0600 `secret.key`（默认随机生成）+ 每文件随机 salt；仅 `node:crypto`、零原生依赖；写临时文件再 rename 防半写；解密失败/损坏抛 `SecretStoreError`。诚实注释：非 Keychain 替代，防偶发泄漏/库内明文，Keychain 留作后续增强（OQ-T7）。
+- DI：`keyMaterial` 可注入，单测用固定密钥、临时目录、测试后清理。
+- 测试 `encrypted-file-secret-store.test.ts`（5）：跨实例往返 + 缺失键 null、覆盖/幂等删除、磁盘无明文（值与键名均不出现）、错误密钥 → SecretStoreError、文件损坏 → SecretStoreError。
+- 检查：`@sourdex/core` build ✅；vitest 5/5 ✅；core+server typecheck ✅；eslint 0。
+
+#### TASK-055（packages/ai：Provider 适配 + 工厂）— DONE
+- 新建 `@sourdex/ai`（package.json/tsconfig，移除占位 .gitkeep）。
+- `src/http.ts`：`FetchLike`（可注入 fetch，默认全局）+ `postJson`（传输/HTTP/解析失败统一映射 `AIProviderError`，错误不含请求体/Key）+ `readString` 安全取值。
+- `providers/openai-compatible.ts`：`OpenAICompatibleProvider` 实现 LLMProvider+EmbeddingProvider（`/chat/completions`、`/embeddings`，Bearer Key）；`providers/ollama.ts`：`OllamaProvider`（`/api/chat`、`/api/embed`，无 Key，默认 127.0.0.1:11434）。
+- `factory.ts`：`createLLMProvider`/`createEmbeddingProvider`（type→适配器；openai-compatible/lm-studio→OpenAI 形，ollama→Ollama，anthropic/gemini 未实现抛错）+ `isProviderImplemented`。错误用 core `AIProviderError`。
+- 测试 `ai.test.ts`（9，mock fetch 记录调用）：工厂分派 + 未实现类型抛错 + isProviderImplemented；openai chat/embed 报文映射 + URL/Bearer；HTTP 错误/缺内容/无模型 → AIProviderError；ollama chat/embed + 默认 baseUrl。
+- 检查：typecheck ✅；vitest 9/9 ✅；eslint 0；build ✅。
+
+#### TASK-056（ProviderConfig Repository + Service）— DONE
+- `packages/db`：schema 加 `ProviderConfigRow`；mappers 加 `mapProviderConfig`；新增 `ProviderConfigRepository`（create/findById/list/update/delete，create 默认 enabled=false，update 支持以 null 显式清空可空字段，Key 不入库）；barrel 导出。provider_configs 表已在 0000_init 迁移中。
+- `apps/server`：新增 `ProviderConfigService`（list/get/create/update/remove/testConnection）——配置经 repo、API Key 经注入 `SecretStore`（key=config.id），返回 `ProviderConfigView`（含 `hasApiKey`，**绝不含明文 Key**）；update 的 apiKey：string 改写 / null 清除 / undefined 不动；testConnection 经注入工厂（默认 `@sourdex/ai` createLLMProvider）做最小 chat ping。
+- 接线：server package 加依赖 `@sourdex/ai`；config 加 `secretsPath`（`config/secrets.enc`）；container 创建 `EncryptedFileSecretStore` + repo + service 并导出；testing.ts 同步 secretsPath。
+- 测试：repo 6（CRUD + 默认禁用 + null 清空 + 缺失更新返回 null + 删除幂等）；service 7（Key 入 SecretStore 不入视图、无 Key 创建、update 三态、remove 连带删 Key、list 反映 hasApiKey、testConnection ok/NotFound）。
+- 检查：db+server typecheck ✅；vitest 13/13 ✅；eslint 0；db build ✅。
+
+#### TASK-057（AI Provider 设置 API 路由）— DONE
+- 新增 `routes/providers.ts`：`GET /api/settings/providers`（列表）、`GET /:id`、`POST`（201）、`PATCH /:id`（部分更新，house style）、`DELETE /:id`、`POST /:id/test`（测试连接）。全部 Zod 校验；响应仅含非密配置 + `hasApiKey`，**绝不回传明文 Key**；apiKey 字段：string 改写 / null 清除 / 省略不变。
+- `app.ts`：注册路由；errorHandler 新增 `AIProviderError → 502`（消息安全可读，无 Key/正文）。沿用既有 Bearer 鉴权 + CORS 白名单（providers 路由不在 PUBLIC_PATHS）。
+- 集成测试 `providers.integration.test.ts`（5）：完整 CRUD 生命周期且任何响应不含明文 Key、null 清空 Key、非法输入（坏 type/坏 URL/缺 name）400、无 token 401、test 缺失 id 404。
+- 检查：server typecheck ✅；vitest 5/5 ✅；eslint 0。
 
 ### STAGE-11 进度记录（2026-06-21）
 

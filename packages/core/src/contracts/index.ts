@@ -6,3 +6,4 @@ export * from "./exporter.js";
 export * from "./search-engine.js";
 export * from "./logger.js";
 export * from "./ai.js";
+export * from "./secret-store.js";

@@ -4,6 +4,7 @@ import {
   createSqlite,
   ItemRepository,
   JobRepository,
+  ProviderConfigRepository,
   runMigrations,
   SearchRepository,
   TagRepository,
@@ -14,6 +15,7 @@ import { createExtractor } from "@sourdex/extractor";
 import type { ServerConfig } from "./config.js";
 import { ensureDataDirs } from "./paths.js";
 import { AuthService, loadOrCreateToken } from "./infrastructure/security/auth.js";
+import { EncryptedFileSecretStore } from "./infrastructure/security/encrypted-file-secret-store.js";
 import { LocalStorage } from "./infrastructure/storage/local-storage.js";
 import { JobWorker } from "./infrastructure/jobs/job-worker.js";
 import { createExtractContentJob } from "./infrastructure/jobs/extract-content-job.js";
@@ -21,6 +23,7 @@ import { CaptureService } from "./services/capture-service.js";
 import { ItemService } from "./services/item-service.js";
 import { SearchService } from "./services/search-service.js";
 import { ExportService } from "./services/export-service.js";
+import { ProviderConfigService } from "./services/provider-config-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -31,10 +34,12 @@ export interface Container {
   tagRepo: TagRepository;
   jobRepo: JobRepository;
   searchRepo: SearchRepository;
+  providerConfigRepo: ProviderConfigRepository;
   captureService: CaptureService;
   itemService: ItemService;
   searchService: SearchService;
   exportService: ExportService;
+  providerConfigService: ProviderConfigService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -58,8 +63,10 @@ export function createContainer(config: ServerConfig): Container {
   const tagRepo = new TagRepository(db);
   const jobRepo = new JobRepository(db);
   const searchRepo = new SearchRepository(db);
+  const providerConfigRepo = new ProviderConfigRepository(db);
 
   const storage = new LocalStorage(config.dataDir);
+  const secrets = new EncryptedFileSecretStore({ secretsPath: config.secretsPath });
 
   const captureService = new CaptureService({
     itemRepo,
@@ -71,6 +78,7 @@ export function createContainer(config: ServerConfig): Container {
   const itemService = new ItemService({ itemRepo, captureRepo, tagRepo, searchRepo, storage });
   const searchService = new SearchService({ searchRepo });
   const exportService = new ExportService({ itemRepo, captureRepo, tagRepo, storage });
+  const providerConfigService = new ProviderConfigService({ repo: providerConfigRepo, secrets });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));
 
@@ -89,10 +97,12 @@ export function createContainer(config: ServerConfig): Container {
     tagRepo,
     jobRepo,
     searchRepo,
+    providerConfigRepo,
     captureService,
     itemService,
     searchService,
     exportService,
+    providerConfigService,
     auth,
     worker,
     close: () => sqlite.close(),
