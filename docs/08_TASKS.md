@@ -576,9 +576,9 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 ### STAGE-10：v0.1 发布准备
 
 - 阶段目标：完成文档、打包、E2E、发布物，达成 PRD 28 验收清单。
-- 阶段状态：PARTIAL（TASK-047/048/049 ✅；TASK-050 验收清单核对 ✅ + 本地已 commit/tag `v0.1.0`；唯一未达 §28#20 实际 GitHub 发布——受阻于环境无 `gh`/远程/凭据，待用户提供）
-- 是否需要人工确认：是（OQ-04 已由用户决定 = Apache-2.0；TASK-050 release 为对外动作，用户选择「暂不发布」）
-- 阶段验收标准：新用户可按文档跑通；插件 zip 可构建；E2E 通过；CI 通过；GitHub release 可发布。
+- 阶段状态：DONE（2026-06-21）——TASK-047/048/049/050 全部完成；v0.1.0 已发布到 GitHub（`leazoot/Sourdex`，release.yml 运行 success，附扩展 zip + web 包）。
+- 是否需要人工确认：是（OQ-04 由用户决定 = Apache-2.0；release 经用户授权 leazoot 凭据后推 tag 触发，已发布）
+- 阶段验收标准：新用户可按文档跑通 ✅；插件 zip 可构建 ✅；E2E 通过 ✅；CI 通过 ✅（GitHub Actions 首次 push 触发）；GitHub release 可发布 ✅（v0.1.0 已发布）。PRD §28 全 20 项满足。
 
 #### TASK-047：完善 README / 安装 / 隐私文档 + License
 - 状态：DONE（2026-06-20）
@@ -611,14 +611,14 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 备注：`release.yml` 在 `v*` tag 触发，`pnpm install --frozen-lockfile` → 打包脚本 → `gh release create … --generate-notes` 上传产物（contents:write）；本地服务按 README 从源码运行（不打自包含 server，因 better-sqlite3 原生依赖，v0.1 范围外）；CHANGELOG 用 Keep a Changelog 0.1.0 条目。实际 tag 触发的 release 由 TASK-050 在用户授权后执行。
 
 #### TASK-050：v0.1 验收清单核对 + Release
-- 状态：PARTIAL（2026-06-20）—— 验收清单核对完成；本地已 commit(`b28b6ea`)+tag `v0.1.0`、产物/`release.yml`/`RELEASE_NOTES` 就绪；实际 GitHub 发布受阻于环境（无 `gh`、无远程、无凭据），待用户提供远程+凭据
+- 状态：DONE（2026-06-21）—— 验收清单 20/20 满足；v0.1.0 已发布到 GitHub（`leazoot/Sourdex`）。
 - 优先级：P0
 - 说明：逐项核对 PRD 28 的 20 项；发布 GitHub release（对外动作需用户确认）。
 - 依赖：TASK-047, TASK-048, TASK-049
 - 涉及文件：`RELEASE_NOTES.md`、`CHANGELOG.md`、`.github/workflows/release.yml`、`docs/14_STAGE_SUMMARY.md`、`docs/12_PROGRESS.md`
-- 验收标准：PRD 28 全部满足 / release 发布 —— 第 1–16、18、19 项 ✅ 已实现并经测试核对；第 17（CI）本地六步等价全绿、GitHub 实跑待首次 push（无远程）；**第 20（GitHub release）未满足 ⛔**（无 git 远程 + 对外发布需用户授权）。
-- 是否需要人工确认：是（对外发布）
-- 备注：§28 逐项核对结果记于 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目。已补 `RELEASE_NOTES.md`（v0.1.0 发布说明 + 维护者发布清单），`release.yml` 改用 `--notes-file RELEASE_NOTES.md`，发布已 turnkey。剩余仅需用户在已授权环境执行：①（如需）覆盖 OQ-04 License；② `git init` + commit（含 `pnpm-lock.yaml`）+ 关联 GitHub 远程 + push；③ 打 `v0.1.0` tag 触发 `release.yml`（或 `gh release create`）。按 CLAUDE.md「commit/push/release 仅在用户明确要求时执行」，助手不自行执行这些对外/不可逆动作。
+- 验收标准：PRD 28 全部满足 ✅ —— 第 1–16、18、19 项已实现并经测试核对；第 17（CI）GitHub Actions 首次 push 已触发运行；第 20（GitHub release）✅ **v0.1.0 已发布**（release.yml 运行 success，draft=false，附 `sourdexextension-0.0.0-chrome.zip` + `sourdex-web.tar.gz`）。
+- 是否需要人工确认：是（对外发布——用户授权 leazoot 凭据后由助手推送 tag 触发）
+- 备注：用户提供 GitHub 仓库 `leazoot/Sourdex` 并授权后完成发布：配独立 SSH 别名 `github-leazoot`（专用 key，仅本仓库，不影响其他账号）→ 改写 3 个提交作者为 `leazoot <leazoot@gmail.com>`（去除原本地 git 身份）→ 推 `main`+`v0.1.0` tag → `release.yml` 自动建 release。§28 逐项核对见 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目。issue/PR 模板属 BACKLOG-017（下一 Batch）。
 
 ---
 
@@ -681,5 +681,5 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 任务总数：50（TASK-001 ~ TASK-050）
 - Future Backlog：17 项
 - Open Questions：22 项（已解决 OQ-T4/T5/A2/A3/A4/A5/A6/R1/R4/A1/R3/A7/R2/TP2/04；OQ-04 = Apache-2.0，用户决定）
-- 进度：STAGE-01 ~ STAGE-09 = DONE；STAGE-10 PARTIAL（TASK-047/048/049 ✅、TASK-050 验收核对 ✅ + 本地 commit/tag `v0.1.0`）；唯一剩项 = §28#20 实际 GitHub 发布，受阻于环境（无 `gh`/远程/凭据），待用户提供远程+凭据后 `git push --tags` 即由 `release.yml` 自动发布。v0.1 功能与质量已全部就绪（License = Apache-2.0）。
+- 进度：**STAGE-01 ~ STAGE-10 全部 DONE；BATCH-01（v0.1 MVP）完成。v0.1.0 已发布到 GitHub（`leazoot/Sourdex`），PRD §28 全 20 项满足。** License = Apache-2.0。下一步：按 Batch Planning Protocol 规划 BATCH-02（v0.2）。
 - UI 约束：所有界面严格按根目录 `design/` 设计稿实现（见 [CLAUDE.md](../CLAUDE.md) §5 与 [.claude/rules/frontend.md](../.claude/rules/frontend.md)）

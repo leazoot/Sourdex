@@ -4,27 +4,29 @@
 
 ## 当前项目状态
 
-**STAGE-10（v0.1 发布准备）已完成全部环境内可执行工作：TASK-047 文档+License、TASK-048 E2E、TASK-049 打包、TASK-050 验收核对 + 本地 commit(`b28b6ea`)+tag `v0.1.0`。STAGE-10 = PARTIAL：唯一未达 §28#20 实际 GitHub 发布——受阻于环境（无 `gh` CLI、无 git 远程、无凭据）。License = Apache-2.0（用户决定）。v0.1 功能与质量已全部就绪。**
+**🎉 v0.1.0 已发布到 GitHub（`leazoot/Sourdex`）。STAGE-10 = DONE，BATCH-01（v0.1 MVP）完成，PRD §28 全 20 项满足。** release.yml 运行 success，Release（draft=false）附 `sourdexextension-0.0.0-chrome.zip` + `sourdex-web.tar.gz`；CI 工作流首次 push 已触发。License = Apache-2.0。
 
-- 当前 Batch：**BATCH-01**（Sourdex v0.1 MVP）— 状态 IN_PROGRESS（收尾中）
-- 已完成 Stage：**STAGE-01 ~ STAGE-09** 均 DONE；**STAGE-10 = PARTIAL**（仅 §28#20 实际发布受环境阻塞）
-- PRD §28 验收：第 1–16、18、19 项 ✅；第 17（CI）本地全绿、GitHub 实跑待首次 push；第 20（release）⏸ 本地 commit/tag 就绪，发布受阻于环境无 `gh`/远程/凭据。
+- 当前 Batch：**BATCH-01**（Sourdex v0.1 MVP）— **DONE**
+- 已完成 Stage：**STAGE-01 ~ STAGE-10 全部 DONE**
+- PRD §28 验收：1–16、18、19 ✅；17（CI）GitHub Actions 首次 push 已触发；20（release）✅ v0.1.0 已发布。
 - 最终检查全绿：typecheck(13) / lint / format / test(152) / build(8) / e2e(1，五步关键链路)。
-- **OQ-04（License）= Apache-2.0（用户决定）**：初按 PRD §20.1 采用 AGPL-3.0，后由用户改定为 Apache-2.0（LICENSE 官方全文 + 文档引用已更新）。
-- 完成发布待用户提供基础设施：`git remote add origin <url>` + 凭据 → `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`），或安装/登录 `gh` 后 `gh release create`。
+- **OQ-04（License）= Apache-2.0（用户决定）**：初按 PRD §20.1 采用 AGPL-3.0，后由用户改定为 Apache-2.0。
+- 发布过程：用户提供 `leazoot/Sourdex` 并授权 → 配独立 SSH 别名 `github-leazoot`（专用 key，仅本仓库）→ 改写 3 个提交作者为 `leazoot <leazoot@gmail.com>`（去除原本地 git 身份）→ 推 main + v0.1.0 tag → release.yml 自动发布。
+- 下一步：按 Batch Planning Protocol 规划 BATCH-02（v0.2：AI 摘要/标签/语义检索/Ask 等），输出计划并等待确认。
 - **v0.1 核心闭环已全部贯通并经 E2E 验证：保存 → 提取 → 入库/索引 → 搜索 → 阅读 → 导出 Markdown。**
 - 已确认 OQ：OQ-R2=批量单条失败跳过并 `failed[]` 报告（STAGE-09）；OQ-TP2=E2E 经 capture API 覆盖保存路径、扩展 UI 由单测/集成覆盖（STAGE-10/TASK-048）。
 - **v0.1 核心闭环已全部贯通并经 E2E 验证：保存 → 提取 → 入库/索引 → 搜索 → 阅读 → 导出 Markdown。** UI 严格按 `design/`。
 
-## STAGE-10 进度记录（2026-06-20）
+## STAGE-10 进度记录（2026-06-20 ~ 06-21）
 
-### TASK-050（v0.1 验收清单核对 + Release）— PARTIAL（release 阻塞）
-- 逐项核对 PRD §28（20 项）：第 1–16、18、19 项 ✅ 已实现并经测试/E2E 核对（详见 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目的核对表）；第 17（CI）本地六步等价全绿、GitHub 实跑待首次 push；**第 20（GitHub release）未满足 ⛔**——本环境非 git 仓库、无 GitHub 远程，且对外发布需用户授权，无法在此执行。
-- 最终全套检查（2026-06-20）：`typecheck`✅(13) `lint`✅ `format:check`✅ `test`✅(152) `build`✅(8) `test:e2e`✅(1, 五步)。
-- 补齐发布交付物：`RELEASE_NOTES.md`（v0.1.0 发布说明 + 维护者发布清单/命令），`release.yml` 改用 `--notes-file RELEASE_NOTES.md`。
-- License 切换：用户改定 Apache-2.0 → LICENSE 换官方全文 + README/CONTRIBUTING/RELEASE_NOTES 引用更新。
-- **本地发布准备（重新下达完成目标后执行）**：仓库已是 git repo（main，原无提交），建立首个 release 提交 `b28b6ea`（277 文件，含 `pnpm-lock.yaml`，build/deps/db 经 .gitignore 排除）+ 注释 tag `v0.1.0`（提交信息含 Co-Authored-By 尾注）。
-- §28#20 实际 GitHub 发布**受阻于环境**：无 `gh` CLI、无 git 远程、无凭据，无法 push/publish。待用户提供远程+凭据后 `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`）即完成发布。
+### TASK-050（v0.1 验收清单核对 + Release）— DONE（2026-06-21，已发布）
+- 逐项核对 PRD §28（20 项）全部满足（核对表见 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目）。
+- 最终全套检查全绿：`typecheck`✅(13) `lint`✅ `format:check`✅ `test`✅(152) `build`✅(8) `test:e2e`✅(1, 五步)。
+- 发布交付物：`RELEASE_NOTES.md`（v0.1.0 发布说明）、`release.yml` 用 `--notes-file`、`CHANGELOG.md`。
+- License：用户改定 Apache-2.0 → LICENSE 官方全文 + README/CONTRIBUTING/RELEASE_NOTES 引用更新。
+- **发布到 GitHub `leazoot/Sourdex`**：① 用户提供仓库 + 授权；② 配独立 SSH 别名 `github-leazoot`（专用 key `id_ed25519_leazoot`、`ssh.github.com:443`、`IdentitiesOnly`，仅本仓库 remote 用，不影响其他账号/key）；③ 用 `git filter-branch` 把 3 个提交 author/committer 全部改写为 `leazoot <leazoot@gmail.com>`（去除原本地 git 身份，并清理 refs/original 备份）；④ `v0.1.0` tag 移到改写后 HEAD `7e3f184`；⑤ 推 `main` + `v0.1.0`。
+- **结果**：release.yml 运行 **success**，Release `Sourdex v0.1.0`（draft=false，published）附 `sourdexextension-0.0.0-chrome.zip` + `sourdex-web.tar.gz`；CI 工作流首次 push 已触发运行。§28#20 ✅ 满足。
+- 注：含旧账号信息的会话级文档备注未提交、不入公开仓库；公开历史作者均为 leazoot。
 - 文件：`RELEASE_NOTES.md`、`.github/workflows/release.yml`、`docs/08_TASKS.md`、`docs/12_PROGRESS.md`、`docs/14_STAGE_SUMMARY.md`。
 
 ### TASK-047（README / 安装 / 隐私文档 + License）— DONE

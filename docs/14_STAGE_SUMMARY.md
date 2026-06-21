@@ -60,14 +60,14 @@
 
 ### STAGE-10：v0.1 发布准备（文档 / License / E2E / 打包 / 发布）
 
-- 阶段状态：**PARTIAL**（可自动化部分全部完成；唯一剩项 GitHub release 由用户决定「暂不发布」而延后）
-- 开始/完成时间：2026-06-20 /（release 用户择期）
+- 阶段状态：**DONE**（2026-06-21）——v0.1.0 已发布到 GitHub（`leazoot/Sourdex`），PRD §28 全 20 项满足。
+- 开始/完成时间：2026-06-20 / 2026-06-21
 - 阶段目标：完成文档、打包、E2E、发布物，达成 PRD §28 验收清单。
 - 已完成内容：
   - TASK-047：发布版 README（PRD §20.3 全 10 项）+ PRD §20.2 必备文件（`LICENSE` **Apache-2.0** 官方全文、`docs/PRIVACY.md`、`docs/DEVELOPMENT.md`、`CONTRIBUTING.md`、`SECURITY.md`、`ROADMAP.md`、`CODE_OF_CONDUCT.md`）。
   - TASK-048：Playwright E2E `tests/e2e/save-search-export.spec.ts`——真实 server(dist)+Vite dev 联调跑通五步关键链路（save→inbox→search→reader→export），保存经 capture API、worker 真实提取+建索引；预写 auth.json 固定 token 免交互配对。
   - TASK-049：`pnpm --filter @sourdex/extension zip` 产出插件 zip；`scripts/package-release.sh` 汇集 `dist-release/`（扩展 zip + web 包）；`.github/workflows/release.yml`（`v*` tag → 打包 → `gh release create`）；`CHANGELOG.md`。
-  - TASK-050：PRD §28 验收清单逐项核对（见下表）；补 `RELEASE_NOTES.md`（v0.1.0 发布说明 + 发布清单）、`release.yml` 改用 `--notes-file`，发布 turnkey；release 由用户决定「暂不发布」而延后。
+  - TASK-050：PRD §28 验收清单逐项核对（见下表，20/20）；补 `RELEASE_NOTES.md`；发布到 GitHub `leazoot/Sourdex`（独立 SSH 别名、提交作者改写为 leazoot、推 main+v0.1.0 tag、release.yml 自动发布 success）。
 - PRD §28 验收核对（20 项）：
 
   | # | 项 | 状态 | 依据 |
@@ -88,16 +88,17 @@
   | 14 | 深色模式 | ✅ | theme light/dark/system |
   | 15 | README 指导新用户 | ✅ | README（TASK-047） |
   | 16 | 隐私文档清晰 | ✅ | docs/PRIVACY.md |
-  | 17 | CI 通过 | ⚠️ | ci.yml 六步本地等价全绿；GitHub 实跑待首次 push（无远程） |
+  | 17 | CI 通过 | ✅ | ci.yml 六步本地全绿；GitHub Actions 首次 push 已触发运行 |
   | 18 | 核心测试通过 | ✅ | test 152 + e2e 1 全绿 |
   | 19 | 插件 zip 可构建 | ✅ | wxt zip |
-  | 20 | GitHub release 可发布 | ⏸ | 本地已 commit(`b28b6ea`)+tag `v0.1.0`、产物/`release.yml`/`RELEASE_NOTES` 就绪；实际 GitHub 发布受阻于环境（无 `gh` CLI、无 git 远程、无凭据），需用户提供远程+凭据 |
+  | 20 | GitHub release 可发布 | ✅ | v0.1.0 已发布（`leazoot/Sourdex`，release.yml success，draft=false，附扩展 zip + web 包） |
 
 - 验证结果（本地）：typecheck ✅(13) / lint ✅ / format:check ✅ / test ✅(152) / build ✅(8) / e2e ✅(1，五步)。
-- 重要决策：**OQ-04 = Apache-2.0（用户决定）**——初按 PRD §20.1 推荐采用 AGPL-3.0，后由用户在两候选中改定为 Apache-2.0（LICENSE 官方全文 + README/CONTRIBUTING/RELEASE_NOTES 引用已更新）；**OQ-TP2** E2E 经 capture API 覆盖保存路径（headless 加载 MV3 脆弱），扩展 UI 由单测/集成覆盖；Vite dev 需 `--host 127.0.0.1` 以匹配 Playwright/CORS；**用户决定 v0.1 暂不对外发布**。
-- 遗留问题：GitHub release（§28#20）——本地仓库已 commit(`b28b6ea`)+tag `v0.1.0`、产物/工作流/发布说明就绪；**实际发布受阻于环境**（无 `gh` CLI、无 git 远程、无 GitHub 凭据）。完成发布需用户：① 提供 GitHub 远程（`git remote add origin <url>`）+ 推送凭据；② `git push -u origin main && git push origin v0.1.0`（tag 触发 `release.yml`），或安装并登录 `gh` 后 `gh release create v0.1.0 dist-release/* --notes-file RELEASE_NOTES.md`。issue/PR 模板、CODEOWNERS、changesets 属 BACKLOG-017（下一 Batch）。
-- 下一阶段目标：BATCH-01 收尾；按 Batch Planning Protocol 规划下一 Batch（v0.2：AI 摘要/标签/语义检索/Ask 等）。
-- 下一步建议：v0.1 功能与质量已全部就绪（License = Apache-2.0），发布按用户意愿延后。进入 Batch Planning Protocol，输出下一 Batch 计划并等待确认，不自动进入下一阶段。
+- 重要决策：**OQ-04 = Apache-2.0（用户决定）**——初按 PRD §20.1 推荐采用 AGPL-3.0，后由用户在两候选中改定为 Apache-2.0（LICENSE 官方全文 + 文档引用已更新）；**OQ-TP2** E2E 经 capture API 覆盖保存路径（headless 加载 MV3 脆弱），扩展 UI 由单测/集成覆盖；Vite dev 需 `--host 127.0.0.1` 以匹配 Playwright/CORS。
+- 发布执行：用户提供 GitHub 仓库 `leazoot/Sourdex` 并授权；配独立 SSH 别名 `github-leazoot`（专用 key、`ssh.github.com:443`、`IdentitiesOnly`，仅本仓库，不影响其他账号）；`git filter-branch` 改写 3 个提交作者为 `leazoot <leazoot@gmail.com>`（去除原本地 git 身份）；推 `main` + `v0.1.0` tag → `release.yml` 自动发布（success）。
+- 遗留问题：issue/PR 模板、CODEOWNERS、changesets 属 BACKLOG-017（下一 Batch）；CI 工作流首次 push 已触发，结果以 GitHub Actions 为准。
+- 下一阶段目标：BATCH-01 已完成；按 Batch Planning Protocol 规划下一 Batch（v0.2：AI 摘要/标签/语义检索/Ask 等）。
+- 下一步建议：v0.1.0 已发布。进入 Batch Planning Protocol，输出 BATCH-02 计划并等待确认，不自动进入下一阶段。
 
 ---
 
