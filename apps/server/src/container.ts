@@ -33,6 +33,7 @@ import { AutoTagService } from "./services/auto-tag-service.js";
 import { EmbeddingService } from "./services/embedding-service.js";
 import { SemanticSearchService } from "./services/semantic-search-service.js";
 import { HybridSearchService } from "./services/hybrid-search-service.js";
+import { AskService } from "./services/ask-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -54,6 +55,7 @@ export interface Container {
   embeddingService: EmbeddingService;
   semanticSearchService: SemanticSearchService;
   hybridSearchService: HybridSearchService;
+  askService: AskService;
   auth: AuthService;
   worker: JobWorker;
   /** Close underlying resources (DB handle). */
@@ -133,6 +135,16 @@ export function createContainer(config: ServerConfig): Container {
     semanticSearchService,
     tagRepo,
   });
+  const askService = new AskService({
+    providerConfigRepo,
+    secrets,
+    searchRepo,
+    semanticSearchService,
+    chunkRepo,
+    itemRepo,
+    tagRepo,
+    aiOutputRepo,
+  });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));
 
@@ -164,6 +176,7 @@ export function createContainer(config: ServerConfig): Container {
     embeddingService,
     semanticSearchService,
     hybridSearchService,
+    askService,
     auth,
     worker,
     close: () => sqlite.close(),

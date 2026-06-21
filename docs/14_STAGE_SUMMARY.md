@@ -58,6 +58,22 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：用户基于自己资料库提问（PRD §5.2.4 / §14.5）：仅基于已保存资料、每结论有引用、引用来自 chunks、证据不足说明、不编造、引用可跳转；支持复制；scope（全部/标签/选中）。
+- 已完成内容：
+  - TASK-072：`@sourdex/ai` `buildAnswerMessages`/`parseAnswerOutput`（强制引用、JSON 解析）+ core `AskScope/AskCitation/AskResult/AnswerConfidence`。6 测试。
+  - TASK-073：`AskService`（semantic+keyword 取证 chunk、scope 过滤、引用校验、无有效引用→证据不足、答案存 ai_outputs）+ `POST /api/ask` + container 接线。service 5 + 集成 3 测试。
+  - TASK-074：Ask 页面（AnswerCard 内联引用 chip + 证据 quote + 复制；提问栏 + scope；rail/路由启用）。3 测试。
+- 关键产出：可溯源问答闭环——答案仅来自用户资料、每条引用回链到具体 chunk、无引用不作答（改返回证据不足）、不编造库外事实；AI opt-in。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 280（58 文件，263→280，+17）** / `pnpm build` 9/9 ✅。**无 schema/迁移改动**（ai_outputs 已建）。
+- 重要决策：引用强制以「校验后无有效引用即不展示答案、返回证据不足」落实 PRD §14.5 rule 1（杜绝未引用结论）；Ask 为同步请求（非后台 job）；答案存 `ai_outputs(type='answer', item_id=null)`；检索 semantic 优先 + keyword 兜底（按 token 重叠选 item 内最佳 chunk）；provider 错误上抛走 502（与后台任务吞错不同——Ask 是前台请求）；core 搜索/AI 类型新增项均为 additive、不动 DB。
+- 遗留问题：OQ-A10（非阻塞）scope 的「当前标签/选中」上下文来源（API 已支持 scope.tagIds/itemIds，UI 待从 Library/Reader 带入；当前 all 完整可用）；keyword 兜底仅在已有 chunk（embedding 跑过）时提供证据，纯无 embedding 库 Ask 多走「证据不足」；导出回答为 Markdown（PRD §5.2.4.6）随导出阶段统一（当前提供复制引用）。
+- 下一阶段目标：STAGE-18 高亮与备注（annotations 启用，导出含高亮，PRD §5.2.5 / BACKLOG-005）。
+- 下一步建议：进入 STAGE-18 前明确 annotations 写入/读取与 Reader 选区交互、导出含高亮格式、user_signal 接入混合排序（STAGE-16 预留）。**当前按 /goal 停在 STAGE-17，等待用户下发 /goal 再进入 STAGE-18。**
+
 ### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BATCH-02
 
 - 阶段状态：DONE

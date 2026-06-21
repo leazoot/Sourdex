@@ -1,5 +1,7 @@
 /** AI domain types. Mirrors PRD §12.8 `ai_outputs`, §12.9 `provider_configs` (v0.2). */
 
+import type { SourceType } from "./item.js";
+
 /** Kind of AI output (PRD §12.8 `type`). */
 export type AiOutputType = "summary" | "tags" | "embedding" | "answer";
 
@@ -47,4 +49,34 @@ export interface SummaryOutput {
   usefulFor: string[];
   riskNotes: string[];
   suggestedTags: string[];
+}
+
+/** Model's confidence in an Ask answer (PRD §13.4 response, §5.2.4). */
+export type AnswerConfidence = "high" | "medium" | "low";
+
+/** Scope of sources an Ask question runs against (PRD §5.2.4 rule 4, §13.4). */
+export interface AskScope {
+  /** "all" (default) or a specific source type. */
+  type?: SourceType | "all";
+  tagIds?: string[];
+  itemIds?: string[];
+}
+
+/** A validated citation backing an Ask answer — always traces to a saved chunk (PRD §14.5). */
+export interface AskCitation {
+  /** 1-based index referenced inline in the answer (e.g. "[1]"). */
+  n: number;
+  itemId: string;
+  chunkId: string;
+  title: string;
+  url: string | null;
+  /** Source quote backing the citation (PRD §13.4). */
+  quote: string;
+}
+
+/** Ask answer with mandatory citations (PRD §5.2.4, §13.4). */
+export interface AskResult {
+  answer: string;
+  citations: AskCitation[];
+  confidence: AnswerConfidence;
 }

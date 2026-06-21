@@ -14,15 +14,15 @@ import {
 
 type IconType = ComponentType<{ size?: number }>;
 
-const PRIMARY: { to: string; icon: IconType; key: "inbox" | "library" | "search" }[] = [
+const PRIMARY: { to: string; icon: IconType; key: "inbox" | "library" | "search" | "ask" }[] = [
   { to: "/", icon: HomeIcon, key: "inbox" },
   { to: "/library", icon: LibraryIcon, key: "library" },
   { to: "/search", icon: SearchIcon, key: "search" },
+  { to: "/ask", icon: AskIcon, key: "ask" },
 ];
 
-// v0.2 surfaces — shown for design parity but disabled in v0.1 (OQ-D2).
-const SOON: { icon: IconType; key: "ask" | "export" | "tags" }[] = [
-  { icon: AskIcon, key: "ask" },
+// v0.2 surfaces still pending — shown for design parity but disabled (OQ-D2).
+const SOON: { icon: IconType; key: "export" | "tags" }[] = [
   { icon: ExportIcon, key: "export" },
   { icon: TagsIcon, key: "tags" },
 ];

@@ -4,7 +4,23 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-16（混合搜索排序）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~15 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础）。STAGE-16 = DONE（TASK-069~071）：`@sourdex/search` 混合打分（PRD §15.3 权重 + recency 半衰期 + tagScore + 相似度归一化）；`HybridSearchService` 融合 keyword∪semantic、统一过滤、排序分页、debug 明细；`/api/search?mode=hybrid`（无 provider 优雅降级不 409）；Web 搜索启用 keyword/hybrid 切换；user_signal 暂 0（待 STAGE-18）；core 加可选 `debug`/`scoreBreakdown`（非破坏）；**test 263 全绿**。按 /goal 停在 STAGE-16。
+**BATCH-02（v0.2）进行中 — STAGE-17（Ask 页面 RAG）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11~16 = DONE（抓取硬化 / AI 基础设施 / AI 摘要 / AI 自动标签 / 语义检索基础 / 混合搜索排序）。STAGE-17 = DONE（TASK-072~074）：`@sourdex/ai` 答案 prompt/JSON 解析（强制引用）；`AskService`（semantic+keyword 取证 chunk→引用校验→无有效引用即「证据不足」不展示）+ `POST /api/ask`（无 provider 409、答案存 `ai_outputs(answer)`、不编造）；Ask 页面（设计稿 05/16：提问栏+scope+答案卡含内联引用 chip+证据 quote+复制引用）、rail 启用 /ask；core 加 `AskScope/AskCitation/AskResult`；**test 280 全绿**。按 /goal 停在 STAGE-17。
+
+### STAGE-17 进度记录（2026-06-21，Ask 页面 RAG DONE）
+
+#### TASK-072（Ask Prompt + 答案/引用解析 @sourdex/ai）— DONE
+- `buildAnswerMessages`（system 强约束：仅用编号 passage、每结论 [n]、证据不足→空引用+confidence low、不编造）+ `parseAnswerOutput`（剥围栏/恢复 JSON、丢弃非法 citation、confidence 缺省 low、非 JSON 抛 AIProviderError）。core 加 `AskScope/AskCitation/AskResult/AnswerConfidence`。测试 6。
+- 检查：core/ai build+typecheck ✅，eslint 0。
+
+#### TASK-073（AskService + 检索 + 引用校验 + API server）— DONE
+- `AskService.ask`：取证 chunk（semantic 优先 + keyword 兜底按 token 重叠选最佳 chunk，scope 过滤 type/itemIds/tagIds）→无证据「证据不足」不调用 LLM→context packing（≤6 chunk，各 ≤1500 字）→chat→parse→**引用校验**（仅保留指向检索 chunk 的引用，映射 itemId/chunkId/title/url/quote）→**无有效引用即返回证据不足**（§14.5 rule 1「没有引用不得回答」）→存 `ai_outputs(type='answer', item_id=null)`。`POST /api/ask`（缺 question 400、无 provider 409、否则 AskResult）；provider 错误上抛（→502）。container 接线。
+- 测试：service 单测 5（带引用校验、无效引用→证据不足、无证据不调用模型、scope itemIds 过滤、provider 错误上抛）+ 集成 3（400/409/空库证据不足）。
+
+#### TASK-074（Ask 页面 UI apps/web）— DONE
+- `lib/api/ask.ts` + `hooks/useAsk.ts`；`features/ask/AnswerCard.tsx`（confidence 配色徽标、based-on、答案内联 [n] 引用 chip 跳转 reader、证据列表 quote + 跳转）；`pages/ask/AskPage.tsx`（提问栏 + scope chips + 无 provider 提示 + 证据不足提示 + 复制引用）；App 加 `/ask` 路由、Rail 将 Ask 由占位移入主导航。i18n EN/简中。
+- 测试：AskPage 组件 3（提问→答案/引用/证据、证据不足提示、无 provider 禁用+提示）。
+- STAGE-17 收尾全量检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 280/280（58 文件，263→280，+17）**；`pnpm build` 9/9 ✅。
+- 非阻塞 OQ-A10：Ask scope 的「当前标签/选中」上下文来源（API 已支持 scope.tagIds/itemIds，UI 待从 Library/Reader 带入；当前 all 完整可用）。
 
 ### STAGE-16 进度记录（2026-06-21，混合搜索排序 DONE）
 

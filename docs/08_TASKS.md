@@ -803,6 +803,27 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 与设计稿冲突则 Decision Required
 
 ### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BACKLOG-004
+
+- 阶段目标：用户基于自己资料库提问（PRD §5.2.4 / §14.5）：仅基于已保存资料回答、每个结论必须有引用、引用必须来自 chunks、证据不足必须说明、不得编造、引用可跳转原文；支持复制引用；scope（全部/标签/选中）。
+- 阶段状态：DONE（2026-06-21，TASK-072~074 全部 DONE）
+- 口径（无新表，不动 PRD §12）：Ask 同步请求（非 job）；答案存 `ai_outputs(type='answer', item_id=null)`；引用校验后无有效引用则不展示答案、改返回「证据不足」（落实 §14.5 rule 1「没有引用不得回答」）；AI 以 enabled provider 为开关。
+- 是否需要人工确认：否（scope 中 tag/选中需「当前标签/选中集」上下文，独立 Ask 页暂无来源，记非阻塞 OQ-A10；当前 all 完整可用）
+
+#### TASK-072：Ask Prompt + 答案/引用解析（@sourdex/ai）— STATUS: DONE
+- `buildAnswerMessages({question, contexts:[{n,title,text}]})`：system 强约束（仅用编号passage、每结论 [n] 引用、证据不足则空引用+confidence low、不编造）；`parseAnswerOutput`（剥围栏/恢复 JSON，{answer, citations:[{n,quote}], confidence}，丢弃非法 citation，confidence 缺省 low，非 JSON 抛 AIProviderError）。core 加 `AskScope/AskCitation/AskResult/AnswerConfidence`。
+- 验收：单测覆盖 prompt 编号/问题嵌入、解析正常/围栏/非法 citation/非 JSON。
+- 是否需要人工确认：否
+
+#### TASK-073：AskService + 检索 + 引用校验 + API（server）— STATUS: DONE
+- `AskService.ask(question, scope)`：检索证据 chunk（semantic 优先 + keyword 兜底，scope 过滤）→无证据则「证据不足」（不调用 LLM）→context packing→chat→parseAnswerOutput→**引用校验**（仅保留指向检索 chunk 的引用，映射 itemId/chunkId/title/url/quote）→**无有效引用则返回证据不足**（不展示可能未引用的答案）→存 ai_outputs(answer)。`POST /api/ask`（无 provider→409；缺 question→400；否则 AskResult）。provider 错误上抛（→502）。
+- 验收：service 单测（带引用回答+校验、无效引用→证据不足、无证据不调用模型、scope itemIds 过滤、provider 错误上抛）+ 集成（400/409/空库证据不足）。
+- 是否需要人工确认：否
+
+#### TASK-074：Ask 页面 UI（apps/web）— STATUS: DONE
+- 对照设计稿 ask（05/16）：提问栏 + scope chips；AnswerCard（confidence 徽标按等级配色、based-on、答案内联 [n] 引用 chip 可跳转、证据列表含 quote + 跳转 reader）；复制引用；无 enabled provider 提示去设置；证据不足提示。rail 将 Ask 由占位启用为主导航 + `/ask` 路由。i18n EN/简中。
+- 验收：组件测试（提问→渲染答案/引用/证据、证据不足提示、无 provider 禁用+提示）；组件 < 150 行、无硬编码文案/颜色。
+- 是否需要人工确认：UI 与设计稿冲突则 Decision Required
+
 ### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BACKLOG-005
 ### STAGE-19：Tags 页面 / Export 页面完整化 — BACKLOG-006
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）
@@ -849,6 +870,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-A7（新增）FTS5 CJK 分词策略~~ ✅ 已定（2026-06-20）：保留 unicode61 + 索引/查询期 CJK 逐字切分（`segmentCjk`），snippet 返回前去字间空格并合并相邻高亮；相比 trigram（≥3 字符门槛）支持中文常见 2 字词与任意长度子串，且无需更改 FTS schema/迁移（STAGE-08 落地）
 - ~~OQ-A6 Storage 是否抽象接口~~ ✅ 已定：是（core 接口 + LocalStorage 实现）（STAGE-04 落地）
 - OQ-A8（新增，非阻塞）AI 功能级开关粒度（单独禁用「自动标签」而不关摘要）— 当前默认：由 AI 总开关（enabled provider）统一覆盖；用户可手动改/删标签、手动标签优先。若后续需要功能级独立开关，再评估新增设置项（不动 PRD §12 现有表）。STAGE-14 不阻塞。
+- OQ-A10（新增，非阻塞）Ask scope 的「当前标签 / 选中资料」上下文来源 — 独立 Ask 页暂无「当前标签/选中集」，tag/selected chip 当前无 ID 即等同 all；当前 all 完整可用。后续可从 Library/Reader 进入 Ask 时带入 tagIds/itemIds（API 已支持 scope.tagIds/itemIds）。STAGE-17 不阻塞。
 - OQ-A9（新增，非阻塞）向量检索后端与队列优先级 — 当前默认：embedding 存 `ai_outputs(type='embedding')`，语义检索用 **brute-force 余弦**（零原生依赖、可测、v0.2 规模足够）；**sqlite-vec ANN** 作为后续规模化加速（PRD §5.2.3.6「可使用」非必须）。jobs 表无 priority 列，embedding「低优先级」（§14.6.6）以 FIFO 后置近似；若需严格优先级再评估（不动 PRD §12）。STAGE-15 不阻塞。
 - ~~OQ-R1 重复 URL 默认行为~~ ✅ 已定：status="exists" + forceNew 新建（STAGE-04 落地）
 - ~~OQ-R2 批量导出单条失败策略~~ ✅ 已定（2026-06-20）：批量单条失败**跳过并在响应 `failed[]` 报告**，不整体失败（STAGE-09 落地）

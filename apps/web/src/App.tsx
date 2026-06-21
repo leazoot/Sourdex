@@ -5,6 +5,7 @@ import { InboxPage } from "@/pages/inbox/InboxPage";
 import { LibraryPage } from "@/pages/library/LibraryPage";
 import { ReaderPage } from "@/pages/reader/ReaderPage";
 import { SearchPage } from "@/pages/search/SearchPage";
+import { AskPage } from "@/pages/ask/AskPage";
 import { SettingsPage } from "@/pages/settings/SettingsPage";
 
 const queryClient = new QueryClient({
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="library" element={<LibraryPage />} />
             <Route path="reader/:id" element={<ReaderPage />} />
             <Route path="search" element={<SearchPage />} />
+            <Route path="ask" element={<AskPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

@@ -9,5 +9,6 @@
 export * from "./http.js";
 export * from "./factory.js";
 export * from "./summary.js";
+export * from "./answer.js";
 export { OpenAICompatibleProvider } from "./providers/openai-compatible.js";
 export { OllamaProvider } from "./providers/ollama.js";

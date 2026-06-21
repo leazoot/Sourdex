@@ -109,6 +109,28 @@ describe("POST /api/ai/embed/:itemId (STAGE-15)", () => {
   });
 });
 
+describe("POST /api/ask (STAGE-17)", () => {
+  it("400s when the question is missing", async () => {
+    const res = await auth({ method: "POST", url: "/api/ask", payload: {} });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("409s when no AI provider is enabled", async () => {
+    const res = await auth({ method: "POST", url: "/api/ask", payload: { question: "hi?" } });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toMatchObject({ error: "NO_AI_PROVIDER" });
+  });
+
+  it("answers with insufficient evidence when the library is empty (no fabrication)", async () => {
+    await enableProvider();
+    const res = await auth({ method: "POST", url: "/api/ask", payload: { question: "anything?" } });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as { answer: string; citations: unknown[]; confidence: string };
+    expect(body.citations).toEqual([]);
+    expect(body.confidence).toBe("low");
+  });
+});
+
 describe("GET /api/items/:id summary exposure (TASK-062)", () => {
   it("returns the latest structured summary when one exists", async () => {
     const itemId = await saveAndExtract();
