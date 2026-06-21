@@ -80,3 +80,9 @@ export const ThemeIcon = (p: { size?: number }) => (
     <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19" />
   </Icon>
 );
+
+export const ChevronDownIcon = (p: { size?: number }) => (
+  <Icon {...p} size={p.size ?? 16}>
+    <path d="M6 9.5l6 6 6-6" />
+  </Icon>
+);

@@ -33,6 +33,8 @@ export async function buildApp(
   config: ServerConfig,
   options: { logger?: boolean } = {},
 ): Promise<FastifyInstance> {
+  // Keep Fastify's modest 1 MB default body limit globally; only the capture route (which
+  // carries full-page HTML) raises it, per-route, so other endpoints stay tightly bounded.
   const app = Fastify({ logger: options.logger ?? false });
 
   await app.register(cors, {
@@ -68,6 +70,11 @@ export async function buildApp(
     }
     if (error instanceof NotFoundError) {
       reply.code(404).send({ error: error.code, message: error.message });
+      return;
+    }
+    // Oversized capture payload: return a readable 413 instead of a generic 500.
+    if ((error as { code?: unknown }).code === "FST_ERR_CTP_BODY_TOO_LARGE") {
+      reply.code(413).send({ error: "BODY_TOO_LARGE", message: "This page is too large to save." });
       return;
     }
     // Anything else is internal: log it, but never leak details to the client.
