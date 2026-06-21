@@ -15,6 +15,7 @@ import {
 } from "@sourdex/db";
 import { LocalStorage } from "../infrastructure/storage/local-storage.js";
 import { SummaryService } from "./summary-service.js";
+import { AutoTagService } from "./auto-tag-service.js";
 
 class MemorySecretStore implements SecretStore {
   readonly map = new Map<string, string>();
@@ -39,6 +40,8 @@ let captureRepo: CaptureRepository;
 let aiOutputRepo: AiOutputRepository;
 let searchRepo: SearchRepository;
 let providerRepo: ProviderConfigRepository;
+let tagRepo: TagRepository;
+let autoTagService: AutoTagService;
 let secrets: MemorySecretStore;
 let storage: LocalStorage;
 
@@ -51,6 +54,8 @@ beforeEach(() => {
   aiOutputRepo = new AiOutputRepository(mem.db);
   searchRepo = new SearchRepository(mem.db);
   providerRepo = new ProviderConfigRepository(mem.db);
+  tagRepo = new TagRepository(mem.db);
+  autoTagService = new AutoTagService({ tagRepo, aiOutputRepo });
   secrets = new MemorySecretStore();
   storage = new LocalStorage(root);
 });
@@ -84,9 +89,10 @@ function service(chat: () => Promise<{ content: string; model: string }>) {
     aiOutputRepo,
     itemRepo,
     captureRepo,
-    tagRepo: new TagRepository(createMemoryDb().db), // tags unused here
+    tagRepo,
     searchRepo,
     storage,
+    autoTagService,
     createProvider: (_c: ProviderConfig) => ({ chat }),
   });
 }
@@ -117,6 +123,16 @@ describe("SummaryService", () => {
     // The summary text is now searchable.
     const hits = searchRepo.search("full text search");
     expect(hits.some((h) => h.itemId === item.id)).toBe(true);
+  });
+
+  it("auto-applies suggested tags from the same model output (PRD §14.4)", async () => {
+    const item = await seed({ enabled: true });
+    const svc = service(async () => ({ content: summaryJson, model: "gpt-test" }));
+
+    await svc.summarizeItem(item.id);
+
+    expect(tagRepo.listByItem(item.id).map((t) => t.normalizedName)).toEqual(["sqlite"]);
+    expect(aiOutputRepo.findLatestByItem(item.id, "tags")).not.toBeNull();
   });
 
   it("marks ai_status=failed without throwing on provider error", async () => {

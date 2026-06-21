@@ -58,6 +58,21 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-14：AI 自动标签（规范化复用）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：AI 启用时为资料自动生成标签（PRD §5.2.2 / §14.4）：复用已有标签、规范化、最多新增 3 个、单条最多 7 个、长度 ≤20、过滤过泛词、手动标签优先；不额外调用 LLM。
+- 已完成内容：
+  - TASK-064：`TagRepository.findByNormalizedName`（只读判定复用 vs 新建）+ `AutoTagService.applySuggestedTags`（规范化/去重→丢弃空/超长/过泛→优先复用全局标签→新建≤3→结合既有满足单条≤7→`tags.type='ai'`/`item_tags.source='ai'`→写 `ai_outputs(type='tags')`）。5 测试。
+  - TASK-065：`SummaryService` 注入可选 `autoTagService`，在 applyAiSummary 后、重建 FTS 前调用（独立 try/catch，标签失败不撤销摘要），索引含新标签；container 接线。summary-service 集成测试断言 suggested_tags 落库 + ai_outputs(tags)。Reader 经既有 `TagDisplay` 自动展示标签，无新 UI。
+- 关键产出：摘要任务同一次模型输出顺带产出规范化标签（零额外 LLM 调用）；标签可搜索；手动标签优先且 AI 标签可被用户改/删。
+- 验证结果（本地）：typecheck 全部 ✅ / eslint 0 / prettier --check 全绿 / **test 229（48 文件，223→229，+6）** / `pnpm build` 9/9 ✅。
+- 重要决策：复用 summary 的 `suggested_tags` 而非新增 `generate_tags` 任务/二次 LLM 调用（呼应阶段名「复用」、省成本）；confidence=null（模型未给分，不编造）；既有 item 标签占位并永不移除以保证手动优先（PRD §5.2.2.3）；不新增表、不动 PRD §12。
+- 遗留问题：OQ-A8（非阻塞）功能级「单独禁用自动标签」开关粒度——默认由 AI 总开关覆盖 + 用户可手改/删，留待未来设置项；自动标签仅随手动触发的摘要任务产出（无自动摘要触发）；过泛词表为小型内置集（中英常见词），未来可扩充/可配置。
+- 下一阶段目标：STAGE-15 语义检索基础（chunks 分块 + embedding + sqlite-vec，PRD §14.6 / BACKLOG-003）。
+- 下一步建议：进入 STAGE-15 前明确分块策略与 sqlite-vec 集成方式（原生依赖/扩展加载）、embedding provider 接线（复用 `createEmbeddingProvider`）；保持 AI opt-in 与不阻塞主流程。**当前按 /goal 停在 STAGE-14，等待用户下发 /goal 再进入 STAGE-15。**
+
 ### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BATCH-02
 
 - 阶段状态：DONE

@@ -738,6 +738,23 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 是否需要人工确认：UI 与设计稿冲突则 Decision Required
 
 ### STAGE-14：AI 自动标签（规范化复用）— BACKLOG-002
+
+- 阶段目标：AI 启用时为资料自动生成标签（PRD §5.2.2 / §14.4）：复用摘要任务同一次模型输出的 `suggested_tags`（不额外调用 LLM）；规范化、优先复用已有标签、最多新增 3 个、单条最多 7 个、长度 ≤20、过滤过泛词；用户手动标签优先（占位且永不被移除）；标签写为 `tags.type='ai'` + `item_tags.source='ai'`，并入 FTS。
+- 阶段状态：DONE（2026-06-21，TASK-064~065 全部 DONE）
+- 口径（无需新表，不动 PRD §12）：沿用 STAGE-13「enabled provider = AI 开关 + 数据外发 opt-in」；自动标签随摘要任务（generate_summary）一并产出，无独立 LLM 调用。AI 标签失败不撤销已成功的摘要。
+- 是否需要人工确认：否（「单独禁用自动标签」的功能级开关粒度记为非阻塞 OQ-A8，默认由 AI 总开关覆盖 + 用户可手改/删标签，留待未来设置项）
+
+#### TASK-064：AutoTagService + 标签规范化复用（server/db）— STATUS: DONE
+- `TagRepository.findByNormalizedName(name)`（只读查不创建，用于「复用 vs 新建」判定）。
+- `AutoTagService.applySuggestedTags(itemId, suggested, {provider,model})`：规范化（trim/折叠空白/小写匹配）、丢弃空/超长（>20）/过泛词、按规范名去重；已有全局标签优先复用，新建上限 3，结合既有 item 标签满足单条 ≤7；以 `tags.type='ai'`/`item_tags.source='ai'` 关联；写 `ai_outputs(type='tags')` 溯源。
+- 验收：单测（测试 SQLite）覆盖规范化/去重、过泛+超长过滤、新建上限 3+复用不受限、7 上限+不删既有、跳过已在 item 上的标签且无应用时不写 output。
+- 是否需要人工确认：否
+
+#### TASK-065：摘要管线集成 + 接线（server）— STATUS: DONE
+- `SummaryService` 注入可选 `autoTagService`，在 `applyAiSummary` 后、重建 FTS 前调用 `applySuggestedTags`（独立 try/catch，标签失败不撤销摘要）；重建索引含新标签。container 接线 `AutoTagService`。
+- 验收：summary-service 集成测试改用共享 TagRepository + AutoTagService，断言 `suggested_tags` 落库为 item 标签且写 `ai_outputs(type='tags')`；既有摘要测试保持通过。Reader 经既有 `TagDisplay` 自动展示标签（轮询失效刷新），无新 UI。
+- 是否需要人工确认：否
+
 ### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BACKLOG-003
 ### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BACKLOG-007
 ### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BACKLOG-004
@@ -786,6 +803,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - ~~OQ-A5 是否一次建全部表~~ ✅ 已定：一次建全部 9 表（STAGE-03 落地）
 - ~~OQ-A7（新增）FTS5 CJK 分词策略~~ ✅ 已定（2026-06-20）：保留 unicode61 + 索引/查询期 CJK 逐字切分（`segmentCjk`），snippet 返回前去字间空格并合并相邻高亮；相比 trigram（≥3 字符门槛）支持中文常见 2 字词与任意长度子串，且无需更改 FTS schema/迁移（STAGE-08 落地）
 - ~~OQ-A6 Storage 是否抽象接口~~ ✅ 已定：是（core 接口 + LocalStorage 实现）（STAGE-04 落地）
+- OQ-A8（新增，非阻塞）AI 功能级开关粒度（单独禁用「自动标签」而不关摘要）— 当前默认：由 AI 总开关（enabled provider）统一覆盖；用户可手动改/删标签、手动标签优先。若后续需要功能级独立开关，再评估新增设置项（不动 PRD §12 现有表）。STAGE-14 不阻塞。
 - ~~OQ-R1 重复 URL 默认行为~~ ✅ 已定：status="exists" + forceNew 新建（STAGE-04 落地）
 - ~~OQ-R2 批量导出单条失败策略~~ ✅ 已定（2026-06-20）：批量单条失败**跳过并在响应 `failed[]` 报告**，不整体失败（STAGE-09 落地）
 - ~~OQ-R3 插件发送 DOM 范围与体积上限~~ ✅ 已定（2026-06-20）：发送 `documentElement.outerHTML`，**上限 2MB**，超限截断并在元数据标记 `truncated=true`；清理交服务端 extractor；选中文本单独字段。（STAGE-06 落地）

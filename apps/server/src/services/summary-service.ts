@@ -16,6 +16,7 @@ import type {
 } from "@sourdex/db";
 import { buildSummaryMessages, createLLMProvider, parseSummaryOutput } from "@sourdex/ai";
 import type { ProviderFactoryOptions } from "@sourdex/ai";
+import type { AutoTagService } from "./auto-tag-service.js";
 
 /** Cap the text sent to the model so prompts stay bounded (PRD §18, §17.1). */
 const MAX_SUMMARY_INPUT_CHARS = 12_000;
@@ -29,6 +30,7 @@ export interface SummaryServiceDeps {
   tagRepo: TagRepository;
   searchRepo: SearchRepository;
   storage: Storage;
+  autoTagService?: AutoTagService;
   createProvider?: (config: ProviderConfig, options: ProviderFactoryOptions) => LLMProvider;
   logger?: Logger;
 }
@@ -90,7 +92,20 @@ export class SummaryService {
         oneSentence: summary.oneSentence,
       });
 
-      // Re-index so the summary becomes searchable (PRD §15.2).
+      // Auto-tag from the same model output — no extra LLM call (PRD §14.4). Tagging
+      // must never undo an already-successful summary, so failures are swallowed.
+      if (this.deps.autoTagService) {
+        try {
+          this.deps.autoTagService.applySuggestedTags(itemId, summary.suggestedTags, {
+            provider: config.type,
+            model: result.model,
+          });
+        } catch (error) {
+          logger?.warn("auto-tag failed", { itemId, error: (error as Error).message });
+        }
+      }
+
+      // Re-index so the summary (and any new tags) become searchable (PRD §15.2).
       const tags = tagRepo
         .listByItem(itemId)
         .map((t) => t.name)

@@ -27,6 +27,7 @@ import { SearchService } from "./services/search-service.js";
 import { ExportService } from "./services/export-service.js";
 import { ProviderConfigService } from "./services/provider-config-service.js";
 import { SummaryService } from "./services/summary-service.js";
+import { AutoTagService } from "./services/auto-tag-service.js";
 
 /** Wired application dependencies (composition root). */
 export interface Container {
@@ -92,6 +93,7 @@ export function createContainer(config: ServerConfig): Container {
   const searchService = new SearchService({ searchRepo });
   const exportService = new ExportService({ itemRepo, captureRepo, tagRepo, storage });
   const providerConfigService = new ProviderConfigService({ repo: providerConfigRepo, secrets });
+  const autoTagService = new AutoTagService({ tagRepo, aiOutputRepo });
   const summaryService = new SummaryService({
     providerConfigRepo,
     secrets,
@@ -101,6 +103,7 @@ export function createContainer(config: ServerConfig): Container {
     tagRepo,
     searchRepo,
     storage,
+    autoTagService,
   });
 
   const auth = new AuthService(loadOrCreateToken(config.tokenPath));

@@ -4,7 +4,21 @@
 
 ## 当前项目状态
 
-**BATCH-02（v0.2）进行中 — STAGE-13（AI 摘要）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（AI 基础设施）。STAGE-13 = DONE（TASK-059~063）：AiOutput 仓储 + 摘要 prompt/JSON 解析 + generate_summary 后台任务/SummaryService + 摘要 API/详情暴露 + Reader 摘要 UI；AI 以 enabled provider 为开关、失败不影响保存/搜索/导出、摘要并入 FTS；**test 223 全绿**。按 /goal 停在 STAGE-13。
+**BATCH-02（v0.2）进行中 — STAGE-14（AI 自动标签）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（抓取质量硬化）。STAGE-12 = DONE（AI 基础设施）。STAGE-13 = DONE（AI 摘要）。STAGE-14 = DONE（TASK-064~065）：AutoTagService（规范化 + 复用已有 + 新建≤3 + 单条≤7 + 过泛/超长过滤 + 手动优先）随摘要任务同一次模型输出产出标签（无额外 LLM 调用），写 `tags.type='ai'`/`item_tags.source='ai'` + `ai_outputs(type='tags')` 并并入 FTS；Reader 经既有 TagDisplay 自动展示，无新 UI；**test 229 全绿**。按 /goal 停在 STAGE-14。
+
+### STAGE-14 进度记录（2026-06-21，AI 自动标签 DONE）
+
+#### TASK-064（AutoTagService + 标签规范化复用 server/db）— DONE
+- `TagRepository.findByNormalizedName`（只读查不创建，用于复用 vs 新建判定）。
+- `AutoTagService.applySuggestedTags(itemId, suggested, {provider,model})`：规范化/折叠空白/去重；丢弃空、超长（>20，PRD §14.4.4）、过泛词（文章/资料/内容/article/content… §14.4.6）；已有全局标签优先复用（rule 1），新建上限 3（rule 2），结合既有 item 标签满足单条 ≤7（rule 3，既有标签占位且永不移除——手动优先 §5.2.2.3）；关联 `tags.type='ai'`/`item_tags.source='ai'`（confidence=null，模型未给分）；应用非空时写 `ai_outputs(type='tags')` 溯源。无新表、不动 PRD §12。
+- 测试（5）：规范化+去重+ai output、过泛+超长过滤、新建上限 3+复用不受限、7 上限+不删既有、跳过已在 item 的标签且无应用不写 output。
+- 检查：db build ✅；vitest 5/5 ✅；typecheck ✅；eslint 0。
+
+#### TASK-065（摘要管线集成 + 接线 server）— DONE
+- `SummaryService` 注入可选 `autoTagService`，在 `applyAiSummary` 后、重建 FTS 前调用 `applySuggestedTags`（独立 try/catch，标签失败不撤销已成功摘要）；重建索引含新标签。container 接线 `AutoTagService`。
+- summary-service 测试改用共享 `TagRepository` + `AutoTagService`，新增断言：`suggested_tags`（"sqlite"）落库为 item 标签且写 `ai_outputs(type='tags')`；既有摘要测试保持通过。Reader 经既有 `TagDisplay` 展示标签（SummaryPanel 轮询失效刷新），无新 UI（符合设计稿）。
+- 检查：typecheck 全部 ✅；eslint 0；prettier `--check` 全绿（已 format）；**vitest 229/229（48 文件，223→229，+6：AutoTagService 5 + 摘要集成 1）**；`pnpm build` 9/9 ✅。
+- 非阻塞 OQ-A8 记录：功能级「单独禁用自动标签」开关粒度——默认由 AI 总开关覆盖 + 用户可手改/删、手动优先，留待未来设置项。
 - **OQ-T7 已确认（2026-06-21，用户决定）：API Key 安全存储 = 本地加密文件**（数据目录 `secrets.enc`，AES-256-GCM + scrypt 派生主密钥，仅依赖 `node:crypto`；零原生依赖、跨平台一致、临时目录即可测）；系统 Keychain 留作后续增强。已同步 08_TASKS / 04_TECH_STACK / security 规则。STAGE-12（AI 基础设施）阻塞已解除，待用户下发 /goal 启动。
 - 今日另提交：UI/bug 修复（Select 箭头间距、设置外观预览、capture 32MB 体积上限+413）已推送 `e6c5f97`。
 

@@ -13,6 +13,13 @@ export function normalizeTagName(name: string): string {
 export class TagRepository {
   constructor(private readonly db: Db) {}
 
+  /** Look up a tag by normalized name without creating it (null if absent). */
+  findByNormalizedName(name: string): Tag | null {
+    const normalized = normalizeTagName(name);
+    const row = this.db.select().from(tags).where(eq(tags.normalizedName, normalized)).get();
+    return row ? mapTag(row) : null;
+  }
+
   /** Find an existing tag by normalized name, or create it. */
   upsert(name: string, type: TagType = "manual"): Tag {
     const normalized = normalizeTagName(name);
