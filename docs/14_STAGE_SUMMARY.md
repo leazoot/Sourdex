@@ -58,6 +58,22 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### STAGE-11：抓取质量硬化（动态页 / Discourse / 占位噪声过滤）— BATCH-02
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-21 / 2026-06-21
+- 阶段目标：让动态/论坛页「存进来的东西干净完整」。
+- 已完成内容：
+  - TASK-051：`packages/extractor/src/html/preclean.ts`——Readability 前按 class/id token 剔除 placeholder/skeleton/ghost/spinner/shimmer/loading 占位骨架 + script/style/noscript/template；token 匹配避免误伤（downloading 等）。接入 `extractArticle`；5 单测。
+  - TASK-052：`strategies/adapters/discourse.ts`——检测 Discourse（meta generator/`#main-outlet`+`.topic-post`），按楼层取 `.cooked` 正文 + 作者/时间，跳过无正文的占位楼层；`WebpageExtractStrategy` 优先用适配器、否则 Readability（非论坛页字符串快门快速跳过）。fixture + 4 测试 + 真实 linux.do 1.4MB 实测干净完整。
+  - TASK-053：`apps/extension/lib/auto-scroll.ts`——依赖注入版滚动加载（高度稳定/步数/时间预算退出），`capture.ts` 注入脚本内联同算法、常量经 args；4 单测。
+- 关键产出：动态/论坛页提取干净完整、占位 byline 噪声消除；为后续 AI 阶段提供更高质量输入。
+- 验证结果（本地）：typecheck ✅ / lint ✅ / format:check ✅ / test ✅(165，+13) / build ✅(8)；真实 linux.do 原文实测。
+- 重要决策：站点适配器作为 WebpageExtractStrategy 内的兜底优先路径（收编 BACKLOG-016）；自动滚动默认 6s 预算、静态页 ~0.5s 退出以兼顾「保存优先」；注入脚本无法 import，故滚动决策抽成可测纯逻辑 + 注入端镜像。
+- 遗留问题：滚动加载在超长帖仍只取时间预算内加载的楼层（非全量）；Discourse 适配器 byline 取首个已加载楼层作者（非楼主，因楼主常未加载）；无 GUI 不能目视核对插件内滚动行为（以单测 + 真实原文提取为准）。
+- 下一阶段目标：STAGE-12 AI 基础设施（Provider 适配 + API Key 安全存储 OQ-T7 + 设置）。
+- 下一步建议：⛔ 进入 STAGE-12 前确认 **OQ-T7**（API Key 加密存储实现：系统 Keychain vs 加密文件）；AI 默认关闭、发送前明示数据外发。
+
 ### STAGE-10：v0.1 发布准备（文档 / License / E2E / 打包 / 发布）
 
 - 阶段状态：**DONE**（2026-06-21）——v0.1.0 已发布到 GitHub（`leazoot/Sourdex`），PRD §28 全 20 项满足。

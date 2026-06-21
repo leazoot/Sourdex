@@ -1,5 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import { createDocument } from "./dom.js";
+import { precleanDocument } from "./preclean.js";
 
 /** Normalized result of running Readability over a document. */
 export interface Article {
@@ -19,6 +20,7 @@ export interface Article {
  */
 export function extractArticle(html: string, url?: string | null): Article | null {
   const document = createDocument(html, url);
+  precleanDocument(document);
   const result = new Readability(document).parse();
   if (!result || !result.content || !result.textContent || !result.textContent.trim()) {
     return null;

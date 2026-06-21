@@ -4,7 +4,30 @@
 
 ## 当前项目状态
 
-**🎉 v0.1.0 已发布到 GitHub（`leazoot/Sourdex`）。STAGE-10 = DONE，BATCH-01（v0.1 MVP）完成，PRD §28 全 20 项满足。** release.yml 运行 success，Release（draft=false）附 `sourdexextension-0.0.0-chrome.zip` + `sourdex-web.tar.gz`；CI 工作流首次 push 已触发。License = Apache-2.0。
+**BATCH-02（v0.2）进行中 — STAGE-11（抓取质量硬化）已完成。** v0.1.0 已发布（`leazoot/Sourdex`，BATCH-01 DONE）。STAGE-11 = DONE（TASK-051/052/053）：占位噪声预清理 + Discourse 适配器 + 扩展抓取前滚动加载；test 165 全绿。按 /goal 停在 STAGE-11，下一阶段 STAGE-12（AI 基础设施）需用户确认 OQ-T7。
+- 今日另提交：UI/bug 修复（Select 箭头间距、设置外观预览、capture 32MB 体积上限+413）已推送 `e6c5f97`。
+
+### STAGE-11 进度记录（2026-06-21）
+
+#### TASK-053（扩展抓取前滚动加载动态内容）— DONE
+- 新增 `apps/extension/lib/auto-scroll.ts`：依赖注入版 `autoScroll(env,opts)`——滚动到底循环，按「高度不再增长 N 次 / 步数上限 / 时间预算」退出；默认 maxScrolls 30 / stableThreshold 2 / stepDelay 250ms / maxDuration 6s（静态页约 0.5s 退出，动态页才持续）。
+- `capture.ts` 注入脚本内联同一算法（注入脚本不能 import），常量经 `args` 传入单一来源；滚动后取 outerHTML，再滚回顶部。
+- `auto-scroll.test.ts`（4 用例：静态页快速停、增长到稳定、步数上限、时间预算）。
+- 检查：auto-scroll test ✅、扩展 typecheck ✅。
+
+#### TASK-052（Discourse 站点适配器）— DONE
+- 新增 `packages/extractor/src/strategies/adapters/discourse.ts`：`extractDiscourseArticle`——字符串快门 + `meta generator=Discourse`/`#main-outlet+.topic-post` 检测；遍历 `.topic-post` 取 `.cooked` 正文 + 作者(`[data-user-card]`/`.username`)/时间(`.relative-date`/`.post-date title`)，**跳过无 `.cooked` 的占位楼层**；拼为干净 Article（content/textContent/byline/title）。
+- 接入 `WebpageExtractStrategy`：`extractDiscourseArticle(...) ?? extractArticle(...)`（Discourse 走适配器，其余 Readability，非论坛页经字符串快门快速跳过）。
+- fixture `test/fixtures/discourse-topic.html`（2 真实楼层 + 1 placeholder 类 + 1 无 cooked stub）；`discourse.test.ts`（4 用例：非 Discourse 返 null、提取已加载楼层、丢弃占位、策略集成）。
+- **真实 linux.do 1.4MB 原文实测**：检测 true、标题正确、正文（「一键最小化」「menubar」段）提取到、byline-only 噪声消除。
+- 检查：extractor test 25 全绿、typecheck/lint/format ✅。收编 BACKLOG-016。
+
+#### TASK-051（提取器占位/样板噪声过滤）— DONE
+- 新增 `packages/extractor/src/html/preclean.ts`：Readability 前对 DOM 预清理——按 class/id token 剔除 placeholder/skeleton/ghost/spinner/shimmer/loading 等占位骨架，并移除 script/style/noscript/template；按 token 匹配（避免误伤 downloading/preloading-tips 等）。
+- 接入 `extractArticle`（preclean → Readability）；`index.ts` 导出；新增 `preclean.test.ts`（5 用例：占位类/ id 剔除、脚本样式剔除、近似词不误删、正常文章不变）。
+- 检查：extractor test 21 全绿、typecheck/lint/format/build ✅。
+
+---
 
 - 当前 Batch：**BATCH-01**（Sourdex v0.1 MVP）— **DONE**
 - 已完成 Stage：**STAGE-01 ~ STAGE-10 全部 DONE**

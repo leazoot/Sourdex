@@ -9,11 +9,16 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 ## Current Batch
 
-- **Batch ID**: BATCH-01
-- **Batch Name**: Sourdex v0.1 MVP — Save → Extract → Store → Search → Read → Export
-- **Batch Goal**: 交付 PRD 2.1 的最小闭环：浏览器插件保存网页 → 正文提取 → 本地 SQLite 入库 → 全文搜索 → 阅读 → 导出 Markdown，并满足 PRD 28 的 v0.1 验收清单。
-- **Batch Status**: TODO（文档初始化完成，尚未开始编码）
-- **Batch Acceptance Criteria**: PRD 28 的 20 项 v0.1 验收清单全部满足；CI（install/typecheck/lint/format/unit test/build）通过；核心测试通过；插件 zip 可构建；GitHub release 可发布。
+- **Batch ID**: BATCH-02
+- **Batch Name**: Sourdex v0.2 — 抓取质量硬化 + AI 价值层（摘要 / 标签 / 语义检索 / Ask）
+- **Batch Goal**: 先把「存进来的东西干净完整」（动态页/Discourse/占位噪声），再叠加 AI 价值层让工具作用显性化。抓取硬化排在 AI 之前。
+- **Batch Status**: IN_PROGRESS（STAGE-11 进行中）
+- **Batch Acceptance Criteria**: 动态/论坛页提取干净完整（无占位 byline 噪声）；AI 摘要/标签/语义检索/Ask 可用且默认关闭、可溯源；API Key 安全存储；CI/核心测试通过。
+- 计划见下方「## BATCH-02 Stages」。
+
+### 上一 Batch
+
+- **BATCH-01**（Sourdex v0.1 MVP）— **DONE**：STAGE-01 ~ STAGE-10 全部完成，v0.1.0 已发布到 GitHub（`leazoot/Sourdex`），PRD §28 全 20 项满足。
 
 ---
 
@@ -619,6 +624,61 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 验收标准：PRD 28 全部满足 ✅ —— 第 1–16、18、19 项已实现并经测试核对；第 17（CI）GitHub Actions 首次 push 已触发运行；第 20（GitHub release）✅ **v0.1.0 已发布**（release.yml 运行 success，draft=false，附 `sourdexextension-0.0.0-chrome.zip` + `sourdex-web.tar.gz`）。
 - 是否需要人工确认：是（对外发布——用户授权 leazoot 凭据后由助手推送 tag 触发）
 - 备注：用户提供 GitHub 仓库 `leazoot/Sourdex` 并授权后完成发布：配独立 SSH 别名 `github-leazoot`（专用 key，仅本仓库，不影响其他账号）→ 改写 3 个提交作者为 `leazoot <leazoot@gmail.com>`（去除原本地 git 身份）→ 推 `main`+`v0.1.0` tag → `release.yml` 自动建 release。§28 逐项核对见 `docs/14_STAGE_SUMMARY.md` STAGE-10 条目。issue/PR 模板属 BACKLOG-017（下一 Batch）。
+
+---
+
+## BATCH-02 Stages（v0.2）
+
+> 10 个阶段，抓取硬化在前、AI 价值层在后。未开始阶段保留模板；详细任务在进入该阶段时展开。
+
+### STAGE-11：抓取质量硬化（动态页 / Discourse / 占位噪声过滤）
+
+- 阶段目标：让动态/论坛页「存进来的东西干净完整」——提取器过滤占位/样板噪声、Discourse 页按楼层正文提取、扩展抓取前滚动加载懒内容。
+- 阶段状态：DONE（2026-06-21）—— TASK-051/052/053 全部完成；真实 linux.do 原文实测干净完整；test 165 全绿。
+- 是否需要人工确认：否（无硬阻塞）
+- 阶段验收标准：① Discourse fixture 能提取全部已加载楼层正文且无「仅 byline」占位噪声；② 通用占位/骨架节点在提取前被剔除；③ 扩展抓取前滚动加载逻辑有单测、capture 集成；④ typecheck/lint/format/test/build 全绿。
+
+#### TASK-051：提取器占位/样板噪声过滤
+- 状态：DONE（2026-06-21）
+- 优先级：P0
+- 说明：在 Readability 之前对 DOM 做预清理，剔除虚拟滚动占位/骨架、仅 byline 的空楼层 stub、明显的样板节点，降低噪声。纯逻辑 + fixture + 单测。
+- 依赖：—
+- 涉及文件：`packages/extractor/src/html/preclean.ts`（新）、`html/dom.ts`、`strategies/webpage.ts`、`packages/extractor/test/fixtures/*`、对应 `*.test.ts`
+- 验收标准：占位/骨架/空 byline 节点被剔除；正常文章不受影响（回归）。
+- 是否需要人工确认：否
+
+#### TASK-052：Discourse 站点适配器（提取兜底，BACKLOG-016 收编）
+- 状态：DONE（2026-06-21）
+- 优先级：P0
+- 说明：识别 Discourse 页（meta generator / `#main-outlet` / `.topic-post .cooked`），按楼层抽取已加载正文（作者/时间/正文），拼为干净 HTML/Markdown，丢弃占位；webpage 策略检测到 Discourse 时走适配器，否则 Readability。
+- 依赖：TASK-051
+- 涉及文件：`packages/extractor/src/strategies/adapters/discourse.ts`（新）、`strategies/webpage.ts`、fixture + 测试
+- 验收标准：Discourse fixture 提取全部已加载楼层、无占位噪声；非 Discourse 页仍走 Readability（回归）。
+- 是否需要人工确认：否
+
+#### TASK-053：扩展抓取前滚动加载动态内容
+- 状态：DONE（2026-06-21）
+- 优先级：P1
+- 说明：capture 前自动滚动到底触发懒加载（循环滚动 + 高度稳定判定 + 次数/时间上限），再取 outerHTML。抽出可测的「是否继续滚动」决策与滚动驱动（依赖注入），单测覆盖。
+- 依赖：—
+- 涉及文件：`apps/extension/lib/auto-scroll.ts`（新）、`lib/capture.ts`、`auto-scroll.test.ts`
+- 验收标准：滚动决策/上限逻辑有单测；capture 在取 HTML 前调用；超时/到底安全退出。
+- 是否需要人工确认：否
+
+### STAGE-12：AI 基础设施（Provider 适配 + API Key 安全存储 + 设置）
+
+- 阶段目标：LLMProvider/EmbeddingProvider 适配（OpenAI 兼容 / Ollama）、API Key 安全存储（OQ-T7：Keychain/加密）、Settings AI 配置页；AI 默认关闭。
+- 阶段状态：TODO
+- 是否需要人工确认：是（**OQ-T7** API Key 加密实现，进入本阶段前确认）
+
+### STAGE-13：AI 摘要（后台任务，可关闭，ai_outputs 启用）— BACKLOG-001
+### STAGE-14：AI 自动标签（规范化复用）— BACKLOG-002
+### STAGE-15：语义检索基础（chunks 分块 + embedding + sqlite-vec）— BACKLOG-003
+### STAGE-16：混合搜索排序（keyword+semantic+tag+recency）— BACKLOG-007
+### STAGE-17：Ask 页面（RAG，强制引用，证据不足说明）— BACKLOG-004
+### STAGE-18：高亮与备注（annotations 启用，导出含高亮）— BACKLOG-005
+### STAGE-19：Tags 页面 / Export 页面完整化 — BACKLOG-006
+### STAGE-20：v0.2 测试/文档/发布 + 仓库治理（issue/PR 模板等 BACKLOG-017）
 
 ---
 

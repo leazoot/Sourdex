@@ -6,6 +6,7 @@ import {
   type SourceType,
 } from "@sourdex/core";
 import { extractArticle } from "../html/readability.js";
+import { extractDiscourseArticle } from "./adapters/discourse.js";
 import { sanitizeHtml } from "../html/sanitize.js";
 import { htmlToMarkdown } from "../markdown/to-markdown.js";
 import { normalizeWhitespace } from "../text/plain-text.js";
@@ -23,7 +24,10 @@ export class WebpageExtractStrategy implements ExtractStrategy {
       throw new ExtractionError("No HTML provided for webpage extraction");
     }
 
-    const article = extractArticle(input.html, input.url);
+    // Site adapters (e.g. Discourse) handle lazy/virtualized pages that Readability mangles;
+    // fall back to Readability for everything else (PRD §26.1).
+    const article =
+      extractDiscourseArticle(input.html, input.url) ?? extractArticle(input.html, input.url);
     if (!article) {
       throw new ExtractionError("Readability could not extract readable content");
     }

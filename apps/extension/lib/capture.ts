@@ -1,5 +1,6 @@
 import { browser } from "wxt/browser";
 import { authedFetch } from "./api";
+import { DEFAULT_AUTO_SCROLL } from "./auto-scroll";
 import { type CapturePayload, type RawPageData } from "./capture-payload";
 
 export {
@@ -21,7 +22,31 @@ export interface CaptureResult {
 export async function readTab(tabId: number): Promise<RawPageData> {
   const [injection] = await browser.scripting.executeScript({
     target: { tabId },
-    func: () => {
+    args: [DEFAULT_AUTO_SCROLL],
+    // Auto-scroll first so lazy / virtualized content is in the DOM before we read it.
+    // This mirrors autoScroll() in auto-scroll.ts (injected scripts cannot import modules).
+    func: async (scroll: typeof DEFAULT_AUTO_SCROLL) => {
+      const start = Date.now();
+      let lastHeight = document.documentElement.scrollHeight;
+      let stable = 0;
+      let steps = 0;
+      while (
+        steps < scroll.maxScrolls &&
+        stable < scroll.stableThreshold &&
+        Date.now() - start < scroll.maxDurationMs
+      ) {
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        await new Promise((resolve) => setTimeout(resolve, scroll.stepDelayMs));
+        steps++;
+        const height = document.documentElement.scrollHeight;
+        if (height <= lastHeight) stable++;
+        else {
+          stable = 0;
+          lastHeight = height;
+        }
+      }
+      window.scrollTo(0, 0);
+
       const icon = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
       return {
         url: location.href,
