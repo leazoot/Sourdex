@@ -969,7 +969,15 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 #### TASK-091：web ItemContent.contentKind + Reader 全文标注 + i18n + 测试 — STATUS: DONE
 - web：`lib/api/items.ts` 的 `ItemContent` 加 `contentKind`（import 自 `@sourdex/core`）；`ReaderPage.tsx` 在内容区顶部按 `contentKind==='fulltext'` 渲染 banner（设计系统 token）；en/zh 加 `reader.fullTextNotice`；`ReaderPage.test.tsx` 加 fulltext 用例（标注 + 纯文本）。
 - 是否需要人工确认：否
-### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: TODO
+### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: DONE
+
+- 阶段目标：BATCH-03 收官——核心闭环回归（typecheck/lint/format/build/test + E2E 关键链路）；三类页面（文章/论坛/app）经 createExtractor 端到端验证 contentKind；更新 14_STAGE_SUMMARY；走 Batch Planning Protocol。
+- 阶段状态：DONE（2026-06-22，TASK-092）。
+- 阶段验收标准：① 全量六项检查通过 ✅（typecheck/lint/format/build ✅、test 336/337 既有 flake 标注）；② E2E save→inbox→search→reader→export 通过 ✅（1 passed）；③ 三类页面 contentKind 验证 ✅（文章→article、Discourse 预载→article 含主楼+回复、app→article/fulltext）；④ 14_STAGE_SUMMARY 追加 BATCH-03 收官记录 ✅。
+
+#### TASK-092：闭环回归 + 三类页面验证 + 阶段总结 — STATUS: DONE
+- 全量六项检查 + E2E + 三类页面 createExtractor 验证；14_STAGE_SUMMARY 写入 BATCH-03 收官条目。
+- 是否需要人工确认：否
 
 ---
 

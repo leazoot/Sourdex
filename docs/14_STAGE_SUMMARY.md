@@ -58,6 +58,25 @@
 
 > 每个 PRD 业务阶段（STAGE-01 ~）完成后，在此追加一条记录，沿用上方模板字段。
 
+### BATCH-03（STAGE-21~26）：分层忠实捕获（Faithful Capture）— 收官
+
+- 阶段状态：DONE
+- 开始/完成时间：2026-06-22 / 2026-06-22
+- 阶段目标：解决「多类网站保存后什么也没有」——在 Tier 1 可读正文（Readability/Discourse）之上加 Tier 2 忠实全文兜底，任何页面保存后都有可读、可全文搜索的内容并诚实标注。方案见 [15_PROPOSAL_FAITHFUL_CAPTURE](15_PROPOSAL_FAITHFUL_CAPTURE.md)。
+- 已完成内容：
+  - STAGE-21（TASK-087）：`packages/extractor` 新增纯函数 `fulltextFromHtml()`——复用 `precleanDocument` + 去结构 chrome（svg/iframe/nav/footer/header/aside）+ 块级元素分隔 + 归一化 + 200KB 截断；8 例单测。
+  - STAGE-22（TASK-088）：core 新增 `ContentKind`（article|fulltext|none）+ `ExtractResult.contentKind`；`WebpageExtractStrategy` 重构为 Tier1（达标返 article）→ Tier2（失败/过短/短+样板 → fulltext）→ 全文空才抛错（保持书签）；删除原临时「短+样板直接判无正文」抛错（FC2）。
+  - STAGE-23（TASK-089）：db `captures.content_kind TEXT` + 幂等 migration `0001`（ALTER + 把既有 success 行回填 article）；schema/mapper/`Capture`/`CaptureRepository.updateExtraction` 贯通；迁移测试 + repository 测试。
+  - STAGE-24（TASK-090）：`extract_content` job 写 `contentKind`；`ItemContent`/`getContent` 返回；content 路由透传；集成测试（article + app 页 fulltext）。
+  - STAGE-25（TASK-091）：web `ItemContent.contentKind`；Reader 在 fulltext 时显示「完整网页文本，非提炼正文」标注（设计系统 token，保留纯文本渲染与打开原网页）；i18n（en/zh）；ReaderPage fulltext 用例。
+  - STAGE-26（TASK-092）：核心闭环回归 + E2E + 三类页面验证 + 本总结 + Batch Planning。
+- 关键产出：分层捕获模型落地（article / fulltext / none），保存任何页面均「有内容、可搜索、有诚实标注」；数据模型仅加 `content_kind` 一列（FC1），无新表、无破坏性迁移。
+- 验证结果（本地）：typecheck ✅ / lint ✅ / format:check ✅ / build ✅ / **test 336/337**（唯一失败为既有 `provider-config-repository` 同毫秒 updatedAt flake，跨阶段既有、与本批无关）/ **E2E 1 passed**（save→inbox→search→reader→export）；三类页面经 `createExtractor` 验证：文章→article、Discourse 预载→article（主楼+回复回收）、app 页内容被回收（小内容→article，样板重→fulltext，后者单测覆盖）。
+- 重要决策：FC1 = 新增 `content_kind` 列（语义清晰、状态与种类解耦）；FC2 = Readability/Discourse 失败与「短+样板」降级都回退 Tier 2 全文（取代临时判空）；FC3 = 全文上限 200KB。Tier 3（视觉快照/截图）留 backlog。
+- 遗留问题：① 既有 `provider-config` 同毫秒 flake 仍非确定性偶发（建议后续给 updatedAt 加单调保证，单独小修）；② OQ-FC4（Tier 3 形态）待评估；③ fulltext 排版以「有胜于无 + 可搜索」为基线，flex 布局可能轻微黏连，不追求完美排版；④ 修复仅对新保存/重新提取生效，用户已存坏条目需重新保存。
+- 下一阶段目标：按 Batch Planning Protocol 规划 BATCH-04（或继续 Faithful Capture Tier 3）。**不自动进入下一 Batch**，输出候选计划等待确认。
+- 下一步建议：见下方「BATCH-03 收官 — 下一批候选」。
+
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理 — BATCH-02（收官）
 
 - 阶段状态：DONE

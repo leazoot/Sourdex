@@ -6,6 +6,15 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-26（2026-06-22）：闭环回归 + 三类页面验证 + 阶段总结 — DONE（BATCH-03 收官）
+
+- 核心闭环回归：typecheck ✅、lint ✅、format:check ✅、build ✅、test **336/337**（唯一失败为既有 `provider-config-repository` 同毫秒 flake，跨阶段既有、无关）、**E2E 1 passed**（save→inbox→search→reader→export，含新提取器改动）。
+- 三类页面经 `createExtractor`（dist）端到端验证：文章→`contentKind=article`；Discourse 预载→`article`（主楼+回复回收）；app 页内容被回收（小内容 Readability→article；样板重→fulltext，后者单测覆盖）。无任何「空内容/抛错丢失」。
+- 文档：`docs/14_STAGE_SUMMARY.md` 追加 BATCH-03（STAGE-21~26）收官记录（目标/成果/验证/决策 FC1-3/遗留/下一批）。
+- **BATCH-03（分层忠实捕获）收官**：article/fulltext/none 模型贯通 core→extractor→db→server→web，仅加 `captures.content_kind` 一列、无新表、无破坏性迁移。
+- 修改文件：`docs/14_STAGE_SUMMARY.md`、`docs/08_TASKS.md`、`docs/12_PROGRESS.md`。
+- 下一步：按 Batch Planning Protocol，输出 BATCH-04 候选计划并**等待确认**，不自动进入。
+
 ### BATCH-03 STAGE-25（2026-06-22）：Reader 全文标注 + web contentKind 贯通 — DONE
 
 - web `lib/api/items.ts` 的 `ItemContent` 加 `contentKind`（import 自 `@sourdex/core`）；`getItemContent` 自然带回该字段。
