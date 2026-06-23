@@ -20,22 +20,26 @@ afterEach(() => {
 });
 
 describe("CaptureRepository", () => {
-  it("creates a capture with pending status by default", () => {
+  it("creates a capture with pending status and no content kind by default", () => {
     const capture = captureRepo.create({ itemId, rawHtmlPath: "files/raw-html/x.html" });
     expect(capture.id).toMatch(/^cap_/);
     expect(capture.extractionStatus).toBe("pending");
+    expect(capture.contentKind).toBeNull();
     expect(captureRepo.findByItemId(itemId)?.id).toBe(capture.id);
   });
 
-  it("updates extraction result paths and status", () => {
+  it("updates extraction result paths, status and content kind", () => {
     const capture = captureRepo.create({ itemId, extractionStatus: "pending" });
     const updated = captureRepo.updateExtraction(capture.id, {
       markdownPath: "files/markdown/x.md",
       originalTextPath: "files/text/x.txt",
       extractionStatus: "success",
+      contentKind: "fulltext",
     });
     expect(updated.extractionStatus).toBe("success");
     expect(updated.markdownPath).toBe("files/markdown/x.md");
+    expect(updated.contentKind).toBe("fulltext");
+    expect(captureRepo.findById(capture.id)?.contentKind).toBe("fulltext");
   });
 
   it("records extraction failure (fallback keeps the item usable)", () => {

@@ -3,6 +3,7 @@ import {
   NotFoundError,
   nowIso,
   type Capture,
+  type ContentKind,
   type CreateCaptureInput,
   type ExtractionStatus,
 } from "@sourdex/core";
@@ -19,6 +20,7 @@ export interface UpdateExtractionInput {
   screenshotPath?: string | null;
   extractionStatus: ExtractionStatus;
   extractionError?: string | null;
+  contentKind?: ContentKind | null;
 }
 
 /** Data access for raw captures (PRD §10.1). */
@@ -64,6 +66,7 @@ export class CaptureRepository {
     if (input.originalTextPath !== undefined) patch.originalTextPath = input.originalTextPath;
     if (input.screenshotPath !== undefined) patch.screenshotPath = input.screenshotPath;
     if (input.extractionError !== undefined) patch.extractionError = input.extractionError;
+    if (input.contentKind !== undefined) patch.contentKind = input.contentKind;
 
     const row = this.db.update(captures).set(patch).where(eq(captures.id, id)).returning().get();
     if (!row) throw new NotFoundError(`Capture not found: ${id}`);

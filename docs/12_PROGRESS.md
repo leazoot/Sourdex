@@ -6,6 +6,15 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-23（2026-06-22）：db `captures.content_kind` 列 + 0001 migration — DONE
+
+- core：`Capture.contentKind: ContentKind | null`（未提取/失败为 null）。
+- db：`schema.ts` 的 `captures` 加 `content_kind TEXT`（`$type<ContentKind>()`，可空）；新增幂等 migration `0001_capture_content_kind`（`ALTER TABLE captures ADD COLUMN content_kind TEXT` + 把既有 `extraction_status='success'` 行回填 `article`，failed/pending 留 null），注册进 `MIGRATIONS`；`mappers.mapCapture` 映射 `contentKind`；`CaptureRepository.UpdateExtractionInput` 加 `contentKind?` 并入 patch（`!== undefined` 守卫，沿用既有部分更新风格）。
+- 迁移测试：`migrate.test.ts` 断言空库 ran=[0000,0001]；新增「模拟旧库（删 0001 记录 + `DROP COLUMN content_kind`）重跑 → 0001 重新加列、success 回填 article、failed 留 null」。repository 测试：create 默认 contentKind=null；`updateExtraction({contentKind:"fulltext"})` 往返 + findById 校验。
+- 修改文件：`packages/core/src/types/capture.ts`、`packages/db/src/schema.ts`、`packages/db/src/migrations/0001_capture_content_kind.ts`（新）、`packages/db/src/migrations/index.ts`、`packages/db/src/mappers.ts`、`packages/db/src/repositories/capture-repository.ts`、`packages/db/src/migrate.test.ts`、`packages/db/src/repositories/capture-repository.test.ts`、`docs/08_TASKS.md`。
+- 检查：全量 typecheck ✅、lint ✅、build ✅；db 50/51（唯一失败为既有 `provider-config-repository` 同毫秒 updatedAt flake，与本改动无关）。
+- 下一步：STAGE-24——`extract_content` job 写 `contentKind` 到 capture；`item-service.getContent` 与 content API（Zod 输出）返回 `contentKind`；附集成测试。
+
 ### BATCH-03 STAGE-22（2026-06-22）：`ExtractResult.contentKind` + webpage Tier1→Tier2 回退 — DONE
 
 - core：`types/capture.ts` 新增 `ContentKind`（article|fulltext|none）；`contracts/extractor.ts` 的 `ExtractResult` 增 `contentKind` 必填字段。

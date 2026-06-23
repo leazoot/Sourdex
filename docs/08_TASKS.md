@@ -939,7 +939,16 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 #### TASK-088：core `ContentKind`/`ExtractResult.contentKind` + webpage 回退 + 单测 — STATUS: DONE
 - core：`types/capture.ts` 加 `ContentKind`；`contracts/extractor.ts` 的 `ExtractResult` 加 `contentKind`。extractor：`webpage.ts` 重构为 Tier1 `buildArticleResult`（达标返 `article`，过短/短+样板返 null）→ Tier2 `fulltextFromHtml` 返 `fulltext`→ 全文空则抛错；`selection.ts` 标 `article`。测试：`extractor.test.ts` 加 article 断言 + app 页内容回收 + 短样板降级为 fulltext + 空页抛错。
 - 是否需要人工确认：否
-### STAGE-23：db 加 `content_kind` 列 + migration + 迁移测试 + repository（db）— STATUS: TODO
+### STAGE-23：db 加 `content_kind` 列 + migration + 迁移测试 + repository（db）— STATUS: DONE
+
+- 阶段目标：`captures` 加 `content_kind TEXT`（FC1）；新增幂等 migration `0001`（ALTER ADD COLUMN + 把既有 success 行回填 `article`）；schema/mapper/Capture 类型贯通；`CaptureRepository.updateExtraction` 支持 `contentKind`；迁移测试 + repository 测试。
+- 口径：不编辑已应用的 `0000_init`；新 migration 追加到 `MIGRATIONS`；列可空（旧/失败行为 null）。
+- 阶段状态：DONE（2026-06-22，TASK-089）。
+- 阶段验收标准：① 空库迁移后 captures 含 `content_kind` 列（migrate test 断言 ran=[0000,0001]）✅；② 迁移幂等（二次运行 []）✅；③ 模拟旧库（DROP COLUMN + 删记录）重跑 0001 → 加列且 success 回填 article、failed 留 null ✅；④ `updateExtraction({contentKind})` 往返正确、create 默认 null ✅；⑤ db typecheck/lint/build/test 通过 ✅（50/51，唯一失败为既有同毫秒 flake）。
+
+#### TASK-089：content_kind 列 + 0001 migration + repository + 测试 — STATUS: DONE
+- core：`Capture.contentKind: ContentKind | null`。db：`schema.ts` captures 加 `content_kind`；`migrations/0001_capture_content_kind.ts`（ALTER + 回填）注册进 `MIGRATIONS`；`mappers.ts` 映射；`CaptureRepository.UpdateExtractionInput.contentKind` + patch。测试：`migrate.test.ts` 加列/回填用例、`capture-repository.test.ts` 默认 null + contentKind 往返。
+- 是否需要人工确认：否
 ### STAGE-24：job 写种类 + content API/service 返回 `contentKind`（server）— STATUS: TODO
 ### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: TODO
 ### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: TODO

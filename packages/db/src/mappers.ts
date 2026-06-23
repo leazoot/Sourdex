@@ -54,6 +54,7 @@ export function mapCapture(row: CaptureRow): Capture {
     originalTextPath: row.originalTextPath,
     extractionStatus: row.extractionStatus,
     extractionError: row.extractionError,
+    contentKind: row.contentKind,
     createdAt: row.createdAt,
   };
 }

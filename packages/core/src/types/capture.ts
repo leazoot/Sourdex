@@ -23,6 +23,8 @@ export interface Capture {
   originalTextPath: string | null;
   extractionStatus: ExtractionStatus;
   extractionError: string | null;
+  /** Capture tier of the stored content; null for not-yet-extracted or failed captures. */
+  contentKind: ContentKind | null;
   /** ISO 8601 string. */
   createdAt: string;
 }

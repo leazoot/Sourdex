@@ -9,6 +9,7 @@ import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite
 import type {
   AiOutputType,
   AiStatus,
+  ContentKind,
   ExtractionStatus,
   ItemStatus,
   JobStatus,
@@ -54,6 +55,7 @@ export const captures = sqliteTable("captures", {
   originalTextPath: text("original_text_path"),
   extractionStatus: text("extraction_status").$type<ExtractionStatus>().notNull(),
   extractionError: text("extraction_error"),
+  contentKind: text("content_kind").$type<ContentKind>(),
   createdAt: text("created_at").notNull(),
 });
 
