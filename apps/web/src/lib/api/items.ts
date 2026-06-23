@@ -1,5 +1,6 @@
 import type {
   Capture,
+  ContentKind,
   Item,
   ItemListQuery,
   Paginated,
@@ -22,6 +23,8 @@ export interface ItemContent {
   markdown: string | null;
   readableHtml: string | null;
   plainText: string | null;
+  /** Capture tier: article (clean) | fulltext (faithful full page) | none; null if not extracted. */
+  contentKind: ContentKind | null;
 }
 
 export interface StatusResponse {

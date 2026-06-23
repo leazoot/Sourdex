@@ -959,7 +959,16 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 #### TASK-090：job 写 contentKind + getContent 返回 + 集成测试 — STATUS: DONE
 - `extract-content-job` persist 调用加 `contentKind: result.contentKind`；`ItemContent` 加 `contentKind` 字段、`getContent` 返回 `capture?.contentKind ?? null`（路由透传）。集成测试：成功文章 → article + getContent；app 页 → fulltext + getContent.plainText 含正文。
 - 是否需要人工确认：否
-### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: TODO
+### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: DONE
+
+- 阶段目标：web `ItemContent` 加 `contentKind`；Reader 在 `contentKind==='fulltext'` 时在正文上方显示「完整网页文本，非提炼正文」标注（保留既有纯文本渲染与「打开原网页」）；i18n（en/zh）新增 `reader.fullTextNotice`。
+- 口径：fulltext 状态不在设计稿 reader 综合图（03/14）中，按设计系统 token（沿用 ReaderPage 既有 banner 风格 border/surface2/text2）实现新状态；不改其它页面。
+- 阶段状态：DONE（2026-06-22，TASK-091）。
+- 阶段验收标准：① fulltext 内容渲染纯文本（既有 `plainText` 分支，readableHtml=null）+ 正文上方显著标注 ✅；② article/无内容不显示该标注（条件 `contentKind==='fulltext'`）✅；③ web typecheck/lint/build/test 通过 ✅（ReaderPage 3/3，全量 336/337，唯一失败为既有 db flake）。
+
+#### TASK-091：web ItemContent.contentKind + Reader 全文标注 + i18n + 测试 — STATUS: DONE
+- web：`lib/api/items.ts` 的 `ItemContent` 加 `contentKind`（import 自 `@sourdex/core`）；`ReaderPage.tsx` 在内容区顶部按 `contentKind==='fulltext'` 渲染 banner（设计系统 token）；en/zh 加 `reader.fullTextNotice`；`ReaderPage.test.tsx` 加 fulltext 用例（标注 + 纯文本）。
+- 是否需要人工确认：否
 ### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: TODO
 
 ---

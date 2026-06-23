@@ -107,4 +107,38 @@ describe("ReaderPage", () => {
     fireEvent.click(await screen.findByText("Export"));
     expect(await screen.findByText(/files\/exports\/export_1\/Readable Article\.md/)).toBeTruthy();
   });
+
+  it("shows the full-page-text notice for fulltext captures (STAGE-25)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        const u = String(url);
+        if (init?.method === "PATCH") return json(item);
+        if (u.includes("/content")) {
+          return json({
+            markdown: "full body text here",
+            readableHtml: null,
+            plainText: "rlzoor.com available US$8.88",
+            contentKind: "fulltext",
+          });
+        }
+        return json({ item, capture: null, tags: [] });
+      }),
+    );
+
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <MemoryRouter initialEntries={["/reader/item_1"]}>
+          <Routes>
+            <Route path="reader/:id" element={<ReaderPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText(/Full page text/i)).toBeTruthy();
+    expect(await screen.findByText(/rlzoor\.com available US\$8\.88/)).toBeTruthy();
+  });
 });

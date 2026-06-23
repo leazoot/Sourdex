@@ -157,6 +157,11 @@ export function ReaderPage() {
             )}
 
             <div className="mt-8 border-t border-border pt-8">
+              {content.data?.contentKind === "fulltext" && (
+                <div className="mb-6 rounded-lg border border-border bg-surface2 px-4 py-3 text-[13px] text-text2">
+                  {t("reader.fullTextNotice")}
+                </div>
+              )}
               {content.isLoading ? (
                 <Loading />
               ) : content.data?.readableHtml ? (

@@ -158,6 +158,8 @@ export const en = {
     relatedSources: "Related sources",
     noContent:
       "No readable article — usually an app/tool page, or extraction is still running. This item is saved as a bookmark; use “Open original” above to view it.",
+    fullTextNotice:
+      "Full page text — the complete page captured faithfully, not a cleaned-up article. Use “Open original” above for the live page.",
     summarize: "Summarize",
     summarizing: "Summarizing…",
     noSummary: "No summary yet.",

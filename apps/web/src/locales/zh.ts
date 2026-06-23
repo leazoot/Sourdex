@@ -160,6 +160,8 @@ export const zh: Resources = {
     relatedSources: "相关来源",
     noContent:
       "暂无可读正文——这通常是应用/工具类页面，或正文仍在提取。该资料已作为书签保存，可用上方「打开原网页」查看。",
+    fullTextNotice:
+      "完整网页文本——忠实保存的整页内容，非提炼正文。可用上方「打开原网页」查看原页面。",
     summarize: "生成摘要",
     summarizing: "生成中…",
     noSummary: "尚无摘要。",

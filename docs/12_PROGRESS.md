@@ -6,6 +6,17 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-25（2026-06-22）：Reader 全文标注 + web contentKind 贯通 — DONE
+
+- web `lib/api/items.ts` 的 `ItemContent` 加 `contentKind`（import 自 `@sourdex/core`）；`getItemContent` 自然带回该字段。
+- `ReaderPage.tsx`：内容区顶部在 `content.data?.contentKind==='fulltext'` 时渲染说明 banner（沿用页面既有 banner 风格的设计系统 token：`rounded-lg border border-border bg-surface2 text-text2`）。fulltext 正文沿用既有 `plainText`（`whitespace-pre-wrap`）分支渲染——readableHtml 为 null 自然走该分支。article/无内容不显示标注。
+- 设计稿口径：reader 综合图（03/14）无 fulltext 这一新状态，按设计系统 token 实现，不偏离 token 体系；其它页面未改。
+- i18n：en/zh 新增 `reader.fullTextNotice`（「完整网页文本——忠实保存的整页内容，非提炼正文…」）。
+- 测试：`ReaderPage.test.tsx` 加 fulltext 用例（断言标注文案 + 纯文本「rlzoor.com available US$8.88」渲染）。
+- 修改文件：`apps/web/src/lib/api/items.ts`、`apps/web/src/pages/reader/ReaderPage.tsx`、`apps/web/src/locales/{en,zh}.ts`、`apps/web/src/pages/reader/ReaderPage.test.tsx`、`docs/08_TASKS.md`。
+- 检查：全量 typecheck ✅、lint ✅、build ✅；ReaderPage 3/3；全量 test **336/337**（唯一失败为既有 `provider-config-repository` 同毫秒 flake，无关）。
+- 下一步：STAGE-26（BATCH-03 收官）——核心闭环回归（保存→提取→全文搜索→阅读→导出）+ 三类页面（文章/论坛/app）验证 + 更新 14_STAGE_SUMMARY + Batch Planning Protocol。
+
 ### BATCH-03 STAGE-24（2026-06-22）：server 写 contentKind + content API 返回 — DONE
 
 - `extract_content` job 的 `persist()` 调 `captureRepo.updateExtraction({..., contentKind: result.contentKind})`——文章页落 `article`、降级页落 `fulltext`、选区回退落 `article`。
