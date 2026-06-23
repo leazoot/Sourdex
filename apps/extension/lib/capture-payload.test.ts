@@ -50,4 +50,21 @@ describe("buildCapturePayload", () => {
     const payload = buildCapturePayload(raw({ title: "" }), "t");
     expect(payload.title).toBe("https://example.com/post");
   });
+
+  it("passes a snapshot through when present and within the cap", () => {
+    const snap = "<!doctype html><html><body>snap</body></html>";
+    const payload = buildCapturePayload(raw({ snapshotHtml: snap }), "t");
+    expect(payload.snapshotHtml).toBe(snap);
+  });
+
+  it("drops an over-cap snapshot rather than truncating it", () => {
+    const big = "x".repeat(100);
+    const payload = buildCapturePayload(raw({ snapshotHtml: big }), "t", 2_000_000, 50);
+    expect(payload).not.toHaveProperty("snapshotHtml");
+  });
+
+  it("omits snapshotHtml when none was produced", () => {
+    const payload = buildCapturePayload(raw(), "t");
+    expect(payload).not.toHaveProperty("snapshotHtml");
+  });
 });

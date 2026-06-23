@@ -985,7 +985,11 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 > 方案见 [16_PROPOSAL_TIER3_SNAPSHOT](16_PROPOSAL_TIER3_SNAPSHOT.md)。已确认：OQ-FC4 = 自包含 HTML 快照。**待确认**：OQ-T3-1（新增 `captures.snapshot_path` 列，推荐）。Batch Planning Protocol：输出计划后等待确认，未确认不开 STAGE-27。
 
-- STAGE-27：扩展自包含快照内联器（CSS/img→data URI，best-effort + 预算/上限/超时，不阻塞保存）+ capture payload `snapshotHtml` + 扩展单测 — STATUS: TODO
+- STAGE-27：扩展自包含快照内联器（CSS/img→data URI，best-effort + 预算/上限/超时，不阻塞保存）+ capture payload `snapshotHtml` + 扩展单测 — STATUS: DONE（2026-06-22）
+  - 口径：纯 `snapshot.ts`（env 抽象 + jsdom 单测），注入脚本内联镜像该逻辑（注入脚本不能 import，沿用 auto-scroll 模式）；snapshotHtml best-effort，超时/超 5MB 放弃，绝不阻塞保存；payload 加可选 `snapshotHtml` 并按上限 cap。OQ-T3-1=加列已确认，本阶段仅扩展端。
+  - 已完成：`lib/snapshot.ts`（`buildSnapshot` 去 script/noscript/preload、内联 stylesheet→`<style>`、img→dataURI、srcset 清除、deadline/maxBytes 兜底）+ `snapshot.test.ts` 8 例（jsdom pragma）；`capture-payload.ts` 加 `MAX_SNAPSHOT_BYTES` + `snapshotHtml`（超上限丢弃不截断）+ 3 例；`capture.ts` 注入脚本镜像内联（base 解析相对 URL、fetch/FileReader 取资源、try/catch 永不破坏 capture）+ 透传 `snapshotHtml`。
+  - 检查：extension typecheck ✅、lint ✅、format ✅、extension 测试 21/21、全量 **348/348**（本次 flake 未触发）。
+  - 验收：snapshot.ts 单测 ✅、capture-payload snapshotHtml 透传/cap 单测 ✅、node 项目 extension 测试 + typecheck/lint ✅。
 - STAGE-28：db `snapshot_path` 列 + migration `0002` + `Capture`/mapper/repository 贯通 + 迁移测试 — STATUS: TODO
 - STAGE-29：server 接收并存储快照（capture Zod + CaptureService）+ `GET /api/items/:id/snapshot` + 集成测试 — STATUS: TODO
 - STAGE-30：Reader 正文/原网页快照切换（sandbox iframe）+ web hasSnapshot 类型 + i18n + ReaderPage 测试 — STATUS: TODO

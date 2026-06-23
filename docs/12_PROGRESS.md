@@ -6,6 +6,18 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-04 STAGE-27（2026-06-22）：扩展自包含快照内联器 + payload snapshotHtml — DONE
+
+- 承接 16_PROPOSAL_TIER3_SNAPSHOT（OQ-FC4=自包含 HTML 快照已确认；OQ-T3-1=加列已确认）。本阶段仅扩展端。
+- 新增 `apps/extension/lib/snapshot.ts` 纯函数 `buildSnapshot(doc, env, opts)`——去 `script/noscript` + preload/prefetch/dns-prefetch；内联 `<link rel=stylesheet>`→`<style>`（取不到则删）；`<img>`→data URI（清 srcset，已是 data: 跳过，取不到删 src）；`deadlineMs` 超时后停止内联、`maxBytes` 超限返回 null（不存快照，raw HTML 始终保留）。env 抽象（fetchText/fetchDataUri/now）便于 jsdom 单测。
+- `capture-payload.ts`：加 `MAX_SNAPSHOT_BYTES=5MB` + `RawPageData.snapshotHtml?`/`CapturePayload.snapshotHtml?`；`buildCapturePayload` 透传快照，**超上限整段丢弃（不截断——截断的 HTML 是坏的）**。
+- `capture.ts`：注入脚本镜像 snapshot.ts 逻辑（注入脚本不能 import，沿用 auto-scroll 模式）——`createHTMLDocument`+`importNode` 克隆、插 `<base href=baseURI>` 解析相对 URL、`fetch`+`FileReader` 取资源、整段 try/catch 永不破坏 capture；best-effort，预算 deadline 3000ms/5MB；透传 `snapshotHtml`。`saveWebpage` 原样发送（仅剥离 UI-only 的 `truncated`）。
+- 保存优先（PRD §18.1）：快照 best-effort，超时/超限/异常一律放弃，绝不阻塞保存；隐私（PRD §17）：仅内联页面已加载/可取资源，读时零外部请求由 STAGE-30 的 sandbox iframe 进一步保证。
+- 测试：`snapshot.test.ts` 8 例（jsdom：去脚本、内联样式、取不到样式删除、img→dataURI+清 srcset、保留已有 data:、取不到删 src、超 maxBytes 返 null、超 deadline 停止内联）；`capture-payload.test.ts` +3 例（透传/超上限丢弃/无快照省略）。
+- 修改文件：`apps/extension/lib/snapshot.ts`（新）、`apps/extension/lib/snapshot.test.ts`（新）、`apps/extension/lib/capture-payload.ts`（+test）、`apps/extension/lib/capture.ts`、`docs/08_TASKS.md`。
+- 检查：extension typecheck ✅、lint ✅、format ✅、build ✅、extension 21/21、全量 **348/348**（本次 flake 未触发）。
+- 下一步：STAGE-28——db `captures.snapshot_path` 列 + migration `0002` + `Capture`/mapper/`CaptureRepository`（create/update 支持 snapshotPath）+ 迁移测试。
+
 ### BATCH-03 STAGE-26（2026-06-22）：闭环回归 + 三类页面验证 + 阶段总结 — DONE（BATCH-03 收官）
 
 - 核心闭环回归：typecheck ✅、lint ✅、format:check ✅、build ✅、test **336/337**（唯一失败为既有 `provider-config-repository` 同毫秒 flake，跨阶段既有、无关）、**E2E 1 passed**（save→inbox→search→reader→export，含新提取器改动）。

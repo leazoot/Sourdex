@@ -1,6 +1,9 @@
 /** OQ-R3: cap the page HTML the extension sends at 2 MB; the server extractor cleans it. */
 export const MAX_HTML_BYTES = 2 * 1024 * 1024;
 
+/** OQ-T3-2: cap the self-contained snapshot at 5 MB; over the cap, send no snapshot. */
+export const MAX_SNAPSHOT_BYTES = 5 * 1024 * 1024;
+
 /** Raw data pulled from the active tab before sizing/normalization. */
 export interface RawPageData {
   url: string;
@@ -8,6 +11,8 @@ export interface RawPageData {
   html: string;
   selectedText: string;
   faviconUrl: string;
+  /** Best-effort self-contained HTML snapshot (Tier 3); absent when generation failed/over cap. */
+  snapshotHtml?: string;
 }
 
 export interface CapturePayload {
@@ -16,6 +21,8 @@ export interface CapturePayload {
   html: string;
   selectedText?: string;
   faviconUrl?: string;
+  /** Self-contained page snapshot (Tier 3); omitted when unavailable or over the size cap. */
+  snapshotHtml?: string;
   capturedAt: string;
   /** True when the HTML exceeded MAX_HTML_BYTES and was truncated (surfaced in UI). */
   truncated: boolean;
@@ -45,17 +52,24 @@ export function buildCapturePayload(
   raw: RawPageData,
   now: string,
   maxBytes = MAX_HTML_BYTES,
+  maxSnapshotBytes = MAX_SNAPSHOT_BYTES,
 ): CapturePayload {
   const truncated = byteLength(raw.html) > maxBytes;
   const html = truncated ? capToBytes(raw.html, maxBytes) : raw.html;
   const selectedText = raw.selectedText.trim();
   const faviconUrl = raw.faviconUrl.trim();
+  // A snapshot is all-or-nothing: a truncated snapshot is broken HTML, so drop it if over cap.
+  const snapshotHtml =
+    raw.snapshotHtml && byteLength(raw.snapshotHtml) <= maxSnapshotBytes
+      ? raw.snapshotHtml
+      : undefined;
   return {
     url: raw.url,
     title: raw.title || raw.url,
     html,
     ...(selectedText ? { selectedText } : {}),
     ...(faviconUrl ? { faviconUrl } : {}),
+    ...(snapshotHtml ? { snapshotHtml } : {}),
     capturedAt: now,
     truncated,
   };
