@@ -83,6 +83,22 @@ describe("createExtractor — webpage", () => {
       extractor.extract({ sourceType: "webpage", url: "https://example.com/x", html: "" }),
     ).rejects.toBeInstanceOf(ExtractionError);
   });
+
+  it("treats a short, boilerplate-only app/tool page as having no readable article", async () => {
+    // An app page (e.g. a domain-search tool) has no article — Readability falls back to the
+    // legal footer, which we reject rather than storing as the body (graceful degradation).
+    const appPage = `<!doctype html><html><head><title>Domain Search</title></head><body>
+<nav>Domains Pricing Hosting</nav>
+<article><p>© 2019–2026 Spaceship, Inc. All rights reserved. 4600 East Washington Street, Suite 300, Phoenix, AZ 85034, USA</p></article>
+</body></html>`;
+    await expect(
+      extractor.extract({
+        sourceType: "webpage",
+        url: "https://www.spaceship.com/domain-search/",
+        html: appPage,
+      }),
+    ).rejects.toBeInstanceOf(ExtractionError);
+  });
 });
 
 describe("createExtractor — dispatch", () => {

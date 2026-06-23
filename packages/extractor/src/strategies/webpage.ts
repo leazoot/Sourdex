@@ -15,6 +15,15 @@ import { countWords, readingTimeMinutes } from "../text/metrics.js";
 /** Below this many characters, extracted text is treated as boilerplate, not an article. */
 const MIN_CONTENT_CHARS = 25;
 
+/**
+ * App / tool pages (dashboards, search tools) have no article — Readability falls back to
+ * the footer, yielding a few words of legal boilerplate. When the extract is short *and*
+ * dominated by such markers, treat the page as having no readable article (it stays saved as
+ * a bookmark) rather than storing the footer as the body (PRD §26.1 graceful degradation).
+ */
+const MIN_ARTICLE_WORDS = 60;
+const BOILERPLATE = /©|版权|保留所有权利|all rights reserved|copyright/i;
+
 /** Extract a readable article from a full webpage via Readability (PRD §5.1.2). */
 export class WebpageExtractStrategy implements ExtractStrategy {
   readonly sourceType: SourceType = "webpage";
@@ -40,6 +49,9 @@ export class WebpageExtractStrategy implements ExtractStrategy {
     }
 
     const wordCount = countWords(plainText);
+    if (wordCount < MIN_ARTICLE_WORDS && BOILERPLATE.test(plainText)) {
+      throw new ExtractionError("Page has no readable article (looks like an app or tool page)");
+    }
     const title = (article.title ?? input.title ?? "").trim() || input.url || "Untitled";
 
     return {

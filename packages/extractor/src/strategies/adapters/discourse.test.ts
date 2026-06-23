@@ -35,6 +35,47 @@ describe("extractDiscourseArticle", () => {
   });
 });
 
+describe("extractDiscourseArticle — preload fallback", () => {
+  // Long topics captured scrolled away from the top have their .topic-post nodes unloaded by
+  // virtual scrolling; the posts then survive only in the embedded data-preloaded JSON.
+  const preloadEnvelope = {
+    topic_2450876: JSON.stringify({
+      title: "Preloaded Topic Title",
+      post_stream: {
+        posts: [
+          {
+            cooked: "<p>Body from preload one.</p>",
+            username: "omnis",
+            created_at: "2026-06-22T10:00:00Z",
+          },
+          {
+            cooked: "<p>Body from preload two.</p>",
+            username: "nottake",
+            created_at: "2026-06-22T10:05:00Z",
+          },
+        ],
+      },
+    }),
+  };
+  // The attribute is HTML-escaped JSON; jsdom decodes &quot; back to " on getAttribute.
+  const dataAttr = JSON.stringify(preloadEnvelope).replace(/"/g, "&quot;");
+  const preloadHtml = `<!doctype html><html><head>
+    <meta name="generator" content="Discourse 2026.6.0">
+    <title>Preloaded Topic Title - Forum</title></head>
+    <body><div id="main-outlet"></div>
+    <div id="data-preloaded" data-preloaded="${dataAttr}"></div>
+    </body></html>`;
+
+  it("recovers posts from the preload JSON when no .topic-post is rendered", () => {
+    const article = extractDiscourseArticle(preloadHtml, "https://forum.example/t/2450876");
+    expect(article).not.toBeNull();
+    expect(article?.title).toBe("Preloaded Topic Title");
+    expect(article?.byline).toBe("omnis");
+    expect(article?.textContent).toContain("Body from preload one.");
+    expect(article?.textContent).toContain("Body from preload two.");
+  });
+});
+
 describe("WebpageExtractStrategy with Discourse", () => {
   it("uses the Discourse adapter for forum pages", async () => {
     const result = await new WebpageExtractStrategy().extract({
