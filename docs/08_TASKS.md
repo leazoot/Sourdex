@@ -929,7 +929,16 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - 检查：typecheck ✅、eslint ✅、extractor 35/35 ✅、build ✅（dist/html/fulltext.js）。
 - 是否需要人工确认：否
 
-### STAGE-22：`ExtractResult.contentKind` + 回退逻辑（core/extractor）— STATUS: TODO
+### STAGE-22：`ExtractResult.contentKind` + 回退逻辑（core/extractor）— STATUS: DONE
+
+- 阶段目标：core 定义 `ContentKind`（article|fulltext|none）并给 `ExtractResult` 加 `contentKind` 字段；`WebpageExtractStrategy` 在 Readability/Discourse 失败或「短+样板」降级时回退 `fulltextFromHtml`，返回 `contentKind:"fulltext"`；纯空页（全文也为空）仍抛 `ExtractionError`（保持书签行为）。删除当前临时「直接判无正文」的抛错路径（FC2）。
+- 口径：不动 DB（STAGE-23）；selection 策略标 `article`；job/service 暂不消费 contentKind（STAGE-24）。
+- 阶段状态：DONE（2026-06-22，TASK-088）。
+- 阶段验收标准：① 文章页返回 `contentKind:"article"` ✅；② app/论坛页内容被回收（Readability 或 Tier 2 全文）且正文非空 ✅；③ 短+样板页回退全文而非抛错（`contentKind:"fulltext"`）✅；④ 纯空页仍抛 ExtractionError ✅；⑤ extractor+core+server typecheck/lint/build/test 通过 ✅（全量 333/334，唯一失败为既有 db 同毫秒 flake，与本改动无关）。
+
+#### TASK-088：core `ContentKind`/`ExtractResult.contentKind` + webpage 回退 + 单测 — STATUS: DONE
+- core：`types/capture.ts` 加 `ContentKind`；`contracts/extractor.ts` 的 `ExtractResult` 加 `contentKind`。extractor：`webpage.ts` 重构为 Tier1 `buildArticleResult`（达标返 `article`，过短/短+样板返 null）→ Tier2 `fulltextFromHtml` 返 `fulltext`→ 全文空则抛错；`selection.ts` 标 `article`。测试：`extractor.test.ts` 加 article 断言 + app 页内容回收 + 短样板降级为 fulltext + 空页抛错。
+- 是否需要人工确认：否
 ### STAGE-23：db 加 `content_kind` 列 + migration + 迁移测试 + repository（db）— STATUS: TODO
 ### STAGE-24：job 写种类 + content API/service 返回 `contentKind`（server）— STATUS: TODO
 ### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: TODO

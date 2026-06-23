@@ -33,6 +33,7 @@ export class SelectionExtractStrategy implements ExtractStrategy {
       plainText: text,
       wordCount,
       readingTime: readingTimeMinutes(wordCount),
+      contentKind: "article",
     };
   }
 }

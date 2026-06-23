@@ -45,6 +45,7 @@ describe("createExtractor — webpage", () => {
       html: englishBlog,
     });
     expect(result.title).toBe("My Blog Post");
+    expect(result.contentKind).toBe("article");
     expect(result.plainText).toContain("readability algorithm");
     expect(result.plainText).not.toContain("subscribe to our newsletter");
     expect(result.markdown.length).toBeGreaterThan(0);
@@ -72,7 +73,8 @@ describe("createExtractor — webpage", () => {
     expect(result.markdown).toContain("CREATE VIRTUAL TABLE");
   });
 
-  it("throws ExtractionError when readability finds no content", async () => {
+  it("throws ExtractionError when the page has no readable text at all", async () => {
+    // No article and no recoverable full text — stays a bookmark.
     await expect(
       extractor.extract({ sourceType: "webpage", url: "https://example.com/x", html: failurePage }),
     ).rejects.toBeInstanceOf(ExtractionError);
@@ -84,20 +86,42 @@ describe("createExtractor — webpage", () => {
     ).rejects.toBeInstanceOf(ExtractionError);
   });
 
-  it("treats a short, boilerplate-only app/tool page as having no readable article", async () => {
-    // An app page (e.g. a domain-search tool) has no article — Readability falls back to the
-    // legal footer, which we reject rather than storing as the body (graceful degradation).
+  it("recovers visible content from an app/tool page instead of dropping it", async () => {
+    // A domain-search tool has no clean article. Whether via Readability or the Tier 2
+    // full-text fallback, the rendered results must be saved and searchable (FC2).
     const appPage = `<!doctype html><html><head><title>Domain Search</title></head><body>
 <nav>Domains Pricing Hosting</nav>
-<article><p>© 2019–2026 Spaceship, Inc. All rights reserved. 4600 East Washington Street, Suite 300, Phoenix, AZ 85034, USA</p></article>
+<main>
+  <div class="result"><span>rlzoor.com</span><span>available</span><span>US$8.88</span></div>
+  <div class="result"><span>rlzoor.net</span><span>taken</span></div>
+</main>
+<footer>© 2019–2026 Spaceship, Inc. All rights reserved.</footer>
 </body></html>`;
-    await expect(
-      extractor.extract({
-        sourceType: "webpage",
-        url: "https://www.spaceship.com/domain-search/",
-        html: appPage,
-      }),
-    ).rejects.toBeInstanceOf(ExtractionError);
+    const result = await extractor.extract({
+      sourceType: "webpage",
+      url: "https://www.spaceship.com/domain-search/",
+      html: appPage,
+    });
+    expect(["article", "fulltext"]).toContain(result.contentKind);
+    expect(result.plainText).toContain("rlzoor.com");
+    expect(result.plainText).toContain("US$8.88");
+    expect(result.wordCount).toBeGreaterThan(0);
+  });
+
+  it("degrades a short, boilerplate-only page to full text rather than failing", async () => {
+    // Even a footer-only page is kept as full text ("something beats nothing"); the Reader
+    // labels it as full page text. Only a genuinely empty page fails.
+    const footerOnly = `<!doctype html><html><head><title>Tool</title></head><body>
+<nav>Domains Pricing</nav>
+<article><p>© 2019–2026 Spaceship, Inc. All rights reserved.</p></article>
+</body></html>`;
+    const result = await extractor.extract({
+      sourceType: "webpage",
+      url: "https://www.spaceship.com/x/",
+      html: footerOnly,
+    });
+    expect(result.contentKind).toBe("fulltext");
+    expect(result.plainText).toContain("Spaceship");
   });
 });
 

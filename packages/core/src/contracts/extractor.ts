@@ -1,6 +1,7 @@
 /** Content extraction contract (PRD §9.3, §10.3). Implemented in packages/extractor. */
 
 import type { SourceType } from "../types/item.js";
+import type { ContentKind } from "../types/capture.js";
 
 /** Input to an extraction run. Raw artifacts come from the capture. */
 export interface ExtractInput {
@@ -21,6 +22,8 @@ export interface ExtractResult {
   readableHtml: string | null;
   wordCount: number;
   readingTime: number;
+  /** Which capture tier produced this content (PRD §26.1 graceful degradation). */
+  contentKind: ContentKind;
 }
 
 /** Extractor facade used by services. */

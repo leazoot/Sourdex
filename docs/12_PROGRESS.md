@@ -6,6 +6,15 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-22（2026-06-22）：`ExtractResult.contentKind` + webpage Tier1→Tier2 回退 — DONE
+
+- core：`types/capture.ts` 新增 `ContentKind`（article|fulltext|none）；`contracts/extractor.ts` 的 `ExtractResult` 增 `contentKind` 必填字段。
+- extractor：`WebpageExtractStrategy` 重构——Tier1 `buildArticleResult`（Readability/Discourse 文章达标返 `contentKind:"article"`；正文 < 25 字符、或「<60 词且命中样板」返 null 让位）→ Tier2 回退 `fulltextFromHtml` 返 `contentKind:"fulltext"`（readableHtml=null，markdown=plainText=全文）→ 全文也为空才抛 `ExtractionError`（保持书签）。**删除了原临时「短+样板直接判无正文」的抛错**（FC2：改为降级到全文）。`selection.ts` 标 `article`。
+- 行为影响：spaceship/V2EX 类页面不再「什么也没有」——能被 Readability 抓到就 article，否则降级为忠实全文；仅纯无文本页仍保留为书签。job/service 暂不消费 `contentKind`（留 STAGE-24 写库与返回）。
+- 修改文件：`packages/core/src/types/capture.ts`、`packages/core/src/contracts/extractor.ts`、`packages/extractor/src/strategies/webpage.ts`、`packages/extractor/src/strategies/selection.ts`、`packages/extractor/src/extractor.test.ts`、`docs/08_TASKS.md`。
+- 检查：全量 typecheck ✅、lint ✅、build ✅、test **333/334**（唯一失败为既有 `provider-config-repository` 同毫秒 updatedAt flake，与本改动无关，未触碰 db）；extractor 36/36；server `extract_content` job 测试（失败→书签、有选区→回退选区）仍通过。
+- 下一步：STAGE-23——db `captures` 加 `content_kind TEXT` 列 + 幂等 migration + 迁移测试 + `CaptureRepository.updateExtraction` 支持 `contentKind`（FC1 已确认加列）。
+
 ### BATCH-03 STAGE-21（2026-06-22）：`fulltextFromHtml()` 全文兜底纯函数 — DONE
 
 - 承接 15_PROPOSAL_FAITHFUL_CAPTURE（已确认决策：FC1=新增 `captures.content_kind` 列；FC2=Readability/Discourse 失败与「短+样板」降级都回退 Tier 2 全文；FC3=全文上限 200KB）。本次只做 STAGE-21：纯函数，**不接线进 strategy**（STAGE-22 再接）。
