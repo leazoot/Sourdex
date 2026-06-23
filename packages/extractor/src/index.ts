@@ -9,6 +9,7 @@ export { SelectionExtractStrategy } from "./strategies/selection.js";
 export { extractDiscourseArticle, isDiscourseDocument } from "./strategies/adapters/discourse.js";
 export { extractArticle, type Article } from "./html/readability.js";
 export { precleanDocument } from "./html/preclean.js";
+export { fulltextFromHtml } from "./html/fulltext.js";
 export { sanitizeHtml } from "./html/sanitize.js";
 export { htmlToMarkdown } from "./markdown/to-markdown.js";
 export { normalizeWhitespace, escapeHtml } from "./text/plain-text.js";

@@ -6,6 +6,15 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-21（2026-06-22）：`fulltextFromHtml()` 全文兜底纯函数 — DONE
+
+- 承接 15_PROPOSAL_FAITHFUL_CAPTURE（已确认决策：FC1=新增 `captures.content_kind` 列；FC2=Readability/Discourse 失败与「短+样板」降级都回退 Tier 2 全文；FC3=全文上限 200KB）。本次只做 STAGE-21：纯函数，**不接线进 strategy**（STAGE-22 再接）。
+- 实现：新增 `packages/extractor/src/html/fulltext.ts` 的 `fulltextFromHtml(html, url?)`——`createDocument` 解析 → 复用 `precleanDocument`（去 script/style/noscript/template + skeleton 噪声）→ 额外移除结构 chrome（svg/iframe/nav/footer/header/aside）→ 树遍历在块级元素与 `<br>` 处插换行避免黏连 → `normalizeWhitespace` → 200KB 上限按空白边界截断。空页返回 `""`（上层映射 contentKind `none`）。`index.ts` 导出。
+- 测试：`fulltext.test.ts` 8 例——空/空白页、spaceship 式 app 页（捞回 rlzoor.com/US$8.88 且丢弃 nav/footer chrome）、论坛主楼+回复、块级不黏连、中文保留、script/style 剥离、纯无文本返回空、200KB 截断。
+- 修改文件：`packages/extractor/src/html/fulltext.ts`（新）、`packages/extractor/src/html/fulltext.test.ts`（新）、`packages/extractor/src/index.ts`、`docs/08_TASKS.md`（建 BATCH-03 段 + STAGE-21/TASK-087 DONE）。
+- 检查：extractor typecheck ✅、eslint（改动文件）✅、extractor 测试 **35/35** ✅、extractor build ✅（产出 `dist/html/fulltext.js`）。
+- 下一步：STAGE-22——`ExtractResult.contentKind`（core）+ `WebpageExtractStrategy` 在 Readability/Discourse 失败或「短+样板」降级时回退 `fulltextFromHtml` 返回 `contentKind:"fulltext"`，纯空页返回 `none`；附单测。**一次只推进一个 STAGE，做完即停等指示。**
+
 ### 维护性改动（2026-06-22，v0.2 发布后）：提取器 — Discourse 预载回退 + App 页优雅降级
 
 - 用户用真实页面反馈两个提取问题（无须逐站适配）：

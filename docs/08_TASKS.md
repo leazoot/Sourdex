@@ -913,6 +913,30 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 ---
 
+## BATCH-03：分层忠实捕获（Faithful Capture）— BACKLOG-018
+
+> 方案见 [15_PROPOSAL_FAITHFUL_CAPTURE](15_PROPOSAL_FAITHFUL_CAPTURE.md)。已确认决策：FC1 = 新增 `captures.content_kind` 列；FC2 = Readability/Discourse 失败与「短+样板」降级都回退到 Tier 2 全文；FC3 = 全文上限 200KB。一次只推进一个 STAGE。
+
+### STAGE-21：`fulltextFromHtml()` 全文兜底纯函数（packages/extractor）— STATUS: DONE
+
+- 阶段目标：实现从渲染后 DOM 去噪取忠实全文的纯函数 `fulltextFromHtml()`，块级元素间分隔、归一化空白、体积上限 200KB；不接线进 strategy（STAGE-22 再接）。
+- 口径：纯函数，输入 HTML 输出文本；复用 `precleanDocument`；额外移除 svg/iframe/nav/footer/header/aside 等结构噪声；不动 DB、不改 PRD §12。
+- 阶段状态：DONE（2026-06-22，TASK-087）。
+- 阶段验收标准：① 单测覆盖 spaceship 式 app 页（捞回搜索结果文本）、V2EX 式论坛（主楼+回复）、纯空页（返回空串）、中文页、块级分隔不黏连、200KB 截断 ✅；② extractor 包 typecheck/lint/test 通过 ✅（35/35）。
+
+#### TASK-087：`fulltextFromHtml()` + 单测（extractor）— STATUS: DONE
+- 新增 `packages/extractor/src/html/fulltext.ts`（block 分隔 + precleanDocument + 移除 svg/iframe/nav/footer/header/aside + 200KB 截断）；`index.ts` 导出；`fulltext.test.ts` 8 例覆盖空页/app 页/论坛/块级分隔/中文/噪声剥离/纯无文本/截断。
+- 检查：typecheck ✅、eslint ✅、extractor 35/35 ✅、build ✅（dist/html/fulltext.js）。
+- 是否需要人工确认：否
+
+### STAGE-22：`ExtractResult.contentKind` + 回退逻辑（core/extractor）— STATUS: TODO
+### STAGE-23：db 加 `content_kind` 列 + migration + 迁移测试 + repository（db）— STATUS: TODO
+### STAGE-24：job 写种类 + content API/service 返回 `contentKind`（server）— STATUS: TODO
+### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: TODO
+### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: TODO
+
+---
+
 ## Future Backlog
 
 > 当前 Batch 不实现。下一 Batch 再基于实际进度规划（≤10 阶段）。
