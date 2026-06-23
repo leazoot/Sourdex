@@ -6,6 +6,24 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### 维护性改动（2026-06-22，v0.2 发布后）：提取器 — Discourse 预载回退 + App 页优雅降级
+
+- 用户用真实页面反馈两个提取问题（无须逐站适配）：
+  - **linux.do（Discourse 论坛）抓成「推荐话题列表」**：用用户**实际失败的原始文件**定位根因——Discourse 虚拟滚动把帖子从 DOM 卸载（采集时 `.topic-post`/`.cooked`=0），适配器扑空回退 Readability，抓到底部 chrome。修复：`discourse.ts` 在 DOM 无帖子时**回退解析 `data-preloaded` 预载 JSON**（`topic_<id>.post_stream.posts[].cooked`），并放宽 `isDiscourseDocument`（`#main-outlet` 单独即判定）。一次修复覆盖所有 Discourse 站点。**用该失败文件端到端验证**：webpage 策略产出 标题「本地 CodeX 防止降智方法」/作者 Omnis/1662 字/9 分钟/干净 Markdown。
+  - **spaceship.com（纯 Web App/工具页）抓成 26 字版权 footer**：此类页面本无「文章」，任何提取器都变不出正文。修复：`webpage.ts` 加优雅降级——提取文本 `wordCount < 60` 且命中法务/footer 样板（`©|版权|保留所有权利|all rights reserved|copyright`）时抛 `ExtractionError`，资料仍以书签形式保留（标题+URL+原始落盘），Reader 显示无正文，而非把 footer 当正文存。
+  - Reader 文案：把无正文提示 `reader.noContent` 由「提取可能仍在进行或已失败」（误导成「坏了」）改为诚实表述——「通常是应用/工具页或仍在提取，已作为书签保存，可用上方『打开原网页』查看」（en+zh）。降级后的工具页不再显得像出错。
+  - 测试：`discourse.test.ts` 加预载回退用例；`extractor.test.ts` 加 app 页降级用例。检查：typecheck/lint/format/build 全绿；extractor 27/27；全量 **325/325**。
+  - 注意：修复仅对**新保存/重新提取**生效；用户已存的坏条目需重新保存该页面才会得到正确正文。
+
+### 维护性改动（2026-06-22，v0.2 发布后）：AI 设置改为「对话 / 嵌入」两块独立卡片
+
+- 承接 2026-06-21 方案 A 的后续：用户进一步要求「对话大模型与嵌入模型分开**配置**，而非在一个服务里同填两个模型（共用同一 base_url/提供商）」。经 Decision Required，用户选 **方案 1（只改 UI，不动 PRD §12 数据模型、无迁移）**，并以选中带 mockup 的方案为「偏离设计稿」签字。
+  - 前端：`ProvidersSection` 由「Provider 列表 + 添加服务」改为**两块独立卡片**（对话模型 / 嵌入模型），各自 提供商/接口地址/模型/API Key/启用；新增组件 `RoleProviderCard`（单角色）。底层仍写现有 `provider_configs`：对话卡片写仅含 `chat_model` 的行、嵌入卡片写仅含 `embedding_model` 的行；选取沿用「按能力独立解析」。删除已无引用的 `ProviderForm.tsx`/`ProviderRow.tsx`。
+  - 范围取舍：嵌入卡片不放「测试连接」（现有 `testConnection` 仅发 chat ping，对嵌入-only 会误失败；做嵌入测试需动后端，超出「只改 UI」范围）。
+  - i18n：删除已死 key（aiChatRole/aiEmbeddingRole/aiRoleNone/aiProviderName/aiAddProvider/aiNoProviders/aiKeySet/aiEdit），新增 aiModelLabel/aiSaveFailed，更新 aiRoleHint 文案（en+zh 同步）。
+  - 测试：重写 `ProvidersSection.test.tsx`（两卡片渲染 / 对话卡片预填+测试连接 / 嵌入-only 绑定到嵌入卡片且无 chat 测试）。检查：typecheck/lint/format/build 全绿；改动域 web 测试 10/10；全量 **322/323**（唯一失败为 `packages/db` provider-config-repository 既有「同毫秒 updatedAt」flake，与本改动无关，未触碰 db）。
+  - 仍待评估：方案 B（显式「活动对话/嵌入 provider」选择，需数据模型变更）仍为 BATCH-03 候选。
+
 ### 维护性改动（2026-06-21，v0.2 发布后）：AI 对话/嵌入分开选择
 
 - 用户反馈「AI 嵌入与大模型应分开配置」（见 memory `ai-provider-split-config`）。采用**方案 A（不改 PRD §12 数据模型）**：

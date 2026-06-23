@@ -934,6 +934,7 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 - BACKLOG-015：Pocket / Raindrop / Omnivore / Markdown 导入；API 与插件系统 — PRD 5.3
 - BACKLOG-016：站点适配器（提取兜底）— PRD 26.1
 - BACKLOG-017：CODEOWNERS / issue·PR 模板 / changesets 完整化 — PRD 20.4
+- BACKLOG-018：分层忠实捕获（Tier 2 全文兜底 + Tier 3 快照/截图）— 见 [15_PROPOSAL_FAITHFUL_CAPTURE](15_PROPOSAL_FAITHFUL_CAPTURE.md)（草案待确认，BATCH-03 候选；OQ-FC1~FC4）
 
 ## Open Questions
 
