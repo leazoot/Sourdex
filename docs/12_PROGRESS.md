@@ -6,6 +6,15 @@
 
 **BATCH-02（v0.2）完成 — STAGE-20（v0.2 测试/文档/发布 + 仓库治理）已完成，v0.2.0 发布。** STAGE-11~19 = DONE。STAGE-20 = DONE（TASK-083~086）：全量回归（typecheck/lint/format/build + **test 322/322** + E2E 关键链路 ✅）；发布文档更新（README EN/中补 v0.2 功能、CHANGELOG 加 [0.2.0]、RELEASE_NOTES 改写 v0.2.0、ROADMAP 勾选 v0.2 完成）；仓库治理 BACKLOG-017（bug/feature issue 模板 + config + PR 模板 + CODEOWNERS）；版本 bump 0.0.0→0.2.0（root/web/extension）；打 `v0.2.0` tag 触发 release.yml 发布。**BATCH-02 收官**；按 Batch Planning Protocol，下一 Batch 规划待用户下发 /goal。按 /goal 停在 STAGE-20。
 
+### BATCH-03 STAGE-24（2026-06-22）：server 写 contentKind + content API 返回 — DONE
+
+- `extract_content` job 的 `persist()` 调 `captureRepo.updateExtraction({..., contentKind: result.contentKind})`——文章页落 `article`、降级页落 `fulltext`、选区回退落 `article`。
+- `item-service.ItemContent` 加 `contentKind`；`getContent` 返回 `capture?.contentKind ?? null`。content 路由（`GET /api/items/:id/content`）直接透传 service 结果（本就无 Zod 输出层），故无需改路由。
+- 集成测试（`extract-content-job.test.ts`）：成功文章页断言 `capture.contentKind==='article'` 且 `getContent().contentKind==='article'`；新增 app 页用例断言降级为 `fulltext` 且 `getContent().plainText` 含正文。
+- 修改文件：`apps/server/src/services/item-service.ts`、`apps/server/src/infrastructure/jobs/extract-content-job.ts`、`apps/server/src/infrastructure/jobs/extract-content-job.test.ts`、`docs/08_TASKS.md`。
+- 检查：全量 typecheck ✅、lint ✅、build ✅；server 49/49；全量 test **335/336**（唯一失败为既有 `provider-config-repository` 同毫秒 flake，无关）。
+- 下一步：STAGE-25——Reader 在 `contentKind==='fulltext'` 时渲染纯文本并显著标注「完整网页文本，非提炼正文」，保留「打开原网页」；web `ItemContent` 类型加 `contentKind`；i18n（en/zh）。
+
 ### BATCH-03 STAGE-23（2026-06-22）：db `captures.content_kind` 列 + 0001 migration — DONE
 
 - core：`Capture.contentKind: ContentKind | null`（未提取/失败为 null）。

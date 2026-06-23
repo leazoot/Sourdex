@@ -949,7 +949,16 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 #### TASK-089：content_kind 列 + 0001 migration + repository + 测试 — STATUS: DONE
 - core：`Capture.contentKind: ContentKind | null`。db：`schema.ts` captures 加 `content_kind`；`migrations/0001_capture_content_kind.ts`（ALTER + 回填）注册进 `MIGRATIONS`；`mappers.ts` 映射；`CaptureRepository.UpdateExtractionInput.contentKind` + patch。测试：`migrate.test.ts` 加列/回填用例、`capture-repository.test.ts` 默认 null + contentKind 往返。
 - 是否需要人工确认：否
-### STAGE-24：job 写种类 + content API/service 返回 `contentKind`（server）— STATUS: TODO
+### STAGE-24：job 写种类 + content API/service 返回 `contentKind`（server）— STATUS: DONE
+
+- 阶段目标：`extract_content` job 把 `result.contentKind` 写入 capture；`ItemContent` + `item-service.getContent` 返回 `contentKind`；content 路由透传（无 Zod 输出层）。附集成测试。
+- 口径：不改 web（STAGE-25）；选区回退也写 `contentKind:"article"`。
+- 阶段状态：DONE（2026-06-22，TASK-090）。
+- 阶段验收标准：① 成功提取后 capture.contentKind 落库且 getContent 返回（集成测试断言 article）✅；② app 页降级时 capture+getContent contentKind=fulltext ✅；③ server typecheck/lint/build/test 通过 ✅（全量 335/336，唯一失败为既有 db 同毫秒 flake）。
+
+#### TASK-090：job 写 contentKind + getContent 返回 + 集成测试 — STATUS: DONE
+- `extract-content-job` persist 调用加 `contentKind: result.contentKind`；`ItemContent` 加 `contentKind` 字段、`getContent` 返回 `capture?.contentKind ?? null`（路由透传）。集成测试：成功文章 → article + getContent；app 页 → fulltext + getContent.plainText 含正文。
+- 是否需要人工确认：否
 ### STAGE-25：Reader 全文渲染 + 标注 + i18n（apps/web）— STATUS: TODO
 ### STAGE-26：回归 + 三类页面验证 + 文档（全栈）— STATUS: TODO
 

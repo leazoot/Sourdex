@@ -1,6 +1,7 @@
 import {
   NotFoundError,
   type Capture,
+  type ContentKind,
   type Item,
   type ItemListQuery,
   type Paginated,
@@ -31,6 +32,8 @@ export interface ItemContent {
   markdown: string | null;
   readableHtml: string | null;
   plainText: string | null;
+  /** Capture tier of the stored content (article | fulltext | none); null if not extracted. */
+  contentKind: ContentKind | null;
 }
 
 export interface ItemServiceDeps {
@@ -90,6 +93,7 @@ export class ItemService {
       markdown: await read(capture?.markdownPath),
       readableHtml: await read(capture?.readableHtmlPath),
       plainText: await read(capture?.originalTextPath),
+      contentKind: capture?.contentKind ?? null,
     };
   }
 

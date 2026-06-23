@@ -70,6 +70,7 @@ export function createExtractContentJob(deps: ExtractContentJobDeps): JobHandler
         readableHtmlPath,
         originalTextPath: textPath,
         extractionStatus: "success",
+        contentKind: result.contentKind,
       });
       itemRepo.applyExtraction(itemId, {
         author: result.author,
