@@ -981,6 +981,20 @@ Priority: `P0` (v0.1 must-have) / `P1` (v0.2) / `P2` (later)
 
 ---
 
+## BATCH-04（候选，待确认）：Tier 3 自包含 HTML 快照
+
+> 方案见 [16_PROPOSAL_TIER3_SNAPSHOT](16_PROPOSAL_TIER3_SNAPSHOT.md)。已确认：OQ-FC4 = 自包含 HTML 快照。**待确认**：OQ-T3-1（新增 `captures.snapshot_path` 列，推荐）。Batch Planning Protocol：输出计划后等待确认，未确认不开 STAGE-27。
+
+- STAGE-27：扩展自包含快照内联器（CSS/img→data URI，best-effort + 预算/上限/超时，不阻塞保存）+ capture payload `snapshotHtml` + 扩展单测 — STATUS: TODO
+- STAGE-28：db `snapshot_path` 列 + migration `0002` + `Capture`/mapper/repository 贯通 + 迁移测试 — STATUS: TODO
+- STAGE-29：server 接收并存储快照（capture Zod + CaptureService）+ `GET /api/items/:id/snapshot` + 集成测试 — STATUS: TODO
+- STAGE-30：Reader 正文/原网页快照切换（sandbox iframe）+ web hasSnapshot 类型 + i18n + ReaderPage 测试 — STATUS: TODO
+- STAGE-31：回归 + E2E（含快照链路）+ 三类页面快照验证 + 文档 + BATCH-04 收官 — STATUS: TODO
+
+Open Questions（详见 16_PROPOSAL §7）：OQ-T3-1（snapshot_path 列，Decision）、OQ-T3-2（上限 5MB）、OQ-T3-3（自写内联器 vs single-file-core）、OQ-T3-4（独立 /snapshot 端点）。
+
+---
+
 ## Future Backlog
 
 > 当前 Batch 不实现。下一 Batch 再基于实际进度规划（≤10 阶段）。

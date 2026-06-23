@@ -74,8 +74,8 @@
 - 验证结果（本地）：typecheck ✅ / lint ✅ / format:check ✅ / build ✅ / **test 336/337**（唯一失败为既有 `provider-config-repository` 同毫秒 updatedAt flake，跨阶段既有、与本批无关）/ **E2E 1 passed**（save→inbox→search→reader→export）；三类页面经 `createExtractor` 验证：文章→article、Discourse 预载→article（主楼+回复回收）、app 页内容被回收（小内容→article，样板重→fulltext，后者单测覆盖）。
 - 重要决策：FC1 = 新增 `content_kind` 列（语义清晰、状态与种类解耦）；FC2 = Readability/Discourse 失败与「短+样板」降级都回退 Tier 2 全文（取代临时判空）；FC3 = 全文上限 200KB。Tier 3（视觉快照/截图）留 backlog。
 - 遗留问题：① 既有 `provider-config` 同毫秒 flake 仍非确定性偶发（建议后续给 updatedAt 加单调保证，单独小修）；② OQ-FC4（Tier 3 形态）待评估；③ fulltext 排版以「有胜于无 + 可搜索」为基线，flex 布局可能轻微黏连，不追求完美排版；④ 修复仅对新保存/重新提取生效，用户已存坏条目需重新保存。
-- 下一阶段目标：按 Batch Planning Protocol 规划 BATCH-04（或继续 Faithful Capture Tier 3）。**不自动进入下一 Batch**，输出候选计划等待确认。
-- 下一步建议：见下方「BATCH-03 收官 — 下一批候选」。
+- 下一阶段目标：BATCH-04 候选已定为 Faithful Capture Tier 3（自包含 HTML 快照，OQ-FC4 已确认），方案见 [16_PROPOSAL_TIER3_SNAPSHOT](16_PROPOSAL_TIER3_SNAPSHOT.md)，阶段 STAGE-27~31 已登记 08_TASKS。
+- 下一步建议：**不自动进入下一 Batch**；待用户确认 OQ-T3-1（新增 `captures.snapshot_path` 列）后开 STAGE-27。当前停在 BATCH-03 收官。
 
 ### STAGE-20：v0.2 测试/文档/发布 + 仓库治理 — BATCH-02（收官）
 
